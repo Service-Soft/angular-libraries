@@ -1,0 +1,10 @@
+<ui-consent-gate
+    provider="YouTube"
+    providerPrivacyPolicyUrl="https://policies.google.com/privacy"
+    aspectRatio="16 / 9"
+    [alwaysAllow]="true"
+    [(consented)]="consented"
+    (alwaysAllowed)="alwaysAllowed = alwaysAllowed + 1"
+>
+    <ng-template><p data-video>The video</p></ng-template>
+</ui-consent-gate>

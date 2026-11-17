@@ -1,0 +1,40 @@
+<!-- the content is the label when there is no label text, like one with a link to the terms. One box, so its text and
+     links wrap together in the flex row of the label. -->
+<ng-template #projectedLabel><span><ng-content /></span></ng-template>
+<ui-input-field
+    layout="inline"
+    [field]="this"
+    [size]="size()"
+    [alignWithInputs]="alignWithInputs()"
+    [labelTemplate]="label() ? undefined : projectedLabel"
+>
+    <!-- inline-flex, so the box of a checkbox and the track of a switch both center in the row of the label -->
+    <span class="relative inline-flex">
+        <input
+            #nativeInput
+            type="checkbox"
+            [class]="checkboxClasses()"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [attr.role]="isSwitch() ? 'switch' : null"
+            [checked]="value()"
+            [indeterminate]="nativeIndeterminate()"
+            [required]="required()"
+            [disabled]="disabled()"
+            [attr.name]="name() ?? null"
+            [attr.aria-readonly]="readonly() ? 'true' : null"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (click)="preventWhileReadonly($event)"
+            (change)="value.set(nativeInput.checked)"
+            (blur)="showValidationError.set(true)"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+        @if (isSwitch()) {
+            <span aria-hidden="true" [class]="thumbClasses()"></span>
+        } @else {
+            <span aria-hidden="true" [class]="markClasses().checked"><ui-icon [icon]="checkIcon" /></span>
+            <span aria-hidden="true" [class]="markClasses().indeterminate"><ui-icon [icon]="indeterminateIcon" /></span>
+        }
+    </span>
+</ui-input-field>

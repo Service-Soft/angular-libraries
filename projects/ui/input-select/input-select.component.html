@@ -1,0 +1,77 @@
+<ui-input-field [field]="this">
+    <!-- the native select is what the browser validates, submits and autofills, and what the label and a form focus, which
+         hands focus on to the combobox. Hidden from everyone else: its list is drawn by the browser and can't be styled,
+         the combobox is what people see and use. -->
+    <select
+        #nativeInput
+        class="sr-only"
+        tabindex="-1"
+        aria-hidden="true"
+        [id]="inputId()"
+        [attr.autofocus]="autofocus() ? '' : null"
+        [required]="required()"
+        [disabled]="disabled()"
+        [attr.name]="name() ?? null"
+        [attr.autocomplete]="autocomplete() ?? null"
+        (change)="updateValue(nativeInput)"
+        (focus)="combobox.element.focus()"
+        (invalid)="showInsteadOfPopup($event)"
+    >
+        <!-- the empty value is what makes a required select invalid -->
+        <option value="" [selected]="selectedIndex() === -1" [disabled]="required() || readonly()"></option>
+        @for (option of options(); track $index) {
+            <option [value]="$index" [selected]="$index === selectedIndex()" [disabled]="isOptionDisabled(option, $index)">
+                {{ option.label }}
+            </option>
+        }
+    </select>
+    <!-- not an input, so the combobox is one to choose from, not to type in: a click, Enter, Space or the arrow down open
+         the list, and letters move to the option that starts with them. Read only, it can be focused but not opened. -->
+    <div
+        #combobox="ngCombobox"
+        ngCombobox
+        [class]="inputClasses()"
+        [style.anchor-name]="anchorName()"
+        [disabled]="disabled()"
+        [softDisabled]="false"
+        [readonly]="readonly()"
+        [attr.aria-labelledby]="labelId()"
+        [attr.aria-required]="required()"
+        [attr.aria-invalid]="errorMessage() ? 'true' : null"
+        [attr.aria-describedby]="describedBy() ?? null"
+        (blur)="showValidationError.set(true)"
+    >
+        <span [class]="chosenLabelClasses()">{{ chosenLabel() ?? placeholder() ?? '' }}</span>
+        <span aria-hidden="true" [class]="chevronClasses()"><ui-icon [icon]="chevronIcon" /></span>
+    </div>
+    <ng-template ngComboboxPopup [combobox]="combobox">
+        <!-- chosen with Enter, Space or a click, not by moving through it. Out of the tab order: focus stays on the
+             combobox, so Tab goes on to the next field and closes the list, and a click doesn't take it either, which would
+             leave it nowhere once the list closes. In the top layer, so no container cuts it off, like a dialog. -->
+        <div
+            #listbox="ngListbox"
+            ngComboboxWidget
+            ngListbox
+            focusMode="activedescendant"
+            selectionMode="explicit"
+            tabindex="-1"
+            [softDisabled]="false"
+            [uiInputPopup]="anchorName()"
+            [class]="popupClasses"
+            [value]="selectedValues()"
+            [activeDescendant]="listbox.activeDescendant()"
+            (mousedown)="$event.preventDefault()"
+            (valueChange)="choose($event)"
+        >
+            @if (!required()) {
+                <!-- empties an optional select again -->
+                <div ngOption [class]="optionClasses" [value]="undefined" [label]="placeholder() ?? ''">{{ placeholder() }}</div>
+            }
+            @for (option of options(); track $index) {
+                <div ngOption [class]="optionClasses" [value]="option.value" [label]="option.label" [disabled]="option.disabled ?? false">
+                    {{ option.label }}
+                </div>
+            }
+        </div>
+    </ng-template>
+</ui-input-field>

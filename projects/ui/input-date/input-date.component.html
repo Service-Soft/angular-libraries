@@ -1,0 +1,53 @@
+<ui-input-field [field]="this">
+    <!-- relative on its own, so the button that opens the calendar is centred on the input -->
+    <div class="relative">
+        <!-- a text rather than the native date input, whose picker looks different in every browser and can't be hidden
+             in all of them. Writing the same text doesn't move the cursor, so [value] can follow every keystroke. -->
+        <input
+            #nativeInput
+            type="text"
+            [class]="inputClasses()"
+            [style.anchor-name]="anchorName()"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [value]="text()"
+            [required]="required()"
+            [disabled]="disabled()"
+            [readOnly]="readonly()"
+            [attr.name]="name() ?? null"
+            [attr.placeholder]="shownPlaceholder()"
+            [attr.autocomplete]="autocomplete() ?? null"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (input)="updateText(nativeInput.value)"
+            (blur)="finishTyping()"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+        <!-- popovertarget lets the browser open and close the calendar and tell screen readers whether it is open -->
+        <button
+            type="button"
+            [class]="calendarButtonClasses"
+            [disabled]="disabled() || readonly()"
+            [attr.popovertarget]="calendarId()"
+            [attr.aria-label]="datePickerLabel"
+        >
+            <ui-icon [icon]="datePickerIcon" />
+        </button>
+        <!-- in the top layer, so no container cuts it off, and closed by the browser on Escape or a click outside -->
+        <div
+            #calendar
+            popover="auto"
+            role="dialog"
+            [id]="calendarId()"
+            [class]="calendarClasses()"
+            [style.position-anchor]="anchorName()"
+            [attr.aria-label]="datePickerLabel"
+            (toggle)="calendarOpen.set($event.newState === 'open')"
+        >
+            <!-- only while open, so it starts at the month of the value and moves focus into it every time -->
+            @if (calendarOpen()) {
+                <ui-input-date-calendar [value]="value()" [min]="min()" [max]="max()" [validation]="dayValidation()" [color]="color()" (chosen)="choose($event)" />
+            }
+        </div>
+    </div>
+</ui-input-field>

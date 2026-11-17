@@ -1,0 +1,9 @@
+@import "tailwindcss" source("../");
+@import "@service-soft/ui";
+@import "@service-soft/ngx-change-sets";
+@import "@service-soft/ngx-navigation";
+@import "@service-soft/ngx-entity";
+
+@theme {
+    --color-primary: light-dark(#0e7068, #5fd5c3);
+}

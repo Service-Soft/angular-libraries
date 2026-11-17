@@ -1,0 +1,20 @@
+@if (step().isNavigable) {
+    <button type="button" [class]="buttonClasses()" (click)="chosen.emit()">
+        <ui-stepper-marker [step]="step()" />
+        <span [class]="step().labelClasses">{{ step().step.label() }} <span class="sr-only">{{ doneLabel() }}</span></span>
+    </button>
+} @else {
+    <span class="flex min-w-0 items-center gap-3">
+        <ui-stepper-marker [step]="step()" />
+        @if (showsHeading() && step().state === 'current') {
+            <ui-stepper-heading [level]="headingLevel()" [text]="step().step.label()" [headingId]="step().headingId" [classes]="headingClasses()" />
+        } @else {
+            <span [class]="step().labelClasses">
+                {{ step().step.label() }}
+                @if (step().state === 'done') {
+                    <span class="sr-only">{{ doneLabel() }}</span>
+                }
+            </span>
+        }
+    </span>
+}

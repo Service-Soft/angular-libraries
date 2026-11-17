@@ -1,0 +1,10 @@
+<dialog
+    #dialog
+    [class]="classes()"
+    [attr.aria-label]="label()"
+    [attr.closedby]="closedBy()"
+    (cancel)="preventEscape($event)"
+    (close)="closed.emit()"
+>
+    <ng-content />
+</dialog>

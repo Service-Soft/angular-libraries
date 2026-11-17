@@ -1,0 +1,9 @@
+<ui-form class="flex flex-col gap-4" (submit)="dialogRef.close(value())">
+    <h2 class="font-heading text-title">{{ data.title }}</h2>
+    <ng-container #outlet />
+    <!-- cancel comes first, like in every dialog of ui -->
+    <div class="flex flex-wrap justify-end gap-2">
+        <button ui-button type="button" variant="text" (click)="dialogRef.close()">{{ data.cancelLabel }}</button>
+        <button ui-button type="submit">{{ data.saveLabel }}</button>
+    </div>
+</ui-form>

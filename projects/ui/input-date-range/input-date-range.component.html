@@ -1,0 +1,133 @@
+<ui-input-field [field]="this">
+    <!-- the anchor of the calendar, which opens below both sides. The sides stand next to each other while both fit and
+         wrap below each other where they don't. The error shows once focus leaves all of it, the calendar included. -->
+    <div #sides class="flex flex-wrap gap-x-4 gap-y-2" [style.anchor-name]="anchorName()" (focusout)="leave($event)">
+        <!-- both sides are built the same. The base input reads the first native input marked #nativeInput, the start,
+             which the label of the range points to and the browser validates for the whole range. -->
+        @for (field of sideFields(); track field.side) {
+            <div class="flex min-w-56 grow basis-0 flex-col gap-1">
+                <label class="text-body-sm text-on-surface-variant" [id]="field.labelId" [for]="field.inputId">{{ field.label }}</label>
+                <!-- the time wraps below the day where both don't fit next to each other, so the date is never cut off.
+                     The least width of the day is the one of a date and the button, in rem, so it grows with the text. -->
+                <div class="flex flex-wrap gap-2">
+                    <!-- relative on its own, so the button that opens the calendar is centred on the input -->
+                    <div class="relative min-w-40 grow-2">
+                        <input
+                            #nativeInput
+                            type="text"
+                            [class]="inputClasses()"
+                            [id]="field.inputId"
+                            [attr.autofocus]="autofocus() && field.side === 'start' ? '' : null"
+                            [value]="field.text"
+                            [required]="required()"
+                            [disabled]="disabled()"
+                            [readOnly]="readonly()"
+                            [attr.name]="field.name ?? null"
+                            [attr.placeholder]="shownPlaceholder()"
+                            [attr.autocomplete]="autocomplete() ?? null"
+                            [attr.aria-labelledby]="field.labelledBy"
+                            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+                            [attr.aria-describedby]="describedBy() ?? null"
+                            (input)="updateText(field.side, nativeInput.value)"
+                            (blur)="finishTyping(field.side)"
+                            (invalid)="showInsteadOfPopup($event)"
+                        />
+                        <!-- both buttons open the one calendar, the click says which side it chooses before the browser
+                             opens it -->
+                        <button
+                            type="button"
+                            [class]="calendarButtonClasses"
+                            [disabled]="disabled() || readonly()"
+                            [attr.popovertarget]="calendarId()"
+                            [attr.aria-label]="field.calendarButtonLabel"
+                            (click)="startChoosing(field.side)"
+                        >
+                            <ui-icon [icon]="datePickerIcon" />
+                        </button>
+                    </div>
+                    @if (times()) {
+                        <!-- like ui-input-time: a text to type the time into, and a button that opens a picker of the times
+                             of the day of the side. The range checks the time with its other rules. -->
+                        <div class="relative min-w-36 grow">
+                            <input
+                                #timeInput
+                                type="text"
+                                [class]="inputClasses()"
+                                [style.anchor-name]="field.timeAnchorName"
+                                [id]="field.timeId"
+                                [value]="field.timeText"
+                                [disabled]="disabled()"
+                                [readOnly]="readonly()"
+                                [attr.placeholder]="timePlaceholder"
+                                [attr.aria-labelledby]="field.timeLabelledBy"
+                                [attr.aria-invalid]="errorMessage() ? 'true' : null"
+                                [attr.aria-describedby]="describedBy() ?? null"
+                                (input)="updateTimeText(field.side, timeInput.value)"
+                                (blur)="finishTypingTime(field.side)"
+                            />
+                            <!-- without times until the side has a day, when the day decides them -->
+                            <button
+                                type="button"
+                                [class]="calendarButtonClasses"
+                                [disabled]="disabled() || readonly() || field.times.length === 0"
+                                [attr.popovertarget]="field.timePickerId"
+                                [attr.aria-label]="field.timePickerLabel"
+                            >
+                                <ui-icon [icon]="timePickerIcon" />
+                            </button>
+                            <div
+                                #timePicker
+                                popover="auto"
+                                role="dialog"
+                                [id]="field.timePickerId"
+                                [class]="calendarClasses()"
+                                [style.position-anchor]="field.timeAnchorName"
+                                [attr.aria-label]="field.timePickerLabel"
+                                (toggle)="toggleTimePicker(field.side, $event.newState === 'open')"
+                            >
+                                @if (field.timePickerOpen) {
+                                    <ui-input-time-picker
+                                        [value]="field.time"
+                                        [times]="field.times"
+                                        [color]="color()"
+                                        [label]="field.timePickerLabel"
+                                        (chosen)="chooseTime(field.side, $event, timePicker, timeInput)"
+                                    />
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @if (times()) {
+            <span class="sr-only" [id]="timeLabelId()">{{ timeLabel }}</span>
+        }
+        <!-- in the top layer, so no container cuts it off, and closed by the browser on Escape or a click outside -->
+        <div
+            #calendar
+            popover="auto"
+            role="dialog"
+            [id]="calendarId()"
+            [class]="calendarClasses()"
+            [style.position-anchor]="anchorName()"
+            [attr.aria-label]="datePickerLabel"
+            (toggle)="calendarOpen.set($event.newState === 'open')"
+        >
+            <!-- only while open, so it starts at the month of the start and moves focus into it every time -->
+            @if (calendarOpen()) {
+                <!-- which side a chosen day becomes, announced when it changes from the start to the end -->
+                <p class="sr-only" aria-live="polite">{{ choosingLabel() }}</p>
+                <ui-input-date-calendar
+                    [value]="value().start"
+                    [end]="value().end"
+                    [min]="min()"
+                    [max]="max()"
+                    [validation]="calendarValidation()"
+                    [color]="color()"
+                    (chosen)="choose($event)"
+                />
+            }
+        </div>
+    </div>
+</ui-input-field>

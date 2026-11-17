@@ -1,0 +1,41 @@
+<h2 class="font-heading text-title text-on-surface">{{ labels.settingsTitle }}</h2>
+<ul class="mt-4 divide-y divide-outline-variant empty:hidden">
+    @for (row of rows(); track row.method) {
+        <li class="py-3" [attr.data-method]="row.method">
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- &ngsp;: angular drops the whitespace between elements, and screen readers would read the name and
+                     the status as one word -->
+                <p class="grow text-body text-on-surface">
+                    <span class="me-2 text-label-lg" [id]="row.nameId">{{ row.name }}</span>&ngsp;<span class="text-on-surface-variant">{{
+                        row.status
+                    }}</span>
+                </p>
+                @for (action of row.actions; track action.kind) {
+                    <button
+                        ui-button
+                        type="button"
+                        variant="outlined"
+                        [color]="action.color"
+                        [attr.aria-describedby]="row.nameId"
+                        (click)="act(row, action)"
+                    >
+                        {{ action.label }}
+                    </button>
+                }
+            </div>
+            @if (row.enrolling) {
+                <ngx-two-factor-enrollment class="mt-4" [method]="row.method" (enrolled)="finishEnrollment($event.method)" />
+                <!-- outlined: on its own, a text button looks like text and starts further in than the text above it -->
+                <button ui-button type="button" variant="outlined" (click)="cancelEnrollment(row.method)">{{ labels.cancel }}</button>
+            }
+        </li>
+    }
+</ul>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>

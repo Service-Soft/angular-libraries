@@ -1,0 +1,46 @@
+<ui-pagination [label]="paginationLabel()" [totalAmount]="totalAmount()" [pageSize]="pageSize()" [(page)]="page" />
+@if (range(); as currentRange) {
+    <!-- as wide as the widest range of this many rows, which takes the same cell unseen, so what follows doesn't move
+         from page to page. Digits of the same width make the one with the most digits the widest. -->
+    <div class="grid text-body-sm text-on-surface-variant tabular-nums">
+        <!-- a status, so screen readers say how many rows are left after a filter, and where a new page starts -->
+        <p class="col-start-1 row-start-1" role="status">{{ currentRange }}</p>
+        <span class="invisible col-start-1 row-start-1" aria-hidden="true">{{ widestRange() }}</span>
+    </div>
+}
+@if (hasPageSizes()) {
+    <div class="flex items-center gap-2">
+        <!-- the visible label of the select, which focuses it on a click. Hidden from screen readers, which read its own
+             hidden label, and would read it twice otherwise. -->
+        <label class="text-body-sm text-on-surface-variant" aria-hidden="true" [for]="pageSizeId()">{{ labels.pageSizeLabel }}</label>
+        <ui-input-select
+            size="sm"
+            hideLabel
+            required
+            [label]="labels.pageSizeLabel"
+            [inputId]="pageSizeId()"
+            [options]="pageSizeOptions()"
+            [value]="pageSize()"
+            (valueChange)="changePageSize($event)"
+        />
+    </div>
+}
+@if (activeFilters().length) {
+    <!-- a click on a badge removes its filter, which its name says, with the text it shows in it -->
+    <ul class="ms-auto flex flex-wrap gap-2" [attr.aria-label]="labels.filtersLabel">
+        @for (activeFilter of activeFilters(); track activeFilter.key) {
+            <li>
+                <button
+                    #filterBadge
+                    type="button"
+                    [class]="filterBadgeClasses"
+                    [attr.aria-label]="labels.removeFilterLabel(activeFilter.text)"
+                    (click)="removedFilter.emit($index)"
+                >
+                    {{ activeFilter.text }}
+                    <ui-icon [icon]="removeFilterIcon" />
+                </button>
+            </li>
+        }
+    </ul>
+}

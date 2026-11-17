@@ -1,0 +1,23 @@
+<ui-card class="h-full" [color]="color()">
+    <!-- a colored surface gives its tokens to its direct children, which is this one. The features take the space that is
+         left, so the actions of every card of a row stand at the same height. -->
+    <div class="flex h-full flex-col gap-6">
+        <div class="flex flex-col gap-2">
+            @if (highlighted()) {
+                <!-- before the name, so screen readers read it with the plan: 'Recommended, Family'. Always primary and
+                     filled: on a filled card, which is a colored surface, primary becomes the on- color of the card, so
+                     the badge stands out on every variant and color, where secondary would vanish on a secondary card. -->
+                <ui-badge class="self-start" color="primary" variant="filled">{{ badge() }}</ui-badge>
+            }
+            <ui-heading class="font-heading text-title" [level]="headingLevel()">{{ name() }}</ui-heading>
+            @if (description()) {
+                <p class="text-body text-on-surface-variant">{{ description() }}</p>
+            }
+        </div>
+        <ng-content select="ui-price" />
+        <div class="grow">
+            <ng-content />
+        </div>
+        <ng-content select="ui-pricing-card-actions" />
+    </div>
+</ui-card>

@@ -1,0 +1,68 @@
+<ui-input-field [field]="this">
+    <!-- the browser's own button is in the language of the browser, so the one below opens the native picker instead.
+         It holds no files of the backend, so it only takes the chosen ones and is emptied again. -->
+    <input
+        #nativeInput
+        type="file"
+        class="hidden"
+        tabindex="-1"
+        aria-hidden="true"
+        [multiple]="multiple()"
+        [disabled]="!isEditable()"
+        [attr.accept]="accept() ?? null"
+        [attr.name]="name() ?? null"
+        (change)="addFiles(nativeInput)"
+        (invalid)="showInsteadOfPopup($event)"
+    />
+    @if (singleFile(); as file) {
+        <!-- as high as an input of its size, so it lines up with the inputs next to it. The button that removes it
+             takes the id, so the label focuses it, and the one that chooses a file takes it back once it is removed. -->
+        <div [class]="singleFileClasses()">
+            <ui-input-file-summary [file]="file" />
+            @if (isEditable()) {
+                <button
+                    #control
+                    type="button"
+                    [class]="removeButtonClasses"
+                    [id]="inputId()"
+                    [attr.autofocus]="autofocus() ? '' : null"
+                    [attr.aria-label]="removeLabel"
+                    [attr.aria-invalid]="errorMessage() ? 'true' : null"
+                    [attr.aria-describedby]="file.nameId + (describedBy() ? ' ' + describedBy() : '')"
+                    (click)="removeFile(0)"
+                    (blur)="showValidationError.set(true)"
+                >
+                    <ui-icon [icon]="removeIcon" />
+                </button>
+            }
+        </div>
+    } @else {
+        <div class="flex flex-col items-start gap-2">
+            @if (isEditable()) {
+                <button
+                    #control
+                    ui-button
+                    type="button"
+                    variant="outlined"
+                    [id]="inputId()"
+                    [attr.autofocus]="autofocus() ? '' : null"
+                    [size]="size()"
+                    [attr.aria-invalid]="errorMessage() ? 'true' : null"
+                    [attr.aria-describedby]="describedBy() ?? null"
+                    (click)="nativeInput.click()"
+                    (blur)="showValidationError.set(true)"
+                >
+                    <ui-icon [icon]="chooseIcon" />
+                    {{ chooseLabel() }}
+                </button>
+            }
+            @if (files().length) {
+                <ul class="grid w-full gap-2">
+                    @for (file of files(); track file.file) {
+                        <li ui-input-file-entry [file]="file" [removable]="isEditable()" [removeLabel]="removeLabel" (removed)="removeFile($index)"></li>
+                    }
+                </ul>
+            }
+        </div>
+    }
+</ui-input-field>

@@ -1,0 +1,81 @@
+<ui-input-field [field]="this">
+    <!-- the box of the field, with the chips inside it before the text, which the input fills the rest of the line with.
+         It is the anchor of the list, which opens below all of it. -->
+    <div [class]="boxClasses()" [style.anchor-name]="anchorName()">
+        @if (chips().length) {
+            <!-- no box of its own: the chips and the text flow in the lines of the field together, so the text goes on after
+                 the last chip instead of below all of them. Disabled with the field, which dims all of it: its values are as
+                 disabled as its native input. -->
+            <ul class="contents" [attr.aria-disabled]="disabled() ? 'true' : null">
+                @for (chip of chips(); track chip.value) {
+                    <li
+                        ui-input-chip
+                        [label]="chip.label"
+                        [labelId]="chip.labelId"
+                        [removable]="isEditable()"
+                        [color]="color()"
+                        [size]="size()"
+                        [removeLabel]="removeLabel"
+                        (removed)="removeValue($index)"
+                    ></li>
+                }
+            </ul>
+        }
+        <!-- the combobox gives the input its role and keyboard, and moves through the list while focus stays here. Not
+             softly disabled, so a disabled input is the native disabled one like every other input. Hidden rather than
+             left out while nothing can be typed, since the base input reads it, and by its style, which the flex of its
+             classes would win against for the hidden attribute. Disabled and read only inputs are no candidates for
+             validation. -->
+        <input
+            #nativeInput
+            #combobox="ngCombobox"
+            ngCombobox
+            type="text"
+            [class]="textClasses"
+            [style.display]="isEditable() ? null : 'none'"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [disabled]="disabled()"
+            [softDisabled]="false"
+            [readonly]="readonly()"
+            [value]="query()"
+            [attr.name]="name() ?? null"
+            [attr.placeholder]="placeholder() ?? null"
+            [attr.autocomplete]="autocomplete() ?? 'off'"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (valueChange)="query.set($event)"
+            (keydown.enter)="addCustomValue($event)"
+            (keydown.backspace)="removeLastValue()"
+            (blur)="showValidationError.set(true)"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+    </div>
+    <ng-template ngComboboxPopup [combobox]="combobox">
+        <!-- chosen and unchosen with Enter or a click, not by moving through it. Out of the tab order: focus stays in the
+             input, so Tab goes on to the next field and closes the list. In the top layer, so no container cuts it off. -->
+        <div
+            #listbox="ngListbox"
+            ngComboboxWidget
+            ngListbox
+            multi
+            focusMode="activedescendant"
+            selectionMode="explicit"
+            tabindex="-1"
+            [softDisabled]="false"
+            [uiInputPopup]="anchorName()"
+            [class]="popupClasses"
+            [value]="shownValues()"
+            [activeDescendant]="listbox.activeDescendant()"
+            (valueChange)="choose($event)"
+        >
+            @for (option of shownOptions(); track $index) {
+                <div ngOption [class]="optionClasses" [value]="option.value" [label]="option.label" [disabled]="option.disabled ?? false">
+                    <!-- aria-selected says it to screen readers, the mark and the weight to everyone else -->
+                    <span class="invisible group-aria-selected:visible" aria-hidden="true"><ui-icon [icon]="checkIcon" /></span>
+                    {{ option.label }}
+                </div>
+            }
+        </div>
+    </ng-template>
+</ui-input-field>

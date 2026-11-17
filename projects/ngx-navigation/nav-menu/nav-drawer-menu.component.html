@@ -1,0 +1,23 @@
+<ui-details>
+    <ui-summary><ngx-nav-label [name]="element().name" [icon]="element().icon" /></ui-summary>
+    <ul class="grid gap-1 ps-4">
+        @for (child of shown(); track $index) {
+            <li>
+                @switch (child.type) {
+                    @case ('link') {
+                        <ngx-nav-link layout="drawer" [element]="child" />
+                    }
+                    @case ('button') {
+                        <ngx-nav-button layout="drawer" [element]="child" />
+                    }
+                    @case ('menu') {
+                        <ngx-nav-drawer-menu [element]="child" />
+                    }
+                    @case ('custom') {
+                        <ng-container *ngComponentOutlet="child.component; inputs: child.inputs ?? {}" />
+                    }
+                }
+            </li>
+        }
+    </ul>
+</ui-details>

@@ -1,0 +1,11 @@
+<!-- an ordered list, as the sections have an order, and nested lists, so screen readers announce the level of each link -->
+<ol [class]="listClasses()">
+    @for (entry of entries(); track entry.fragment) {
+        <li>
+            <a [class]="linkClasses" [href]="entry.href" [attr.aria-current]="entry.fragment === current() ? 'true' : null">{{ entry.name }}</a>
+            @if (entry.children.length) {
+                <ui-table-of-contents-list nested [entries]="entry.children" [current]="current()" />
+            }
+        </li>
+    }
+</ol>

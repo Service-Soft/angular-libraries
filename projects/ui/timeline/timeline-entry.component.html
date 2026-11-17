@@ -1,0 +1,17 @@
+<!-- decorative: a dot at the height of the date, and the line to the next entry. Borders rather than backgrounds, which
+     forced colors mode would remove; the last entry has no next one to join. -->
+<div class="flex flex-col items-center gap-1 pt-1" aria-hidden="true">
+    <span class="size-3 shrink-0 rounded-full border-2 border-primary"></span>
+    <span class="grow border-s-2 border-outline-variant group-last:hidden"></span>
+</div>
+<div class="flex min-w-0 flex-col gap-1 pb-8 group-last:pb-0">
+    @if (datetime(); as datetime) {
+        <time class="text-label text-primary" [attr.datetime]="datetime">{{ date() }}</time>
+    } @else {
+        <span class="text-label text-primary">{{ date() }}</span>
+    }
+    <p class="font-heading text-title">{{ heading() }}</p>
+    <div class="flex flex-col gap-2 text-body">
+        <ng-content />
+    </div>
+</div>

@@ -1,0 +1,11 @@
+<ui-input-select
+    [label]="label()"
+    [hint]="hint()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [options]="options()"
+    [customValidation]="problemValidation()"
+    [value]="selectedValue()"
+    [(showValidationError)]="showError"
+    (valueChange)="value.set($event)"
+/>

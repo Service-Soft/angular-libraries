@@ -1,0 +1,23 @@
+<!-- a paragraph, not a list: it reads as one line of facts, without the count of a list before it -->
+<p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-on-surface-variant">
+    @for (entry of entries(); track $index) {
+        @if (!$first) {
+            <!-- decorative, screen readers pause between the entries anyway -->
+            <span aria-hidden="true">·</span>
+        }
+        @if (entry.kind === 'date') {
+            <ui-date-period [start]="entry.date" [format]="dateFormat()" />
+        } @else {
+            <span [class]="entry.classes">
+                @if (entry.avatar) {
+                    <!-- decorative, the name next to it is read already -->
+                    <ui-avatar size="sm" decorative [name]="entry.text" [src]="avatar()" />
+                }
+                @if (entry.icon) {
+                    <ui-icon [icon]="entry.icon" />
+                }
+                {{ entry.text }}
+            </span>
+        }
+    }
+</p>

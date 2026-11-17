@@ -1,0 +1,20 @@
+<h2 class="font-heading text-title text-on-surface">{{ labels.dialogTitle }}</h2>
+<ngx-second-factor-form
+    class="mt-4"
+    [methods]="methods"
+    (confirmed)="dialogRef.close($event)"
+    (codeRequested)="sendCode($event)"
+    (passkeyRequested)="presentPasskey($event)"
+/>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>
+<div class="mt-6 flex justify-end">
+    <!-- outlined: the only button of the row, without a filled one next to it a text button looks like text -->
+    <button ui-button type="button" variant="outlined" (click)="dialogRef.close()">{{ labels.cancel }}</button>
+</div>

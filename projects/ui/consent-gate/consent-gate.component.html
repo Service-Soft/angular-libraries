@@ -1,0 +1,40 @@
+@if (consented()) {
+    <!-- takes the focus when the user loaded it with a button, which is gone then -->
+    <div
+        #loaded
+        tabindex="-1"
+        class="min-w-0 rounded-consent-gate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+        <ng-container [ngTemplateOutlet]="content()" />
+    </div>
+} @else {
+    @let labels = this.labels();
+    <!-- the border keeps the shape in forced colors mode, which removes the background -->
+    <div
+        class="
+            flex min-w-0 flex-col items-center justify-center gap-3 rounded-consent-gate border border-outline-variant bg-surface-container
+            p-6 text-center text-on-surface
+        "
+    >
+        <!-- decorative, the title says what it is -->
+        <span class="flex text-on-surface-variant [&_svg]:size-[2em]"><ui-icon [icon]="icon" /></span>
+        <p class="font-heading text-title">{{ labels.title }}</p>
+        <p class="max-w-prose text-body-sm text-on-surface-variant">{{ labels.description }}</p>
+        @if (privacyPolicyUrl() || providerPrivacyPolicyUrl()) {
+            <p class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-body-sm">
+                @if (privacyPolicyUrl(); as url) {
+                    <a ui-link [href]="url">{{ privacyPolicyLabel }}</a>
+                }
+                @if (providerPrivacyPolicyUrl(); as url) {
+                    <a ui-link target="_blank" [href]="url">{{ labels.providerPrivacyPolicy }}</a>
+                }
+            </p>
+        }
+        <div class="flex flex-wrap justify-center gap-2">
+            <button ui-button type="button" (click)="load()">{{ labels.load }}</button>
+            @if (alwaysAllow()) {
+                <button ui-button type="button" variant="outlined" (click)="allowAlways()">{{ labels.alwaysAllow }}</button>
+            }
+        </div>
+    </div>
+}

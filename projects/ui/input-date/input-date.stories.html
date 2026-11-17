@@ -1,0 +1,4 @@
+<div class="grid max-w-80 gap-2">
+    <ui-input-date label="Delivery" hint="From the 2nd of November on" [min]="min" [color]="color()" [(value)]="value" />
+    <p class="text-body-sm text-on-surface-variant">Value: {{ value()?.toString() }}</p>
+</div>

@@ -1,0 +1,16 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationMap": true,
+        "outDir": "../../out-tsc/lib",
+        // the paths of the workspace point to the sources of the other libraries, which the build would then compile
+        // into this one. Without them, they resolve from node_modules like for a consumer, so ui has to be built first.
+        "paths": {},
+        "types": []
+    },
+    "exclude": ["**/*.spec.ts", "**/*.stories.ts", "test-setup.ts"],
+    "extends": "../../tsconfig.json",
+    "include": ["**/*.ts"]
+}

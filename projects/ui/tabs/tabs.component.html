@@ -1,0 +1,14 @@
+<div ngTabs>
+    <div ngTabList [class]="tabListClasses()" [selectedTab]="shown()" (selectedTabChange)="select($event)">
+        @for (tab of tabs(); track tab.value()) {
+            <button ngTab type="button" [class]="tabClasses()" [value]="tab.value()" [disabled]="tab.disabled()">{{ tab.label() }}</button>
+        }
+    </div>
+    @for (tab of tabs(); track tab.value()) {
+        <!-- rendered right away and kept while hidden, not deferred: a form validates the fields of every tab, also of
+             one the user never opened, and keeps what the user typed. Inert while hidden, so nothing in it is reached -->
+        <div #panel="ngTabPanel" ngTabPanel class="pt-4" [value]="tab.value()" [hidden]="!panel.visible()">
+            <ng-container [ngTemplateOutlet]="tab.content()" />
+        </div>
+    }
+</div>

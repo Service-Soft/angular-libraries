@@ -1,0 +1,5 @@
+<footer class="bg-surface-container text-on-surface">
+    @for (row of rowViews(); track $index) {
+        <ngx-nav-row [groups]="row" [components]="components()" />
+    }
+</footer>

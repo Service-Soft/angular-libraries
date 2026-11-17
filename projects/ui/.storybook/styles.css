@@ -1,0 +1,17 @@
+/* storybook renders the sources, so tailwind scans them instead of the built package. */
+@import "tailwindcss" source("../");
+@import "../theme.css";
+@source "../../ngx-change-sets";
+@source "../../ngx-persistence-logger";
+@source "../../ngx-tracking";
+@source "../../ngx-pwa";
+@source "../../ngx-auth";
+@source "../../ngx-error-handling";
+@source "../../ngx-navigation";
+@source "../../ngx-entity";
+@source "../../ngx-ecommerce";
+
+/* what consumers put on their own body, so stories show the surface of light and dark mode. */
+body {
+    @apply bg-surface text-on-surface;
+}

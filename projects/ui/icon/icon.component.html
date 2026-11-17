@@ -1,0 +1,12 @@
+<!-- the size of an icon inside a button comes from the button, which overrides this one -->
+<svg
+    class="inline-block size-[1em] shrink-0 fill-current"
+    [attr.viewBox]="viewBox()"
+    [attr.role]="role()"
+    [attr.aria-label]="label()"
+    [attr.aria-hidden]="ariaHidden()"
+>
+    @for (path of paths(); track $index) {
+        <path [attr.d]="path" />
+    }
+</svg>

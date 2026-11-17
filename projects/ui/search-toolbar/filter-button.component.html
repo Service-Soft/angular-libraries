@@ -1,0 +1,8 @@
+<!-- decorative, the text names the button -->
+<ui-icon [icon]="filterIcon" />
+<ng-content />
+@if (count() > 0) {
+    <!-- the number alone would be read without saying what it counts -->
+    <span aria-hidden="true" [class]="badgeClasses()">{{ count() }}</span>
+    <span class="sr-only">({{ countLabel() }})</span>
+}

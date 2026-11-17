@@ -1,0 +1,23 @@
+<ui-card flush [class]="cardClasses()" [variant]="variant()" [color]="color()">
+    <!-- an article on its own, which screen readers can list and jump to, and search engines read as one -->
+    <article [class]="layoutClasses()">
+        @if (image(); as image) {
+            <div [class]="imageClasses()">
+                <img class="object-cover" fill [ngSrc]="image.src" [alt]="image.alt" [priority]="image.priority ?? false" />
+            </div>
+        }
+        <div class="flex grow flex-col gap-2 p-4 sm:p-6">
+            @if (category()) {
+                <!-- below the link, which takes the clicks on it -->
+                <ui-badge class="self-start" color="primary" variant="tinted">{{ category() }}</ui-badge>
+            }
+            <!-- a native heading of the level, which holds your link -->
+            <ui-heading class="font-heading text-title" [level]="headingLevel()"><ng-content select="[uiArticleCardLink]" /></ui-heading>
+            <!-- above the link, so its text can be selected. The last of several children, like a byline after the
+                 excerpt, sits at the bottom of the card, so the bylines of cards next to each other line up. -->
+            <div class="relative flex grow flex-col gap-3 text-body text-on-surface-variant *:last:not-first:mt-auto">
+                <ng-content />
+            </div>
+        </div>
+    </article>
+</ui-card>

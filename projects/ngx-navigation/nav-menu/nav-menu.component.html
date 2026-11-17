@@ -1,0 +1,11 @@
+@if (layout() === 'row') {
+    <button ui-button type="button" variant="text" [uiMenuTrigger]="menu">
+        <ngx-nav-label [name]="element().name" [icon]="element().icon" />
+        <ui-icon [icon]="menuIcon" />
+    </button>
+    <ui-menu #menu>
+        <ngx-nav-menu-items [elements]="element().elements" />
+    </ui-menu>
+} @else {
+    <ngx-nav-drawer-menu [element]="element()" />
+}

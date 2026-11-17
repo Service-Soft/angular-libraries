@@ -1,0 +1,17 @@
+<div #content [id]="contentId" [class]="contentClasses()" [style.mask-image]="mask()">
+    <ng-content />
+</div>
+@if (overflows()) {
+    <!-- the same name while it is open, expanded says which state it is in -->
+    <button
+        ui-button
+        type="button"
+        variant="text"
+        size="sm"
+        [attr.aria-expanded]="expanded()"
+        [attr.aria-controls]="contentId"
+        (click)="expanded.set(!expanded())"
+    >
+        {{ expanded() ? lessLabel() : moreLabel() }}
+    </button>
+}

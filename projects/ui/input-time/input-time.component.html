@@ -1,0 +1,52 @@
+<ui-input-field [field]="this">
+    <!-- relative on its own, so the button that opens the picker is centred on the input -->
+    <div class="relative">
+        <!-- a text rather than the native time input, whose picker looks different in every browser, like a date input -->
+        <input
+            #nativeInput
+            type="text"
+            [class]="inputClasses()"
+            [style.anchor-name]="anchorName()"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [value]="text()"
+            [required]="required()"
+            [disabled]="disabled()"
+            [readOnly]="readonly()"
+            [attr.name]="name() ?? null"
+            [attr.placeholder]="shownPlaceholder()"
+            [attr.autocomplete]="autocomplete() ?? null"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (input)="updateText(nativeInput.value)"
+            (blur)="finishTyping()"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+        <!-- popovertarget lets the browser open and close the picker and tell screen readers whether it is open -->
+        <button
+            type="button"
+            [class]="pickerButtonClasses"
+            [disabled]="disabled() || readonly()"
+            [attr.popovertarget]="pickerId()"
+            [attr.aria-label]="timePickerLabel"
+        >
+            <ui-icon [icon]="timePickerIcon" />
+        </button>
+        <!-- in the top layer, so no container cuts it off, and closed by the browser on Escape or a click outside -->
+        <div
+            #picker
+            popover="auto"
+            role="dialog"
+            [id]="pickerId()"
+            [class]="pickerClasses()"
+            [style.position-anchor]="anchorName()"
+            [attr.aria-label]="timePickerLabel"
+            (toggle)="pickerOpen.set($event.newState === 'open')"
+        >
+            <!-- only while open, so it moves focus to the time of the value every time -->
+            @if (pickerOpen()) {
+                <ui-input-time-picker [value]="value()" [times]="offeredTimes()" [color]="color()" (chosen)="choose($event)" />
+            }
+        </div>
+    </div>
+</ui-input-field>

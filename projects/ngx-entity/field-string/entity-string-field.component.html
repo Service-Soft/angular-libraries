@@ -1,0 +1,14 @@
+<ui-input-string
+    [label]="label()"
+    [hint]="hint()"
+    [type]="type()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [minLength]="metadata().minLength"
+    [maxLength]="metadata().maxLength"
+    [pattern]="pattern()"
+    [customValidation]="problemValidation()"
+    [value]="value() ?? ''"
+    [(showValidationError)]="showError"
+    (valueChange)="changeText($event)"
+/>

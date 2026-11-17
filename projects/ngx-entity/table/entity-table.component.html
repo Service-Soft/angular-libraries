@@ -1,0 +1,54 @@
+<!-- the buttons share the row of the label above the table -->
+<ui-table
+    [label]="label()"
+    [hideLabel]="hideLabel()"
+    [columns]="tableColumns()"
+    [rows]="shown().items"
+    [totalAmount]="shown().totalAmount"
+    [rowKey]="rowKey()"
+    [selectable]="rowsSelectable()"
+    [opens]="rowsOpen()"
+    [actions]="hasRowActions() ? rowActions : undefined"
+    [loading]="loading()"
+    [(pageSize)]="pageSize"
+    [(page)]="page"
+    [(order)]="order"
+    [(filters)]="filters"
+    [(selected)]="selected"
+    (opened)="open($event)"
+>
+    <ui-table-actions>
+        <!-- export what is selected, so they wait for a selection -->
+        @for (format of exportFormats(); track format) {
+            <button ui-button type="button" variant="text" [disabled]="selected().length === 0" (click)="export(format)">
+                {{ labels.exportLabels[format] }}
+            </button>
+        }
+        @if (canImport()) {
+            <!-- the native input only opens the file picker of the browser, the button is what the user sees -->
+            <input #importInput type="file" accept="application/json,.json" hidden (change)="import(importInput)" />
+            <button ui-button type="button" variant="text" (click)="importInput.click()">{{ labels.importLabel }}</button>
+        }
+        @if (canCreate()) {
+            <button ui-button type="button" (click)="create()">{{ labels.createLabel }}</button>
+        }
+    </ui-table-actions>
+    <!-- an empty state of your own in place of the one of ui-table. ui-table sees the ng-content, not what it projects,
+         so it has to say which slot it is meant for -->
+    <ng-content select="ui-empty-state" ngProjectAs="ui-empty-state" />
+    <!-- what is put inside of this table, like a description, below the label -->
+    <ng-content />
+</ui-table>
+<ng-template #rowActions let-row>
+    <div class="flex flex-wrap justify-end gap-1 max-sm:justify-start">
+        @if (actions(); as actions) {
+            <ng-container [ngTemplateOutlet]="actions" [ngTemplateOutletContext]="{ $implicit: row }" />
+        }
+        @if (canDelete()) {
+            <!-- named with the first value of the row, so the buttons of the rows can be told apart -->
+            <button ui-button type="button" variant="text" size="sm" [attr.aria-label]="resolveDeleteLabel(row)" (click)="delete(row)">
+                {{ labels.deleteLabel }}
+            </button>
+        }
+    </div>
+</ng-template>

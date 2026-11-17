@@ -1,0 +1,8 @@
+<!-- decorative, the text says the same: an included item is the default, one that is not says so to screen readers -->
+<span [class]="iconClasses()"><ui-icon [icon]="shownIcon()" /></span>
+<span [class]="textClasses()">
+    <ng-content />
+    @if (!included()) {
+        <span class="sr-only">({{ excludedLabel }})</span>
+    }
+</span>

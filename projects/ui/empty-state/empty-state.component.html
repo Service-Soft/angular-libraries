@@ -1,0 +1,13 @@
+<div [class]="classes()">
+    <!-- decorative, the title says what it is -->
+    <span [class]="iconClasses()"><ui-icon [icon]="shownIcon()" /></span>
+    @if (headingLevel(); as level) {
+        <ui-heading [class]="titleClasses()" [level]="level">{{ title() }}</ui-heading>
+    } @else {
+        <p [class]="titleClasses()">{{ title() }}</p>
+    }
+    @if (text()) {
+        <p class="max-w-prose text-body-sm text-on-surface-variant">{{ text() }}</p>
+    }
+    <ng-content select="ui-empty-state-actions" />
+</div>

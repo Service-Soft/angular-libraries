@@ -1,0 +1,20 @@
+<!-- a progressbar without a value is one whose end isn't known. There is no native element for that which can be drawn
+     as a circle: an indeterminate <progress> shows no content of its own. align-middle centers the small one on a line
+     of text. -->
+<span role="progressbar" class="inline-flex align-middle" [attr.aria-label]="label()">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" [class]="classes()">
+        <!-- forced colors mode draws every stroke in the same color, where the track would hide the arc. In a button, which
+             may be filled in primary, the arc takes its text color instead, and a track would barely differ from it. -->
+        <circle class="stroke-outline-variant forced-colors:hidden in-[button]:hidden" cx="12" cy="12" r="10" stroke-width="3" />
+        <!-- a quarter of the circle, whose circumference is about 63 -->
+        <circle
+            class="stroke-primary in-[button]:stroke-current"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-dasharray="16 47"
+        />
+    </svg>
+</span>

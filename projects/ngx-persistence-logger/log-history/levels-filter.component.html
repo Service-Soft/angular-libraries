@@ -1,0 +1,11 @@
+<div class="flex flex-wrap gap-2" role="group" [attr.aria-label]="label()">
+    @for (option of toggles(); track option.level) {
+        <!-- the check marks a pressed button by its shape, not only by its color -->
+        <button ui-button type="button" variant="outlined" size="sm" [pressed]="option.pressed" (click)="toggle(option.level)">
+            @if (option.pressed) {
+                <ui-icon [icon]="faCheck" />
+            }
+            {{ option.label }}
+        </button>
+    }
+</div>

@@ -1,0 +1,12 @@
+<ui-input-textarea
+    [label]="label()"
+    [hint]="hint()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [minLength]="metadata().minLength"
+    [maxLength]="metadata().maxLength"
+    [customValidation]="problemValidation()"
+    [value]="value() ?? ''"
+    [(showValidationError)]="showError"
+    (valueChange)="changeText($event)"
+/>

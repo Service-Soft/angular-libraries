@@ -1,0 +1,13 @@
+<ui-details [variant]="variant()" [name]="name()" [(open)]="open">
+    <ui-summary><span [attr.itemprop]="microdata() ? 'name' : null">{{ question() }}</span></ui-summary>
+    <!-- the answer is your own content, whose text search engines read as the text of the accepted answer -->
+    <div
+        [attr.itemscope]="microdata() ? '' : null"
+        [attr.itemprop]="microdata() ? 'acceptedAnswer' : null"
+        [attr.itemtype]="microdata() ? 'https://schema.org/Answer' : null"
+    >
+        <div class="flex flex-col gap-2 text-body" [attr.itemprop]="microdata() ? 'text' : null">
+            <ng-content />
+        </div>
+    </div>
+</ui-details>

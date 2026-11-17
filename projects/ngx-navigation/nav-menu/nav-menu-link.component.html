@@ -1,0 +1,18 @@
+@if (link().routerLink; as routerLink) {
+    <a
+        ui-menu-link
+        routerLinkActive
+        ariaCurrentWhenActive="page"
+        [routerLink]="routerLink"
+        [fragment]="link().fragment"
+        [routerLinkActiveOptions]="link().activeOptions ?? {}"
+        [attr.target]="link().target"
+        [attr.rel]="link().rel"
+    >
+        <ngx-nav-label [name]="element().name" [icon]="element().icon" />
+    </a>
+} @else {
+    <a ui-menu-link [href]="link().href" [attr.target]="link().target" [attr.rel]="link().rel">
+        <ngx-nav-label [name]="element().name" [icon]="element().icon" />
+    </a>
+}

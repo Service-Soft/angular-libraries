@@ -1,0 +1,8 @@
+<!-- screen readers read the final value, never the one that counts. Both copies that show stand in the same cell: the
+     final one, invisible, keeps the width the number ends up with, so nothing around it moves while it counts. -->
+<span [class]="numberClasses()">
+    <span class="invisible col-start-1 row-start-1" aria-hidden="true">{{ text() }}</span>
+    <span class="col-start-1 row-start-1" aria-hidden="true">{{ shownText() }}</span>
+    <span class="sr-only">{{ text() }}</span>
+</span>
+<span class="text-body text-on-surface-variant">{{ label() }}</span>

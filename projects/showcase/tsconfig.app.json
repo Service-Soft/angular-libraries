@@ -1,0 +1,12 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+    "compilerOptions": {
+        // the showcase consumes the built libraries from node_modules, exactly like an external project.
+        "paths": {},
+        "types": []
+    },
+    "exclude": ["src/**/*.spec.ts"],
+    "extends": "../../tsconfig.json",
+    "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,46 @@
+<!-- the native address element says that this is how to reach the business or person. Microdata is only written when it
+     is on: an item of its own when there is a business type, otherwise properties of the item around it. -->
+@let microdata = this.microdata();
+@let address = this.address();
+<address class="flex flex-col gap-3 text-body not-italic" [attr.itemscope]="itemType() ? '' : null" [attr.itemtype]="itemType() ?? null">
+    <p>
+        @if (name()) {
+            <span class="block font-semibold" [attr.itemprop]="microdata ? 'name' : null">{{ name() }}</span>
+        }
+        <span
+            class="block"
+            [attr.itemprop]="microdata ? 'address' : null"
+            [attr.itemscope]="microdata ? '' : null"
+            [attr.itemtype]="microdata ? postalAddressType : null"
+        >
+            <span class="block" [attr.itemprop]="microdata ? 'streetAddress' : null">{{ address.street }}</span>
+            <!-- &ngsp; keeps the space between them, which angular removes between elements otherwise -->
+            <span class="block">
+                <span [attr.itemprop]="microdata ? 'postalCode' : null">{{ address.postalCode }}</span>&ngsp;<span
+                    [attr.itemprop]="microdata ? 'addressLocality' : null"
+                >{{ address.city }}</span>
+            </span>
+            @for (line of extraLines(); track line.itemprop) {
+                <span class="block" [attr.itemprop]="microdata ? line.itemprop : null">{{ line.text }}</span>
+            }
+        </span>
+    </p>
+    <!-- without contacts it takes no space: comments, which angular leaves for its blocks, don't count for :empty -->
+    <ul class="flex flex-col gap-1 empty:hidden">
+        @for (contact of contacts(); track contact.itemprop) {
+            <li class="flex flex-wrap items-center gap-x-2">
+                <!-- decorative, the label next to it is read -->
+                <span [class]="iconClasses()"><ui-icon [icon]="contact.icon" /></span>
+                <span [class]="labelClasses()">{{ contact.label }}:</span>
+                <!-- the property is the text inside the link: on the link itself microdata would take its href, like tel:… -->
+                @if (contact.href) {
+                    <a ui-link class="wrap-anywhere" [href]="contact.href"><span [attr.itemprop]="microdata ? contact.itemprop : null">{{
+                        contact.text
+                    }}</span></a>
+                } @else {
+                    <span class="wrap-anywhere" [attr.itemprop]="microdata ? contact.itemprop : null">{{ contact.text }}</span>
+                }
+            </li>
+        }
+    </ul>
+</address>

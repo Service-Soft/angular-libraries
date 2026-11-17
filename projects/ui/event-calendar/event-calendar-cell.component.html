@@ -1,0 +1,27 @@
+<!-- the name of the cell: the date, how many events it has and all of their titles, also the ones without room and in a
+     narrow calendar, where only dots show. Taken from the content rather than an aria-label, which would have to contain
+     every visible text of the cell, like its times. -->
+<span class="sr-only">{{ day().cellLabel }}</span>
+<span aria-hidden="true" [class]="day().numberClasses">{{ day().dayOfMonth }}</span>
+<!-- the titles where there is room for them, a dot for each event where there isn't -->
+<ul class="hidden w-full flex-col gap-0.5 @2xl:flex" aria-hidden="true">
+    @for (entry of day().shownEntries; track entry.key) {
+        <li [class]="entry.entryClasses">
+            @if (entry.shortTime) {
+                <span class="font-normal">{{ entry.shortTime }}</span>
+            }
+            {{ entry.title }}
+        </li>
+    }
+    @if (day().moreLabel; as more) {
+        <li class="px-1 text-label-sm text-on-surface-variant">{{ more }}</li>
+    }
+</ul>
+<span class="flex flex-wrap items-center justify-center gap-0.5 @2xl:hidden" aria-hidden="true">
+    @for (entry of day().shownEntries; track entry.key) {
+        <span [class]="entry.dotClasses"></span>
+    }
+    @if (day().moreLabel) {
+        <span class="text-label-sm text-on-surface-variant">+</span>
+    }
+</span>

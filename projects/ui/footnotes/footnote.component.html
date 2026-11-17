@@ -1,0 +1,20 @@
+<!-- the content shows in the list, which renders this template in its place -->
+<ng-template #content><ng-content /></ng-template>
+@if (number(); as number) {
+    <!-- a superscript inside the text, like a printed footnote. It is a target inside a sentence, which may be smaller
+         than 24px. -->
+    <sup>
+        <a
+            class="
+                ms-0.5 rounded-link text-primary underline decoration-1 underline-offset-2
+                hover:decoration-2
+                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+            "
+            role="doc-noteref"
+            [id]="referenceId()"
+            [href]="noteHref()"
+            [attr.aria-label]="label()"
+            [attr.aria-describedby]="textId()"
+        >{{ number }}</a>
+    </sup>
+}

@@ -1,0 +1,70 @@
+<ul class="grid grid-cols-2 gap-2 @md:grid-cols-3 @3xl:grid-cols-4">
+    @for (image of images(); track $index) {
+        <li>
+            <!-- a button named by the alt of its picture, which opens it. The picture grows a little on hover, which is
+                 movement, so only with motion-safe; the button clips it to its corners. -->
+            <button
+                type="button"
+                class="
+                    group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-gallery bg-surface-container
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                "
+                (click)="open($index)"
+            >
+                <img
+                    class="object-cover motion-safe:transition-transform motion-safe:group-hover:scale-105"
+                    fill
+                    sizes="(min-width: 48rem) 25vw, 50vw"
+                    [ngSrc]="image.src"
+                    [alt]="image.alt"
+                />
+            </button>
+        </li>
+    }
+</ul>
+
+<!-- the frame is always rendered, so the browser finds the close button to focus as the dialog opens; only the picture
+     that shows is loaded -->
+<ui-dialog size="fullscreen" [label]="config.label" (closed)="index.set(undefined)">
+    <div
+        class="flex h-full flex-col gap-4"
+        (keydown.arrowleft)="moveByArrow($event, -1)"
+        (keydown.arrowright)="moveByArrow($event, 1)"
+    >
+        <div class="flex items-center justify-end">
+            <!-- a button of a dialog form closes the dialog natively -->
+            <form method="dialog">
+                <button ui-button type="submit" variant="text" iconOnly [attr.aria-label]="config.closeLabel">
+                    <ui-icon [icon]="closeIcon" />
+                </button>
+            </form>
+        </div>
+        @if (shown(); as shown) {
+            <figure class="flex min-h-0 grow flex-col gap-3">
+                <div class="relative min-h-0 grow">
+                    <img class="object-contain" fill priority [ngSrc]="shown.src" [alt]="shown.alt" />
+                </div>
+                @if (shown.caption) {
+                    <figcaption class="text-center text-body text-on-surface">{{ shown.caption }}</figcaption>
+                }
+            </figure>
+        }
+        <div class="flex items-center justify-center gap-4">
+            @if (images().length > 1) {
+                <!-- the arrows point the other way in a right-to-left language, like the keys do -->
+                <button ui-button type="button" variant="outlined" iconOnly class="rtl:[&_svg]:-scale-x-100" [attr.aria-label]="config.previousLabel" (click)="move(-1)">
+                    <ui-icon [icon]="previousIcon" />
+                </button>
+            }
+            <!-- the screen readers read the position from the status below, together with the alt of the picture -->
+            <p class="min-w-16 text-center text-label text-on-surface" aria-hidden="true">{{ position() }} / {{ images().length }}</p>
+            @if (images().length > 1) {
+                <button ui-button type="button" variant="outlined" iconOnly class="rtl:[&_svg]:-scale-x-100" [attr.aria-label]="config.nextLabel" (click)="move(1)">
+                    <ui-icon [icon]="nextIcon" />
+                </button>
+            }
+        </div>
+        <!-- a polite live region, which announces every picture that shows, without moving the focus away from the buttons -->
+        <p class="sr-only" role="status">{{ announcement() }}</p>
+    </div>
+</ui-dialog>

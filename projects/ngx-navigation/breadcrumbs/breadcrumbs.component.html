@@ -1,0 +1,14 @@
+@if (breadcrumbs().length) {
+    <ui-breadcrumbs>
+        @for (step of breadcrumbs(); track step.url) {
+            <ui-breadcrumb>
+                <a ui-link [routerLink]="step.url" [attr.aria-current]="step.isCurrent ? 'page' : undefined">
+                    @if (step.icon) {
+                        <ui-icon [icon]="step.icon" />
+                    }
+                    {{ step.name }}
+                </a>
+            </ui-breadcrumb>
+        }
+    </ui-breadcrumbs>
+}

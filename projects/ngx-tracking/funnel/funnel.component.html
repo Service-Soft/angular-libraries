@@ -1,0 +1,10 @@
+<!-- the text is above the shapes, not inside: a narrow step can't cut it off, and its color is checked against the
+     surface. The shapes only repeat the shares, so screen readers skip them. -->
+<ol class="grid gap-2" [attr.aria-label]="label()">
+    @for (step of steps(); track step.name) {
+        <li class="grid justify-items-center gap-1">
+            <span class="text-center text-label">{{ step.name }}: {{ step.value }} ({{ step.percent }})</span>
+            <div class="h-10 min-w-1 bg-primary" aria-hidden="true" [style.width]="step.width" [style.clip-path]="step.clipPath"></div>
+        </li>
+    }
+</ol>

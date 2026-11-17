@@ -1,0 +1,25 @@
+@if (card().option.image; as image) {
+    <!-- h-auto keeps the ratio of its width and height, which hold its space while it loads -->
+    <img class="block h-auto w-full" [ngSrc]="image.url" [width]="image.width" [height]="image.height" [alt]="image.alt ?? ''" />
+}
+<!-- a wrapping row: on a narrow card the meta moves below the title instead of squeezing it -->
+<span class="flex grow flex-wrap items-start gap-x-3 gap-y-1 p-4">
+    <span class="flex min-w-0 grow basis-40 items-start gap-3">
+        <ng-content />
+        @if (card().option.icon; as icon) {
+            <!-- decorative, the title says what it is -->
+            <span class="flex min-h-6 items-center text-on-surface-variant [&_svg]:size-5"><ui-icon [icon]="icon" /></span>
+        }
+        <span class="grid min-w-0 gap-1">
+            <span class="text-label-lg" [id]="card().titleId">{{ card().option.label }}</span>
+            @if (card().option.description; as description) {
+                <span class="text-body-sm text-on-surface-variant" [id]="card().descriptionId">{{ description }}</span>
+            }
+        </span>
+    </span>
+    @if (meta(); as meta) {
+        <span class="text-label-lg" [id]="card().metaId">
+            <ng-container [ngTemplateOutlet]="meta.template" [ngTemplateOutletContext]="{ $implicit: card().option }" />
+        </span>
+    }
+</span>

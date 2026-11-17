@@ -1,0 +1,9 @@
+<ngx-entity-editor
+    #editor
+    [service]="data.service"
+    [entity]="data.entity"
+    [createValues]="data.createValues"
+    [title]="data.title"
+    (saved)="dialogRef.close($event)"
+    (cancelled)="cancel()"
+/>

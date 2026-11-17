@@ -1,0 +1,13 @@
+<ui-form class="flex flex-col gap-4" (submit)="save()">
+    @if (headingLevel() === 1) {
+        <h1 class="font-heading text-title">{{ heading() }}</h1>
+    } @else {
+        <h2 class="font-heading text-title">{{ heading() }}</h2>
+    }
+    <ngx-entity-form [entity]="entityClass()" [mode]="mode()" [problems]="problems()" [(value)]="value" />
+    <!-- cancel comes first, like in every dialog of ui -->
+    <div class="flex flex-wrap justify-end gap-2">
+        <button ui-button type="button" variant="text" [disabled]="saving()" (click)="cancelled.emit()">{{ labels.cancelLabel }}</button>
+        <button ui-button type="submit" [disabled]="saving()">{{ labels.saveLabel }}</button>
+    </div>
+</ui-form>

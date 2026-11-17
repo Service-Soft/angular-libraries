@@ -1,0 +1,118 @@
+<ui-input-field layout="group" [field]="this">
+    <div class="grid gap-3">
+        @for (card of cards(); track card.option.id) {
+            @if (card.option.type === 'toggle') {
+                <!-- the label is the card, so a click anywhere on it switches the extra -->
+                <label [class]="cardClasses().toggle" [attr.data-selected]="card.selected" [attr.data-disabled]="card.disabled">
+                    <ngx-extra-option-content [card]="card">
+                        <span control-start class="relative mt-0.5 inline-flex shrink-0">
+                            <!-- named by its title, described by the rest of its card: the label would read all of it as the name -->
+                            <input
+                                #nativeInput
+                                type="checkbox"
+                                [class]="checkboxClasses()"
+                                [id]="card.id"
+                                [attr.role]="isSwitch() ? 'switch' : null"
+                                [attr.name]="name() ?? null"
+                                [value]="card.option.id"
+                                [checked]="card.selected"
+                                [disabled]="card.disabled"
+                                [attr.autofocus]="autofocus() && $first ? '' : null"
+                                [attr.aria-labelledby]="card.titleId"
+                                [attr.aria-describedby]="card.describedBy"
+                                [attr.aria-readonly]="readonly() ? 'true' : null"
+                                [attr.aria-invalid]="card.invalid ? 'true' : null"
+                                (click)="preventWhileReadonly($event)"
+                                (change)="toggle(card.option, nativeInput.checked)"
+                                (blur)="showValidationError.set(true)"
+                                (invalid)="showInsteadOfPopup($event)"
+                            />
+                            @if (isSwitch()) {
+                                <span aria-hidden="true" [class]="thumbClasses()"></span>
+                            } @else {
+                                <span aria-hidden="true" [class]="markClasses()"><ui-icon [icon]="checkIcon" /></span>
+                            }
+                        </span>
+                    </ngx-extra-option-content>
+                </label>
+            } @else {
+                <!-- a group named by the title, which holds the input and its buttons. aria-disabled says the whole card
+                     is disabled: its description and price are no label of the disabled input, so without it they would
+                     be dimmed text of an element that isn't -->
+                <div
+                    role="group"
+                    [class]="cardClasses().quantity"
+                    [attr.aria-labelledby]="card.titleId"
+                    [attr.aria-disabled]="card.disabled ? 'true' : null"
+                    [attr.data-selected]="card.selected"
+                    [attr.data-disabled]="card.disabled"
+                >
+                    <ngx-extra-option-content [card]="card">
+                        <span control-end class="flex items-center gap-1">
+                            <button
+                                ui-button
+                                type="button"
+                                variant="outlined"
+                                [size]="size()"
+                                [disabled]="!card.canDecrease"
+                                [attr.aria-label]="labels.decrease + ': ' + card.option.label"
+                                (click)="step(card.option, -1)"
+                            >
+                                <ui-icon [icon]="decreaseIcon" />
+                            </button>
+                            <span class="w-16">
+                                <!-- no [value], the component writes it only when it differs from what the user typed. The
+                                     value attribute is only the text before the user types, so an extra that isn't chosen
+                                     shows 0 instead of an empty box, and a box the user emptied stays empty -->
+                                <input
+                                    #nativeInput
+                                    #quantityInput
+                                    type="number"
+                                    inputmode="numeric"
+                                    step="1"
+                                    [class]="inputClasses()"
+                                    [id]="card.id"
+                                    [attr.data-option-id]="card.option.id"
+                                    [attr.value]="card.quantity"
+                                    [attr.name]="name() ? name() + '.' + card.option.id : null"
+                                    [attr.min]="card.nativeMin"
+                                    [attr.max]="card.option.max ?? null"
+                                    [disabled]="card.disabled"
+                                    [readOnly]="readonly()"
+                                    [attr.autofocus]="autofocus() && $first ? '' : null"
+                                    [attr.aria-labelledby]="card.titleId"
+                                    [attr.aria-describedby]="card.describedBy"
+                                    [attr.aria-invalid]="card.invalid ? 'true' : null"
+                                    (input)="updateTypedQuantity(card.option, quantityInput)"
+                                    (blur)="showValidationError.set(true)"
+                                    (invalid)="showInsteadOfPopup($event)"
+                                />
+                            </span>
+                            <button
+                                ui-button
+                                type="button"
+                                variant="outlined"
+                                [size]="size()"
+                                [disabled]="!card.canIncrease"
+                                [attr.aria-label]="labels.increase + ': ' + card.option.label"
+                                (click)="step(card.option, 1)"
+                            >
+                                <ui-icon [icon]="increaseIcon" />
+                            </button>
+                        </span>
+                        @if (card.error) {
+                            <span class="block basis-full text-end text-body-sm text-error" [id]="card.errorId">{{ card.error }}</span>
+                        }
+                    </ngx-extra-option-content>
+                </div>
+            }
+        }
+    </div>
+    @if (showTotal()) {
+        <!-- a live region, so screen readers say the new sum after each change -->
+        <p class="mt-3 flex flex-wrap justify-between gap-x-4 border-t border-outline-variant pt-3 text-label-lg" aria-live="polite">
+            <span>{{ labels.total }}</span>
+            <span>{{ total() }}</span>
+        </p>
+    }
+</ui-input-field>

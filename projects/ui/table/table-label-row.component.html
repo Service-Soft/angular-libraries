@@ -1,0 +1,12 @@
+@if (!hideLabel()) {
+    <!-- pushes what follows to the end, which stays there on a line of its own once the row wraps. A step below the
+         headings, so it reads as the title of the table without competing with the heading of the page -->
+    <p class="me-auto font-heading text-label-lg font-semibold text-on-surface" [id]="labelId()">
+        {{ label() }}
+        @if (required()) {
+            <!-- aria-hidden, so it isn't part of the name of the table -->
+            <span class="text-error" aria-hidden="true">*</span>
+        }
+    </p>
+}
+<ng-content />

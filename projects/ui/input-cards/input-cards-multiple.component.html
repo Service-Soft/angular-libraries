@@ -1,0 +1,34 @@
+<ui-input-field layout="group" [field]="this">
+    <!-- columns by the width of the input, not the one of the screen, so the cards also stack in a narrow column -->
+    <div class="grid gap-3 @xl:grid-cols-2 @4xl:grid-cols-3">
+        @for (card of cards(); track $index) {
+            <label [class]="cardClasses()" [attr.data-selected]="card.chosen" [attr.data-disabled]="card.disabled">
+                <ui-input-card-content [card]="card" [meta]="meta()">
+                    <span class="relative mt-0.5 inline-flex shrink-0">
+                        <!-- named by its title, described by the rest of its card: the label would read all of it as the name -->
+                        <input
+                            #nativeInput
+                            type="checkbox"
+                            [class]="checkboxClasses()"
+                            [id]="card.id"
+                            [attr.name]="groupName()"
+                            [value]="$index"
+                            [checked]="card.chosen"
+                            [disabled]="card.disabled"
+                            [attr.autofocus]="autofocus() && $first ? '' : null"
+                            [attr.aria-labelledby]="card.titleId"
+                            [attr.aria-describedby]="card.describedBy ?? null"
+                            [attr.aria-readonly]="readonly() ? 'true' : null"
+                            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+                            (click)="preventWhileReadonly($event)"
+                            (change)="toggle(card.option.value, nativeInput.checked)"
+                            (blur)="showValidationError.set(true)"
+                            (invalid)="showInsteadOfPopup($event)"
+                        />
+                        <span aria-hidden="true" [class]="markClasses()"><ui-icon [icon]="checkIcon" /></span>
+                    </span>
+                </ui-input-card-content>
+            </label>
+        }
+    </div>
+</ui-input-field>

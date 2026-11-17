@@ -1,0 +1,33 @@
+@if (passkeyMethod(); as method) {
+    <p class="text-body text-on-surface-variant">{{ codeHint() }}</p>
+    <div class="mt-4">
+        <button #passkeyButton ui-button type="button" (click)="passkeyRequested.emit(method)">{{ labels.usePasskey }}</button>
+    </div>
+} @else if (codeMethod(); as method) {
+    <ui-form class="grid gap-4" (submit)="confirm(method)">
+        <ui-input-string
+            name="code"
+            autocomplete="one-time-code"
+            [label]="labels.code"
+            [hint]="codeHint()"
+            [inputMode]="codeInputMode()"
+            [(value)]="code"
+        />
+        <div class="flex flex-wrap gap-2">
+            <button ui-button type="submit">{{ labels.confirm }}</button>
+            <!-- hidden rather than left out, which keeps the branches of this template few -->
+            <button ui-button type="button" variant="outlined" [hidden]="!sendsCode()" (click)="requestNewCode(method)">
+                {{ labels.sendCode }}
+            </button>
+        </div>
+    </ui-form>
+} @else {
+    <p class="text-body text-on-surface">{{ labels.noMethod }}</p>
+}
+<!-- empty:hidden: without other methods the list takes no space. Links rather than text buttons: on their own, those
+     look like text and start further in than the text above them -->
+<ul class="mt-4 flex flex-col items-start gap-2 empty:hidden">
+    @for (other of otherMethods(); track other.method) {
+        <li><button ui-link type="button" (click)="choose(other.method)">{{ other.label }}</button></li>
+    }
+</ul>

@@ -1,0 +1,22 @@
+<!-- named by its heading, a section is a region screen readers can jump to; without one it is only a group -->
+<section [attr.id]="sectionId()" [class]="classes()" [attr.aria-labelledby]="heading() ? headingId() : null">
+    <!-- a colored surface gives its tokens to its direct children, which is this one -->
+    <div class="mx-auto flex max-w-section flex-col gap-8 px-4 sm:px-6">
+        @if (heading(); as heading) {
+            <div [class]="headerClasses()">
+                <!-- the eyebrow belongs to the heading, like a subtitle, which is what an hgroup holds -->
+                <hgroup class="flex flex-col gap-2">
+                    @if (eyebrow()) {
+                        <p class="text-label tracking-wide text-primary uppercase">{{ eyebrow() }}</p>
+                    }
+                    <!-- a native heading of the level, which search engines read as well -->
+                    <ui-heading [id]="headingId()" [class]="headingClasses()" [level]="level()">{{ heading }}</ui-heading>
+                </hgroup>
+                @if (lead()) {
+                    <p class="max-w-prose text-body text-on-surface-variant">{{ lead() }}</p>
+                }
+            </div>
+        }
+        <ng-content />
+    </div>
+</section>

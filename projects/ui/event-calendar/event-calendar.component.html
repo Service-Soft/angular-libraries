@@ -1,0 +1,78 @@
+<!-- the header strip of the calendar of a date input, in its color, whose on- colors the buttons take. On a narrow
+     calendar the view buttons wrap below today and the month. -->
+<div [class]="headerClasses()">
+    <button ui-button type="button" variant="outlined" size="sm" (click)="showToday()">{{ labels.todayLabel }}</button>
+    <div class="flex grow items-center justify-center gap-1">
+        <button ui-button type="button" variant="text" size="sm" iconOnly [attr.aria-label]="labels.previousMonthLabel" (click)="showMonth(-1)">
+            <ui-icon class="rtl:-scale-x-100" [icon]="previousMonthIcon" />
+        </button>
+        <!-- a live region, so screen readers announce the month the buttons switched to -->
+        <p class="min-w-32 px-2 text-center text-label-lg text-on-surface" aria-live="polite" [id]="monthId">{{ monthLabel() }}</p>
+        <button ui-button type="button" variant="text" size="sm" iconOnly [attr.aria-label]="labels.nextMonthLabel" (click)="showMonth(1)">
+            <ui-icon class="rtl:-scale-x-100" [icon]="nextMonthIcon" />
+        </button>
+    </div>
+    <!-- toggle buttons rather than tabs: both views show the same events, only the way differs -->
+    <div class="flex gap-1" role="group" [attr.aria-label]="labels.viewLabel">
+        <button ui-button type="button" variant="outlined" size="sm" [pressed]="view() === 'month'" (click)="view.set('month')">
+            {{ labels.monthViewLabel }}
+        </button>
+        <button ui-button type="button" variant="outlined" size="sm" [pressed]="view() === 'agenda'" (click)="view.set('agenda')">
+            {{ labels.agendaViewLabel }}
+        </button>
+    </div>
+</div>
+
+<!-- the header reaches the edges, the content gets its padding here, like in the calendar of a date input -->
+<div class="px-3 pt-2 pb-3">
+    @if (view() === 'month') {
+        <!-- the arrow keys move through the days and select the one they are on, whose events show below. A click
+             selects one as well. The end of a row goes on to the start of the next one. -->
+        <table
+            ngGrid
+            enableSelection
+            selectionMode="follow"
+            rowWrap="nowrap"
+            colWrap="continuous"
+            class="w-full table-fixed"
+            [attr.aria-labelledby]="monthId"
+        >
+            <thead>
+                <tr>
+                    @for (weekday of weekdays; track $index) {
+                        <th class="h-8 text-center text-label-sm text-on-surface-variant" scope="col">
+                            <span aria-hidden="true">{{ weekday.short }}</span>
+                            <span class="sr-only">{{ weekday.long }}</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (week of weeks(); track $index) {
+                    <tr ngGridRow>
+                        @for (day of week; track day.dateTime) {
+                            <!-- named by its content, see the cell -->
+                            <td
+                                ngGridCell
+                                [class]="cellClasses"
+                                [selected]="day.selected"
+                                [attr.aria-current]="day.today ? 'date' : null"
+                                (selectedChange)="select(day, $event)"
+                            >
+                                <ui-event-calendar-cell [day]="day" />
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="mt-3 border-t border-outline-variant pt-3">
+            <p class="mb-2 text-label-lg text-on-surface">
+                <time [attr.datetime]="shownDay().dateTime">{{ shownDay().label }}</time>
+            </p>
+            <ui-event-calendar-event-list [entries]="shownDay().entries" [emptyLabel]="labels.noEventsOnDayLabel" />
+        </div>
+    } @else {
+        <ui-event-calendar-agenda [days]="agendaDays()" />
+    }
+</div>

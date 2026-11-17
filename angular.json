@@ -1,10 +1,424 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
-  "cli": {
-    "packageManager": "npm"
-  },
-  "newProjectRoot": "projects",
-  "projects": {
-  }
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "cli": {
+        "packageManager": "npm"
+    },
+    "newProjectRoot": "projects",
+    "projects": {
+        "ngx-auth": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-auth/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-auth/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-auth/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-auth",
+            "sourceRoot": "projects/ngx-auth"
+        },
+        "ngx-change-sets": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-change-sets/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-change-sets/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-change-sets/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-change-sets",
+            "sourceRoot": "projects/ngx-change-sets"
+        },
+        "ngx-ecommerce": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-ecommerce/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-ecommerce/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-ecommerce/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-ecommerce",
+            "sourceRoot": "projects/ngx-ecommerce"
+        },
+        "ngx-entity": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-entity/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-entity/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "setupFiles": ["projects/ngx-entity/test-setup.ts"],
+                        "tsConfig": "projects/ngx-entity/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-entity",
+            "sourceRoot": "projects/ngx-entity"
+        },
+        "ngx-error-handling": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-error-handling/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-error-handling/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-error-handling/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-error-handling",
+            "sourceRoot": "projects/ngx-error-handling"
+        },
+        "ngx-navigation": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-navigation/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-navigation/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-navigation/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-navigation",
+            "sourceRoot": "projects/ngx-navigation"
+        },
+        "ngx-persistence-logger": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-persistence-logger/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-persistence-logger/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-persistence-logger/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-persistence-logger",
+            "sourceRoot": "projects/ngx-persistence-logger"
+        },
+        "ngx-pwa": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-pwa/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-pwa/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-pwa/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-pwa",
+            "sourceRoot": "projects/ngx-pwa"
+        },
+        "ngx-tracking": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ngx-tracking/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ngx-tracking/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "tsConfig": "projects/ngx-tracking/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ngx",
+            "projectType": "library",
+            "root": "projects/ngx-tracking",
+            "sourceRoot": "projects/ngx-tracking"
+        },
+        "showcase": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:application",
+                    "configurations": {
+                        "development": {
+                            "extractLicenses": false,
+                            "optimization": false,
+                            "sourceMap": true
+                        },
+                        "production": {
+                            "budgets": [
+                                {
+                                    "maximumError": "1MB",
+                                    "maximumWarning": "500kB",
+                                    "type": "initial"
+                                },
+                                {
+                                    "maximumError": "8kB",
+                                    "maximumWarning": "4kB",
+                                    "type": "anyComponentStyle"
+                                }
+                            ],
+                            "outputHashing": "all"
+                        }
+                    },
+                    "defaultConfiguration": "production",
+                    "options": {
+                        "assets": [
+                            {
+                                "glob": "**/*",
+                                "input": "projects/showcase/public"
+                            }
+                        ],
+                        "browser": "projects/showcase/src/main.ts",
+                        "outputMode": "static",
+                        "server": "projects/showcase/src/main.server.ts",
+                        "styles": ["projects/showcase/src/styles.css"],
+                        "tsConfig": "projects/showcase/tsconfig.app.json"
+                    }
+                },
+                "serve": {
+                    "builder": "@angular/build:dev-server",
+                    "configurations": {
+                        "development": {
+                            "buildTarget": "showcase:build:development"
+                        },
+                        "production": {
+                            "buildTarget": "showcase:build:production"
+                        }
+                    },
+                    "defaultConfiguration": "development"
+                }
+            },
+            "prefix": "app",
+            "projectType": "application",
+            "root": "projects/showcase",
+            "schematics": {
+                "@schematics/angular:class": {
+                    "skipTests": true
+                },
+                "@schematics/angular:component": {
+                    "skipTests": true
+                },
+                "@schematics/angular:directive": {
+                    "skipTests": true
+                },
+                "@schematics/angular:guard": {
+                    "skipTests": true
+                },
+                "@schematics/angular:interceptor": {
+                    "skipTests": true
+                },
+                "@schematics/angular:pipe": {
+                    "skipTests": true
+                },
+                "@schematics/angular:resolver": {
+                    "skipTests": true
+                },
+                "@schematics/angular:service": {
+                    "skipTests": true
+                }
+            },
+            "sourceRoot": "projects/showcase/src"
+        },
+        "testing": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/testing/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/testing/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                }
+            },
+            "prefix": "lib",
+            "projectType": "library",
+            "root": "projects/testing",
+            "sourceRoot": "projects/testing"
+        },
+        "ui": {
+            "architect": {
+                "build": {
+                    "builder": "@angular/build:ng-packagr",
+                    "configurations": {
+                        "development": {
+                            "tsConfig": "projects/ui/tsconfig.lib.json"
+                        },
+                        "production": {
+                            "tsConfig": "projects/ui/tsconfig.lib.prod.json"
+                        }
+                    },
+                    "defaultConfiguration": "production"
+                },
+                "build-storybook": {
+                    "builder": "@storybook/angular:build-storybook",
+                    "options": {
+                        "browserTarget": "ui:build",
+                        "compodoc": false,
+                        "configDir": "projects/ui/.storybook",
+                        "experimentalZoneless": true,
+                        "outputDir": "dist/storybook/ui",
+                        "styles": ["projects/ui/.storybook/styles.css"],
+                        "tsConfig": "projects/ui/.storybook/tsconfig.json"
+                    }
+                },
+                "storybook": {
+                    "builder": "@storybook/angular:start-storybook",
+                    "options": {
+                        "browserTarget": "ui:build",
+                        "compodoc": false,
+                        "configDir": "projects/ui/.storybook",
+                        "experimentalZoneless": true,
+                        "port": 6006,
+                        "styles": ["projects/ui/.storybook/styles.css"],
+                        "tsConfig": "projects/ui/.storybook/tsconfig.json"
+                    }
+                },
+                "test": {
+                    "builder": "@angular/build:unit-test",
+                    "options": {
+                        "setupFiles": ["projects/ui/test-setup.ts"],
+                        "tsConfig": "projects/ui/tsconfig.spec.json"
+                    }
+                }
+            },
+            "prefix": "ui",
+            "projectType": "library",
+            "root": "projects/ui",
+            "sourceRoot": "projects/ui"
+        }
+    },
+    "schematics": {
+        "@schematics/angular:component": {
+            "type": "component"
+        },
+        "@schematics/angular:directive": {
+            "type": "directive"
+        },
+        "@schematics/angular:guard": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:interceptor": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:pipe": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:resolver": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:service": {
+            "type": "service"
+        }
+    },
+    "version": 1
 }

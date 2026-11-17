@@ -1,0 +1,19 @@
+<nav [attr.aria-label]="label()">
+    <!-- one row that scrolls sideways once the pills don't fit, which works the same in every browser, rather than a
+         menu: that would have to measure the row to know when, which the server can't, so the page would jump once it
+         loads. Every pill stays one click away and is reached by Tab, which scrolls it into view. The padding keeps the
+         focus ring of a pill inside, where the scrolling would cut it off. -->
+    <ul #list class="relative flex gap-2 overflow-x-auto p-1">
+        @for (item of items(); track $index) {
+            <li class="shrink-0">
+                <ngx-nav-anchor
+                    appearance="pill"
+                    [link]="item.view"
+                    [name]="item.link.name"
+                    [icon]="item.link.icon"
+                    (activeChange)="revealCurrent($event)"
+                />
+            </li>
+        }
+    </ul>
+</nav>

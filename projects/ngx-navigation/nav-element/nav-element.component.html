@@ -1,0 +1,3 @@
+@if (view(); as view) {
+    <ng-container [ngComponentOutlet]="view.component" [ngComponentOutletInputs]="view.inputs" />
+}

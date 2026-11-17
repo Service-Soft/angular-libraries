@@ -1,0 +1,13 @@
+<!-- a search is never required. Its label only shows inside of it, the icon and the place say what it is. The search
+     takes the room the controls leave, and goes on a line of its own when it would get narrower than 16rem. -->
+<div class="flex flex-wrap items-center gap-3">
+    <ui-input-string class="min-w-0 grow basis-64" type="search" hideLabel [label]="searchLabel()" [placeholder]="searchLabel()" [required]="false" [(value)]="search" />
+    <div class="flex flex-wrap items-center gap-3 empty:hidden">
+        <ng-content />
+    </div>
+</div>
+@if (resultCount() !== undefined) {
+    <!-- a status is a polite live region, which screen readers announce when its text changes. It stays while there is a
+         count, as they only announce changes of live regions that exist already. -->
+    <p class="mt-2 text-body-sm text-on-surface-variant" role="status">{{ resultText() }}</p>
+}

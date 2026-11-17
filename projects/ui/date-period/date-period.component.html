@@ -1,0 +1,12 @@
+<!-- the texts are in ng-containers, so the whitespace of the template around them doesn't end up in the text -->
+@for (part of parts(); track $index) {
+    @if (!$first) {
+        <ng-container>{{ separator }}</ng-container>
+    }
+    @if (part.dateTime) {
+        <time [attr.datetime]="part.dateTime">{{ part.text }}</time>
+    } @else {
+        <!-- the open end is no date a machine could read -->
+        <ng-container>{{ part.text }}</ng-container>
+    }
+}

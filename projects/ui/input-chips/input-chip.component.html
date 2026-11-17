@@ -1,0 +1,12 @@
+<span [class]="labelClasses()" [id]="labelId()">{{ label() }}</span>
+@if (removable()) {
+    <button
+        type="button"
+        [class]="removeButtonClasses()"
+        [attr.aria-label]="removeLabel()"
+        [attr.aria-describedby]="labelId()"
+        (click)="removed.emit()"
+    >
+        <ui-icon [icon]="removeIcon" />
+    </button>
+}

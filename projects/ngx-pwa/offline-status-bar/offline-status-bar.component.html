@@ -1,0 +1,15 @@
+<div [class]="barClasses()">
+    <!-- the live region stays while it is empty: screen readers only announce changes of a region that was there before -->
+    <p class="flex items-center gap-2 py-1 text-label" role="status">
+        @if (status(); as status) {
+            <ui-icon [icon]="status.icon" />
+            {{ status.message }}
+        }
+    </p>
+    @if (count()) {
+        <button ui-button type="button" variant="text" size="sm" (click)="openSyncDialog()">
+            <ui-icon [icon]="faArrowsRotate" />
+            {{ labels.sync }} ({{ count() }})
+        </button>
+    }
+</div>

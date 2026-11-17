@@ -1,0 +1,21 @@
+<div [class]="headerClasses()">
+    <p class="mx-auto min-h-8 content-center px-2 text-center text-label-lg text-on-surface" [id]="labelId">{{ label() }}</p>
+</div>
+<!-- as high as the calendar of a date input, and scrolled to the chosen time by focusing it. The padding keeps the focus
+     ring of the times inside of what scrolls. The list moves with the arrow keys, Home, End and the first digits of a
+     time, and chooses with Enter, Space or a click. -->
+<div class="max-h-68 overflow-y-auto px-3 pt-2 pb-3">
+    <div
+        ngListbox
+        focusMode="roving"
+        selectionMode="explicit"
+        class="grid gap-1"
+        [attr.aria-labelledby]="labelId"
+        [value]="selectedValues()"
+        (valueChange)="choose($event)"
+    >
+        @for (option of options(); track option.value) {
+            <div ngOption [class]="optionClasses" [value]="option.value" [label]="option.label">{{ option.label }}</div>
+        }
+    </div>
+</div>

@@ -1,0 +1,33 @@
+@if (file().previewUrl; as previewUrl) {
+    <!-- the name next to it says what it is. NgOptimizedImage refuses the blob and data urls a preview of a chosen file
+         has -->
+    <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+    <img class="size-12 shrink-0 rounded-input object-cover" alt="" [src]="previewUrl" />
+} @else {
+    <span class="flex size-12 shrink-0 items-center justify-center text-title text-on-surface-variant">
+        <ui-icon [icon]="fileIcon" />
+    </span>
+}
+<div class="min-w-0 grow">
+    <p class="text-body wrap-break-word text-on-surface" [id]="file().nameId">{{ file().name }}</p>
+    @if (file().size) {
+        <p class="text-body-sm text-on-surface-variant">{{ file().size }}</p>
+    }
+    @if (file().error) {
+        <p class="text-body-sm text-error" [id]="file().errorId">{{ file().error }}</p>
+    }
+</div>
+@if (removable()) {
+    <button
+        ui-button
+        type="button"
+        variant="text"
+        size="sm"
+        iconOnly
+        [attr.aria-label]="removeLabel()"
+        [attr.aria-describedby]="file().describedBy"
+        (click)="removed.emit()"
+    >
+        <ui-icon [icon]="removeIcon" />
+    </button>
+}

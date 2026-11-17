@@ -1,0 +1,24 @@
+@for (group of groups(); track $index) {
+    <!-- a section of its own, which its heading starts; without a name it is no landmark, so a page with many categories
+         doesn't fill the list of landmarks of screen readers. Its id is where a link to the category leads. -->
+    <section class="flex flex-col gap-4" [attr.id]="group.id">
+        <ui-heading class="font-heading text-headline" [level]="headingLevel()">{{ group.name }}</ui-heading>
+        <ul class="grid gap-3 @xl:grid-cols-2 @4xl:grid-cols-3">
+            @for (item of group.items; track $index) {
+                <!-- a transparent border keeps the shape of the card in forced colors mode, which removes backgrounds -->
+                <li class="flex gap-3 rounded-card border border-transparent bg-surface-container p-4 text-on-surface">
+                    <!-- decorative, a mark like the one of a list. Its line is as high as the title, so it stays next to it. -->
+                    <span class="flex h-[1.5em] shrink-0 items-center text-label-lg text-primary [&_svg]:size-[1.25em]">
+                        <ui-icon [icon]="icon()" />
+                    </span>
+                    <div class="flex min-w-0 flex-col gap-1">
+                        <ui-heading class="font-heading text-label-lg" [level]="itemLevel()">{{ item.title }}</ui-heading>
+                        @if (item.text) {
+                            <p class="text-body-sm text-on-surface-variant">{{ item.text }}</p>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+}

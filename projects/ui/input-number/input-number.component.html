@@ -1,0 +1,24 @@
+<ui-input-field [field]="this">
+    <!-- no [value], the component writes it only when it differs from what the user typed -->
+    <input
+        #nativeInput
+        [class]="inputClasses()"
+        [id]="inputId()"
+        [attr.autofocus]="autofocus() ? '' : null"
+        [type]="type()"
+        [required]="required()"
+        [disabled]="disabled()"
+        [readOnly]="readonly()"
+        [attr.min]="min() ?? null"
+        [attr.max]="max() ?? null"
+        [attr.step]="step() ?? null"
+        [attr.name]="name() ?? null"
+        [attr.placeholder]="placeholder() ?? null"
+        [attr.autocomplete]="autocomplete() ?? null"
+        [attr.aria-invalid]="errorMessage() ? 'true' : null"
+        [attr.aria-describedby]="describedBy() ?? null"
+        (input)="updateValue()"
+        (blur)="showValidationError.set(true)"
+        (invalid)="showInsteadOfPopup($event)"
+    />
+</ui-input-field>

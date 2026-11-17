@@ -1,0 +1,7 @@
+<ui-form class="flex max-w-3xl flex-col gap-4" (submit)="saved.set(true)">
+    <ngx-entity-form [entity]="entity" [mode]="mode()" [problems]="problems()" [(value)]="value" />
+    <div class="flex gap-2">
+        <button ui-button type="submit">Save</button>
+    </div>
+</ui-form>
+<p class="mt-4 text-body-sm text-on-surface-variant" role="status">{{ saved() ? 'Saved.' : '' }}</p>

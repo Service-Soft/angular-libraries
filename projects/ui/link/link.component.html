@@ -1,0 +1,11 @@
+<ng-content />
+@if (showsExternalIcon()) {
+    <!-- smaller than other icons of a link, which it sizes at 1.25em: it only marks the text. The important wins over
+         that size, whose selector is as specific as this one. Decorative, the text in front of it names the link. -->
+    <span class="ms-1 inline-flex [&_svg]:size-[0.75em]!"><ui-icon [icon]="externalIcon" /></span>
+}
+@if (opensNewTab()) {
+    <!-- the space inside the text: one between the elements is a whitespace-only node, which Angular drops, and the name
+         would read "Help(opens in a new tab)" -->
+    <span class="sr-only"> ({{ newTabLabel }})</span>
+}

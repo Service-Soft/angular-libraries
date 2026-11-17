@@ -1,0 +1,15 @@
+<!-- one grid for all items, so every value starts at the same line, after the longest label. Stacked, the margin of a
+     label sets the items apart, next to each other the gap between the rows does. -->
+<dl class="grid grid-cols-1 gap-x-6 @sm:grid-cols-[auto_1fr] @sm:gap-y-2">
+    @for (item of shownItems(); track $index) {
+        <dt class="mt-3 text-body font-semibold text-on-surface first:mt-0 @sm:mt-0">{{ item.label }}</dt>
+        <!-- min-w-0 and wrap-break-word keep a long value without spaces, like a url, from widening the grid -->
+        <dd class="min-w-0 text-body wrap-break-word text-on-surface">
+            @if (item.template) {
+                <ng-container [ngTemplateOutlet]="item.template" />
+            } @else {
+                {{ item.text }}
+            }
+        </dd>
+    }
+</dl>

@@ -1,0 +1,9 @@
+<div [class]="classes()">
+    <div [class]="mediaClasses()">
+        <ng-content select="ui-media-split-media" />
+    </div>
+    <!-- a gap between the heading, paragraphs and actions of the text -->
+    <div class="flex min-w-0 flex-col items-start gap-4">
+        <ng-content />
+    </div>
+</div>

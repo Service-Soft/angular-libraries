@@ -1,0 +1,7 @@
+@if (entries().length) {
+    <!-- named by its title, so screen readers list it among the landmarks next to the main navigation -->
+    <nav [attr.aria-labelledby]="labelId">
+        <p class="mb-2 text-label text-on-surface" [id]="labelId">{{ label() }}</p>
+        <ui-table-of-contents-list [entries]="entries()" [current]="current()" />
+    </nav>
+}

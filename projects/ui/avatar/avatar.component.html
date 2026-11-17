@@ -1,0 +1,16 @@
+<!-- one image for screen readers, named by the name, whatever shows inside: the initials alone would be read as letters,
+     and the picture is the same person. Decorative, screen readers skip all of it. -->
+<span
+    [class]="classes()"
+    [attr.role]="decorative() ? null : 'img'"
+    [attr.aria-label]="decorative() ? null : name()"
+    [attr.aria-hidden]="decorative() ? 'true' : null"
+>
+    <!-- the initials stay below the picture, so they show while it loads -->
+    <span aria-hidden="true">{{ initials() }}</span>
+    @if (showsImage()) {
+        <!-- NgOptimizedImage refuses data urls, which pictures of people are often stored as -->
+        <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+        <img class="absolute inset-0 size-full object-cover" alt="" [src]="src()" (error)="imageFailed.set(true)" />
+    }
+</span>

@@ -1,0 +1,50 @@
+@switch (step()) {
+    @case ('phoneNumber') {
+        <ui-form class="grid gap-4" (submit)="start()">
+            <ui-input-string
+                name="phone-number"
+                type="tel"
+                autocomplete="tel"
+                [label]="labels.phoneNumber"
+                [hint]="labels.phoneNumberHint"
+                [(value)]="phoneNumber"
+            />
+            <div><button ui-button type="submit">{{ labels.sendCode }}</button></div>
+        </ui-form>
+    }
+    @case ('confirming') {
+        <ngx-two-factor-enrollment-details [registration]="registration()" />
+        <ui-form class="mt-4 grid gap-4" (submit)="confirm()">
+            <ui-input-string
+                name="code"
+                autocomplete="one-time-code"
+                [label]="secondFactorLabels.code"
+                [hint]="codeHint()"
+                [inputMode]="codeInputMode()"
+                [(value)]="code"
+            />
+            <div class="flex flex-wrap gap-2">
+                <button ui-button type="submit">{{ labels.turnOn }}</button>
+                <!-- hidden rather than left out, which keeps the branches of this template few -->
+                <button ui-button type="button" variant="outlined" [hidden]="!sendsCode()" (click)="sendCodeAgain()">
+                    {{ secondFactorLabels.sendCode }}
+                </button>
+            </div>
+        </ui-form>
+    }
+    @case ('passkey') {
+        <p class="text-body text-on-surface">{{ labels.createPasskeyMessage }}</p>
+        <div class="mt-4"><button #passkeyButton ui-button type="button" (click)="createPasskey()">{{ labels.createPasskey }}</button></div>
+    }
+    @case ('failed') {
+        <button ui-button type="button" variant="outlined" (click)="begin()">{{ labels.retry }}</button>
+    }
+}
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>

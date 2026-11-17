@@ -1,0 +1,26 @@
+@if (column().sortable) {
+    <!-- aria-sort on the header says the order, the icon only shows it -->
+    <button type="button" [class]="buttonClasses" (click)="sorted.emit()">
+        {{ column().label }}
+        <ui-icon [icon]="sortIcon()" />
+    </button>
+} @else {
+    {{ column().label }}
+}
+@if (hasFilter()) {
+    <button type="button" [class]="filterButtonClasses" [uiPopoverTrigger]="filterPopover" [attr.aria-label]="filterLabel()">
+        <ui-icon [icon]="filterIcon" />
+        @if (isFiltered()) {
+            <span aria-hidden="true" [class]="filterDotClasses"></span>
+        }
+    </button>
+    <!-- closes once the user is done, so the rows they filtered show -->
+    <ui-popover #filterPopover>
+        <ui-table-filter
+            [column]="column()"
+            [value]="filter()"
+            (changed)="filtered.emit($event)"
+            (done)="filterPopover.close()"
+        />
+    </ui-popover>
+}

@@ -1,0 +1,30 @@
+{
+    "name": "@service-soft/ngx-entity",
+    "version": "0.0.1",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Service-Soft/ngx-entity.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "tslib": "^2.3.0"
+    },
+    "exports": {
+        ".": {
+            "style": "./tailwind.css"
+        }
+    },
+    "peerDependencies": {
+        "@angular/common": "^22.2.0",
+        "@angular/core": "^22.2.0",
+        "@angular/router": "^22.2.0",
+        "@service-soft/ngx-error-handling": "0.0.1",
+        "@service-soft/ui": "0.0.1",
+        "tailwindcss": "^4.3.3",
+        "zibri-contract": "^3.1.0"
+    },
+    "sideEffects": false
+}

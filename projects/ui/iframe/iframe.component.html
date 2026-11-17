@@ -1,0 +1,10 @@
+<!-- lazy: it loads once it is close to the screen. The referrer only tells the other site the origin of the page. -->
+<iframe
+    loading="lazy"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+    [class]="classes()"
+    [style.aspect-ratio]="aspectRatio()"
+    [src]="trustedSrc()"
+    [title]="label()"
+></iframe>

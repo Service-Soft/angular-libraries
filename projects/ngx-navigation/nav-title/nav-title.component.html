@@ -1,0 +1,7 @@
+<span [class]="classes">
+    @if (link(); as link) {
+        <ngx-nav-anchor appearance="plain" [link]="link" [name]="element().title" [icon]="element().icon" />
+    } @else {
+        <ngx-nav-label [name]="element().title" [icon]="element().icon" />
+    }
+</span>

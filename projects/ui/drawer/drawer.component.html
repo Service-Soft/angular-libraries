@@ -1,0 +1,23 @@
+<!-- the padding is on the content, so a click on the dialog itself is always one on the backdrop. The content is the
+     child a colored surface gives its on- colors to. -->
+<dialog
+    #dialog
+    closedby="any"
+    [class]="classes()"
+    [attr.aria-label]="label()"
+    (close)="open.set(false)"
+    (click)="closeOnBackdrop($event)"
+>
+    <div class="min-h-full p-4">
+        @if (header()) {
+            <!-- a visible way to close it, for touch users who neither have escape nor think of tapping next to it -->
+            <div class="mb-4 flex items-center justify-between gap-2">
+                <h2 class="font-heading text-title">{{ label() }}</h2>
+                <button ui-button type="button" variant="text" iconOnly [attr.aria-label]="closeLabel" (click)="open.set(false)">
+                    <ui-icon [icon]="closeIcon" />
+                </button>
+            </div>
+        }
+        <ng-content />
+    </div>
+</dialog>

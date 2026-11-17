@@ -1,0 +1,32 @@
+<!-- without a marker, Safari no longer tells screen readers it is a list, unless the role says so -->
+<ul role="list" class="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+    @for (logo of shownLogos(); track $index) {
+        <li class="flex">
+            @if (logo.href; as href) {
+                <a
+                    [class]="linkClasses"
+                    [href]="href"
+                    [attr.target]="logo.opensNewTab ? '_blank' : null"
+                    [attr.rel]="logo.opensNewTab ? 'noopener' : null"
+                >
+                    <ng-container *ngTemplateOutlet="image; context: { $implicit: logo }" />
+                    @if (logo.opensNewTab) {
+                        <span class="sr-only">({{ newTabLabel }})</span>
+                    }
+                </a>
+            } @else {
+                <ng-container *ngTemplateOutlet="image; context: { $implicit: logo }" />
+            }
+        </li>
+    }
+</ul>
+
+<!-- as high as every other logo, as wide as its aspect ratio makes it, and never wider than the page -->
+<ng-template #image let-logo>
+    @if (logo.optimized) {
+        <img class="h-logo-cloud w-auto max-w-full object-contain" [ngSrc]="logo.src" [alt]="logo.alt" [width]="logo.width" [height]="logo.height" />
+    } @else {
+        <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+        <img class="h-logo-cloud w-auto max-w-full object-contain" [src]="logo.src" [alt]="logo.alt" [width]="logo.width" [height]="logo.height" />
+    }
+</ng-template>

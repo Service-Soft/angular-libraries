@@ -1,0 +1,17 @@
+@if (created()) {
+    <!-- the table shows the label, next to its create button -->
+    <ngx-entity-table
+        edit="dialog"
+        canCreate
+        canDelete
+        [label]="label()"
+        [service]="service()"
+        [columns]="columns()"
+        [fixedFilter]="filter()"
+        [createValues]="createValues()"
+    />
+} @else {
+    <!-- like the label of the table that takes its place -->
+    <p class="mb-2 font-heading text-label-lg font-semibold text-on-surface">{{ label() }}</p>
+    <p class="text-body text-on-surface-variant">{{ labels.createFirstLabel }}</p>
+}

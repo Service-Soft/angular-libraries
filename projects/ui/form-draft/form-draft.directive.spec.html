@@ -1,0 +1,9 @@
+<ui-form uiFormDraft="contact" (submit)="submits = submits + 1">
+    <ui-input-string label="Name" name="name" [(value)]="name" />
+    <ui-input-textarea label="Message" name="message" [(value)]="message" />
+    <ui-input-select label="Topic" name="topic" [options]="topics" [(value)]="topic" />
+    <ui-input-boolean label="Call me back" name="callBack" [(value)]="callBack" />
+    <ui-input-string label="Password" name="password" type="password" [required]="false" [(value)]="password" />
+    <div data-form-draft="off"><input name="secret" aria-label="Secret" /></div>
+    <button ui-button type="submit">Send</button>
+</ui-form>

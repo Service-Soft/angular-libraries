@@ -1,0 +1,28 @@
+@if (link().routerLink; as routerLink) {
+    <a
+        ui-link
+        routerLinkActive
+        ariaCurrentWhenActive="page"
+        [appearance]="appearance()"
+        [block]="block()"
+        [routerLink]="routerLink"
+        [fragment]="link().fragment"
+        [routerLinkActiveOptions]="link().activeOptions ?? {}"
+        [attr.target]="link().target"
+        [attr.rel]="link().rel"
+        (isActiveChange)="activeChange.emit($event)"
+    >
+        <ngx-nav-label [name]="name()" [icon]="icon()" />
+    </a>
+} @else {
+    <a
+        ui-link
+        [appearance]="appearance()"
+        [block]="block()"
+        [href]="link().href"
+        [attr.target]="link().target"
+        [attr.rel]="link().rel"
+    >
+        <ngx-nav-label [name]="name()" [icon]="icon()" />
+    </a>
+}

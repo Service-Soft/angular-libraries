@@ -1,0 +1,25 @@
+@if (notes().length) {
+    <!-- named, so screen readers list it among the landmarks, where the reader finds the sources again -->
+    <section [attr.aria-label]="label()">
+        <ol class="flex list-decimal flex-col gap-2 ps-6 text-body-sm text-on-surface-variant marker:text-on-surface-variant">
+            @for (note of notes(); track note.content) {
+                <li class="ps-1" [id]="note.id">
+                    <span [id]="note.textId"><ng-container [ngTemplateOutlet]="note.content" /></span>
+                    <!-- underlined like a link inside text, which it is, so it stands out by more than its color. The text
+                         variation selector keeps the arrow from turning into an emoji. -->
+                    <a
+                        class="
+                            ms-1 inline-flex min-h-6 min-w-6 items-center justify-center rounded-link text-primary underline decoration-1
+                            underline-offset-2
+                            hover:decoration-2
+                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                        "
+                        role="doc-backlink"
+                        [href]="note.referenceHref"
+                        [attr.aria-label]="note.backLabel"
+                    >↩&#xFE0E;</a>
+                </li>
+            }
+        </ol>
+    </section>
+}

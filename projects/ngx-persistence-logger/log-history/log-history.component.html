@@ -1,0 +1,36 @@
+<div class="flex flex-wrap items-end gap-x-4 gap-y-2">
+    <ngx-applications-filter
+        [applications]="applications()"
+        [label]="labels.applications"
+        [allLabel]="labels.allApplications"
+        [(selected)]="selectedApplications"
+    />
+    <ui-input-string class="min-w-48 grow" type="search" [label]="labels.search" [required]="false" [(value)]="search" />
+</div>
+<div class="mt-4 flex flex-wrap items-center gap-2">
+    <ngx-levels-filter [levelLabels]="labels.levels" [label]="labels.levelFilter" [(selected)]="selectedLevels" />
+    <div class="ms-auto flex flex-wrap gap-2">
+        <button ui-button type="button" variant="outlined" size="sm" (click)="logs.reload()">{{ labels.reload }}</button>
+        <!-- the check marks the pressed button by its shape, like the ones of the levels -->
+        <button ui-button type="button" variant="outlined" size="sm" [pressed]="liveMode()" (click)="toggleLiveMode()">
+            @if (liveMode()) {
+                <ui-icon [icon]="faCheck" />
+            }
+            {{ labels.liveMode }}
+        </button>
+    </div>
+</div>
+@if (logs.error()) {
+    <p class="mt-4 text-body text-error" role="alert">{{ labels.loadingFailed }}</p>
+}
+<!-- framed and striped like an outlined table, so one entry is told apart from the next at a glance -->
+<ul class="mt-4 divide-y divide-outline-variant overflow-hidden rounded-table border border-outline-variant">
+    @for (log of shown(); track log.id) {
+        <li class="px-4 py-3 even:bg-primary-faint">
+            <ngx-log-entry [log]="log" [stackLabel]="labels.stack" />
+        </li>
+    } @empty {
+        <li class="px-4 py-3 text-body text-on-surface-variant">{{ labels.noLogs }}</li>
+    }
+</ul>
+<ui-pagination [label]="labels.pages" [totalAmount]="totalAmount()" [pageSize]="pageSize" [(page)]="page" />

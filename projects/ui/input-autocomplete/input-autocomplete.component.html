@@ -1,0 +1,52 @@
+<ui-input-field [field]="this">
+    <!-- the combobox gives the input its role and keyboard, and moves through the list while focus stays here. Not
+         softly disabled, so a disabled input is the native disabled one like every other input. -->
+    <input
+        #nativeInput
+        #combobox="ngCombobox"
+        ngCombobox
+        type="text"
+        [class]="inputClasses()"
+        [style.anchor-name]="anchorName()"
+        [id]="inputId()"
+        [attr.autofocus]="autofocus() ? '' : null"
+        [required]="required()"
+        [disabled]="disabled()"
+        [softDisabled]="false"
+        [readonly]="readonly()"
+        [value]="query()"
+        [attr.name]="name() ?? null"
+        [attr.placeholder]="placeholder() ?? null"
+        [attr.autocomplete]="autocomplete() ?? 'off'"
+        [attr.aria-invalid]="errorMessage() ? 'true' : null"
+        [attr.aria-describedby]="describedBy() ?? null"
+        (valueChange)="updateQuery($event)"
+        (blur)="showValidationError.set(true)"
+        (invalid)="showInsteadOfPopup($event)"
+    />
+    <ng-template ngComboboxPopup [combobox]="combobox">
+        <!-- chosen with Enter or a click, not by moving through it, which would close the list on every arrow key. Out
+             of the tab order: focus stays in the input, so Tab goes on to the next field and closes the list. In the top
+             layer, so no container cuts it off, like a dialog. -->
+        <div
+            #listbox="ngListbox"
+            ngComboboxWidget
+            ngListbox
+            focusMode="activedescendant"
+            selectionMode="explicit"
+            tabindex="-1"
+            [softDisabled]="false"
+            [uiInputPopup]="anchorName()"
+            [class]="popupClasses"
+            [value]="selectedValues()"
+            [activeDescendant]="listbox.activeDescendant()"
+            (valueChange)="choose($event)"
+        >
+            @for (option of shownOptions(); track $index) {
+                <div ngOption [class]="optionClasses" [value]="option.value" [label]="option.label" [disabled]="option.disabled ?? false">
+                    {{ option.label }}
+                </div>
+            }
+        </div>
+    </ng-template>
+</ui-input-field>

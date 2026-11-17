@@ -1,0 +1,29 @@
+<ui-table
+    [label]="label()"
+    [hideLabel]="hideLabel()"
+    [required]="required()"
+    [invalid]="invalid()"
+    [columns]="columns()"
+    [rows]="pageRows()"
+    [totalAmount]="matching().length"
+    [pageSizes]="pageSizes()"
+    [variant]="variant()"
+    [striped]="striped()"
+    [rowKey]="rowKey()"
+    [selectable]="selectable()"
+    [opens]="opens()"
+    [actions]="actions()"
+    [loading]="loading()"
+    [page]="shownPage()"
+    [(pageSize)]="pageSize"
+    [(order)]="order"
+    [(filters)]="filters"
+    [(selected)]="selected"
+    (pageChange)="page.set($event)"
+    (opened)="opened.emit($event)"
+>
+    <!-- ui-table sees the ng-content, not what it projects, so it has to say which slot it is meant for -->
+    <ng-content select="ui-table-actions" ngProjectAs="ui-table-actions" />
+    <ng-content select="ui-empty-state" ngProjectAs="ui-empty-state" />
+    <ng-content />
+</ui-table>

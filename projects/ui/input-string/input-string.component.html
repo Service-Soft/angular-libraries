@@ -1,0 +1,69 @@
+<ui-input-field [field]="this">
+    <!-- relative on its own, so the button that shows a password is centred on the input, not on the strength below -->
+    <div class="relative">
+        @if (isSearch()) {
+            <span [class]="searchIconClasses"><ui-icon [icon]="searchIcon" /></span>
+        }
+        <!-- writing the same value doesn't move the cursor, so [value] can follow every keystroke. A form draft never keeps
+             a password, also while it shows as text. -->
+        <input
+            #nativeInput
+            [class]="inputClasses()"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [type]="nativeType()"
+            [value]="value()"
+            [required]="required()"
+            [disabled]="disabled()"
+            [readOnly]="readonly()"
+            [attr.minlength]="minLength() ?? null"
+            [attr.maxlength]="maxLength() ?? null"
+            [attr.pattern]="pattern() ?? null"
+            [attr.name]="name() ?? null"
+            [attr.placeholder]="placeholder() ?? null"
+            [attr.autocomplete]="autocomplete() ?? null"
+            [attr.inputmode]="inputMode() ?? null"
+            [attr.data-form-draft]="isPassword() ? 'off' : null"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (input)="value.set(nativeInput.value)"
+            (blur)="showValidationError.set(true)"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+        @if (isPassword()) {
+            <!-- pressed rather than a name that changes, which screen readers announce as a change of state -->
+            <button
+                type="button"
+                [class]="innerButtonClasses"
+                [disabled]="disabled()"
+                [attr.aria-pressed]="passwordShown()"
+                [attr.aria-label]="showPasswordLabel"
+                [attr.aria-controls]="inputId()"
+                (click)="passwordShown.set(!passwordShown())"
+            >
+                <ui-icon [icon]="passwordIcon()" />
+            </button>
+        }
+        @if (showsClearButton()) {
+            <button
+                type="button"
+                [class]="innerButtonClasses"
+                [attr.aria-label]="clearSearchLabel"
+                [attr.aria-controls]="inputId()"
+                (click)="clearSearch()"
+            >
+                <ui-icon [icon]="clearIcon" />
+            </button>
+        }
+    </div>
+    @if (showsStrength()) {
+        <!-- the bars only repeat the text, which is a live region that exists before the first keystroke, so screen
+             readers announce each change of the strength, not every key -->
+        <div class="mt-1.5 flex gap-1" aria-hidden="true">
+            @for (classes of strengthBarClasses(); track $index) {
+                <span [class]="classes"></span>
+            }
+        </div>
+        <p class="min-h-5 pt-1 text-body-sm text-on-surface-variant" aria-live="polite">{{ strengthLabel() }}</p>
+    }
+</ui-input-field>

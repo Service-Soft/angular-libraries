@@ -1,0 +1,12 @@
+<ui-input-number
+    [label]="label()"
+    [hint]="hint()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [min]="metadata().min"
+    [max]="metadata().max"
+    [step]="step()"
+    [customValidation]="problemValidation()"
+    [(value)]="value"
+    [(showValidationError)]="showError"
+/>

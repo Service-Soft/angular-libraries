@@ -1,0 +1,32 @@
+<!-- decorative, the category says in text what the color says. As high as the details. -->
+<span aria-hidden="true" [class]="entry().barClasses"></span>
+<div class="grid min-w-0 content-start gap-1">
+    <p class="text-label-lg wrap-break-word text-on-surface">{{ entry().title }}</p>
+    <p class="text-body-sm text-on-surface-variant">
+        <time [attr.datetime]="entry().start.dateTime">{{ entry().start.text }}</time>
+        @if (entry().end; as end) {
+            – <time [attr.datetime]="end.dateTime">{{ end.text }}</time>
+        }
+    </p>
+    @if (entry().category; as category) {
+        <span [class]="entry().categoryClasses">{{ category }}</span>
+    }
+    @if (entry().location; as location) {
+        <p class="flex items-baseline gap-1.5 text-body-sm text-on-surface [&_svg]:size-[1em] [&_svg]:shrink-0">
+            <ui-icon [icon]="locationIcon" />
+            <span class="min-w-0 wrap-break-word"><span class="sr-only">{{ labels.locationLabel }}: </span>{{ location }}</span>
+        </p>
+    }
+    @if (entry().description; as description) {
+        <p class="text-body-sm wrap-break-word whitespace-pre-line text-on-surface">{{ description }}</p>
+    }
+    <!-- the links are read with the title, so each one has a name of its own in a list of links -->
+    <p class="flex flex-wrap gap-x-4 gap-y-1 text-body-sm">
+        @if (entry().url; as url) {
+            <a ui-link [href]="url">{{ labels.linkLabel }}<span class="sr-only">: {{ entry().title }}</span></a>
+        }
+        <a ui-link [href]="entry().calendarFileUrl" [attr.download]="entry().calendarFileName">
+            {{ labels.addToCalendarLabel }}<span class="sr-only">: {{ entry().title }}</span>
+        </a>
+    </p>
+</div>

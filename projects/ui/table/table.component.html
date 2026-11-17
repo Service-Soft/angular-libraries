@@ -1,0 +1,96 @@
+<!-- above the table, in its frame: the label with the actions next to it, and below them everything else that was put
+     inside of the table, like a description or the inputs that add a row, so it is clear that they belong to it. Not in
+     the caption: the text of buttons in it would become part of the name of the table. Takes no room while none of its
+     parts has anything -->
+<div class="hidden flex-col has-[>:not(:empty)]:flex">
+    <ui-table-label-row [label]="label()" [labelId]="labelId" [hideLabel]="hideLabel()" [required]="required()">
+        <ng-content select="ui-table-actions" />
+    </ui-table-label-row>
+    <!-- a line between it and the row of the label, while that shows -->
+    <div class="border-outline-variant px-3 py-3 empty:hidden [ui-table-label-row:not(:empty)+&]:border-t"><ng-content /></div>
+</div>
+<!-- the explicit roles keep the table a table for screen readers on a phone, where its parts are blocks -->
+<div class="overflow-x-auto">
+    <table
+        role="table"
+        class="w-full border-collapse max-sm:block"
+        [attr.aria-labelledby]="hideLabel() ? null : labelId"
+        [attr.aria-busy]="loading() ? 'true' : null"
+    >
+        <!-- a visible label names the table already, screen readers would read it twice -->
+        @if (hideLabel()) {
+            <caption class="sr-only">{{ label() }}</caption>
+        }
+        <thead role="rowgroup" class="bg-table-header max-sm:block">
+            <tr
+                ui-table-header-row
+                [columns]="columns()"
+                [order]="order()"
+                [filters]="filters()"
+                [selectable]="selectable()"
+                [allSelected]="allSelected()"
+                [someSelected]="someSelected()"
+                [empty]="rows().length === 0"
+                [hasActions]="hasActions()"
+                (sorted)="sort($event)"
+                (filtered)="filter($event)"
+                (toggledAll)="toggleAll()"
+            ></tr>
+        </thead>
+        <tbody role="rowgroup" [class]="bodyClasses()">
+            <!-- the rows of the last page are inert while the next one loads, rather than the whole body, which holds the
+                 row of the spinner that screen readers read -->
+            @for (row of rows(); track getKey(row); let index = $index) {
+                <tr
+                    ui-table-row
+                    [attr.inert]="loading() ? '' : null"
+                    [row]="row"
+                    [columns]="columns()"
+                    [selectable]="selectable()"
+                    [selected]="isSelected(row)"
+                    [opens]="opens()"
+                    [striped]="striped()"
+                    [actions]="actions()"
+                    [valueId]="id + '-value-' + index"
+                    [selectLabel]="labels.selectRowLabel"
+                    (toggled)="toggle(row)"
+                    (opened)="opened.emit(row)"
+                ></tr>
+            }
+            @empty {
+                @if (!loading()) {
+                    <tr role="row" class="max-sm:block">
+                        <td role="cell" [class]="emptyCellClasses()" [attr.colspan]="columnCount()">
+                            <!-- a ui-empty-state of your own, or one that says there are none, or none that match the filters.
+                                 Hidden by the one of your own before it rather than as fallback content of the ng-content:
+                                 a table around this one, like ui-local-table, passes its ng-content on, which counts as
+                                 content whether it has any or not. -->
+                            <ng-content select="ui-empty-state" />
+                            <ui-empty-state size="compact" [class]="defaultEmptyStateClasses" [variant]="emptyVariant()" [title]="labels.noRowsLabel" />
+                        </td>
+                    </tr>
+                }
+            }
+            @if (loading()) {
+                <tr role="row" [class]="loadingRowClasses()">
+                    <td role="cell" [class]="loadingCellClasses()" [attr.colspan]="columnCount()">
+                        <ui-spinner size="lg" [label]="labels.loadingLabel" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@if (hasFooter()) {
+    <!-- a div, not a footer: at the top of a page that would be the footer of the whole page for screen readers -->
+    <ui-table-footer
+        [tableId]="id"
+        [label]="label()"
+        [totalAmount]="totalAmount()"
+        [pageSizes]="pageSizes()"
+        [activeFilters]="activeFilters()"
+        [(page)]="page"
+        [(pageSize)]="pageSize"
+        (removedFilter)="removeFilter($event)"
+    />
+}

@@ -1,0 +1,18 @@
+<!-- a named group of toggle buttons rather than a radio group: with multiple, several are chosen, and each one says on
+     its own whether it is. The tiles wrap onto the next line where they don't fit. -->
+<div class="flex flex-wrap gap-3" role="group" [attr.aria-label]="label()">
+    @for (tile of tiles(); track $index) {
+        <button type="button" [class]="tile.classes" [attr.aria-pressed]="tile.pressed" (click)="toggle(tile)">
+            @if (tile.icon) {
+                <!-- decorative, the label says the same -->
+                <ui-icon [icon]="tile.icon" />
+            }
+            <span>{{ tile.label }}</span>
+            @if (tile.count !== undefined) {
+                <!-- the number alone would be read without saying what it counts -->
+                <span class="text-label-sm" aria-hidden="true">{{ tile.count }}</span>
+                <span class="sr-only">({{ tile.countLabel }})</span>
+            }
+        </button>
+    }
+</div>

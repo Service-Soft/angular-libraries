@@ -1,0 +1,19 @@
+<!-- not popovertargetaction="hide": the browser would close the menu after the click handlers, so a dialog that a handler
+     opens would return focus to this item, which is hidden by then. This listener runs before the one of the consumer
+     on the component's element, which the click bubbles to, so the trigger has focus again when that one runs.
+     An item with a submenu is the trigger of that menu, which is placed at it like a menu at its trigger. It is drawn
+     like a link with the appearance of a menu item, so actions and links in one menu look the same. -->
+<button
+    type="button"
+    [class]="classes"
+    [disabled]="disabled()"
+    [attr.popovertarget]="submenu()?.id"
+    [style.anchor-name]="submenu()?.anchorName"
+    (click)="close()"
+>
+    <ng-content />
+    @if (submenu()) {
+        <!-- points towards where the submenu opens, which is the other side in right-to-left -->
+        <span class="ms-auto flex rtl:-scale-x-100"><ui-icon [icon]="submenuIcon" /></span>
+    }
+</button>

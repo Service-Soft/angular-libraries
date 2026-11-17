@@ -1,0 +1,58 @@
+@let microdata = this.microdata();
+<!-- keeps its line before the status is known in the browser, so the days don't move down once it is. The text says it,
+     the dot only repeats it, so its color is no cue of its own. -->
+<p [class]="status() ? statusRowClasses.shown : statusRowClasses.hidden">
+    <span aria-hidden="true" [class]="statusClasses()"></span>
+    {{ statusText() }}
+</p>
+<!-- a table rather than a description list: each day is a row header with its hours in a cell, which every screen reader
+     reads as a pair, and their table navigation moves from day to day and says how many there are. Screen readers read
+     description lists inconsistently, some don't say which day a time belongs to while moving through the times. -->
+<table class="w-full border-collapse text-body">
+    <caption class="sr-only">{{ labels.label }}</caption>
+    <tbody>
+        @for (row of rows(); track row.firstDay) {
+            @let today = $index === todayIndex();
+            <tr class="border-b border-outline-variant last:border-b-0">
+                <th scope="row" [class]="today ? dayClasses.today : dayClasses.other">
+                    <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <!-- the dash between two days is read as the word -->
+                        <span>
+                            {{ row.firstDay }}
+                            @if (row.lastDay) {
+                                <span aria-hidden="true"> – </span><span class="sr-only"> {{ labels.toLabel }} </span>{{ row.lastDay }}
+                            }
+                        </span>
+                        @if (today) {
+                            <!-- a text, so the bold day is not the only cue -->
+                            <span [class]="todayClasses">{{ labels.todayLabel }}</span>
+                        }
+                    </span>
+                </th>
+                <td [class]="today ? hoursClasses.today : hoursClasses.other">
+                    @for (range of row.ranges; track $index) {
+                        <!-- one specification per range, for all days of the row: a day with split hours has two -->
+                        <span
+                            class="block"
+                            [attr.itemprop]="microdata ? 'openingHoursSpecification' : null"
+                            [attr.itemscope]="microdata ? '' : null"
+                            [attr.itemtype]="microdata ? specificationType : null"
+                        >
+                            <!-- meta rather than link: angular only binds the href of a link to a trusted url -->
+                            @for (day of microdata ? row.schemaDays : []; track day) {
+                                <meta itemprop="dayOfWeek" [attr.content]="day" />
+                            }
+                            <time [attr.itemprop]="microdata ? 'opens' : null" [attr.datetime]="range.opens">{{ range.opensText }}</time>
+                            <span aria-hidden="true"> – </span><span class="sr-only"> {{ labels.toLabel }} </span>
+                            <time [attr.itemprop]="microdata ? 'closes' : null" [attr.datetime]="range.closes">{{ range.closesText }}</time>
+                        </span>
+                    } @empty {
+                        <span class="block">{{ labels.closedLabel }}</span>
+                    }
+                    <!-- empty without a note, it takes no space -->
+                    <span class="block text-body-sm text-on-surface-variant empty:hidden">{{ row.note }}</span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,9 @@
+<!-- the header row says which column it is, except on a phone, where the row is a card of its values -->
+<span aria-hidden="true" [class]="phoneLabelClasses">{{ column().label }}</span>
+@if (column().cell; as cell) {
+    <span [attr.id]="valueId() ?? null"><ng-container [ngTemplateOutlet]="cell" [ngTemplateOutletContext]="{ $implicit: row(), column: column() }" /></span>
+} @else if (opens()) {
+    <button type="button" [class]="openClasses" [attr.id]="valueId() ?? null" (click)="opened.emit()">{{ text() }}</button>
+} @else {
+    <span [attr.id]="valueId() ?? null">{{ text() }}</span>
+}

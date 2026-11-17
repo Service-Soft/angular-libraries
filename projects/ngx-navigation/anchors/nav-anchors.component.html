@@ -1,0 +1,9 @@
+@if (anchors().length) {
+    <nav class="border-b border-outline-variant px-4 py-1" [attr.aria-label]="label()">
+        <ul class="flex flex-wrap items-center gap-2">
+            @for (anchor of anchors(); track $index) {
+                <li><ngx-nav-link layout="row" [element]="anchor" /></li>
+            }
+        </ul>
+    </nav>
+}

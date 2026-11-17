@@ -1,0 +1,11 @@
+<button ui-button type="button" variant="outlined" [uiMenuTrigger]="menu">
+    Reset <ui-icon [icon]="faArrowRotateLeft" />
+</button>
+<ui-menu #menu>
+    <ui-menu-item (click)="chosen.set('Reset this change.')"><ui-icon [icon]="faArrowRotateLeft" /> This change</ui-menu-item>
+    <ui-menu-item (click)="chosen.set('Rolled back to this state.')">
+        <ui-icon [icon]="faClockRotateLeft" /> Everything back to this state
+    </ui-menu-item>
+    <ui-menu-item disabled (click)="chosen.set('Chose a disabled item.')">Nothing else</ui-menu-item>
+</ui-menu>
+<p class="mt-4 text-body-sm text-on-surface-variant" role="status">{{ chosen() }}</p>

@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "types": ["node"]
+    },
+    "exclude": ["../**/*.spec.ts", "../../ngx-change-sets/**/*.spec.ts", "../../ngx-persistence-logger/**/*.spec.ts", "../../ngx-tracking/**/*.spec.ts", "../../ngx-pwa/**/*.spec.ts", "../../ngx-auth/**/*.spec.ts", "../../ngx-error-handling/**/*.spec.ts", "../../ngx-navigation/**/*.spec.ts", "../../ngx-entity/**/*.spec.ts", "../../ngx-ecommerce/**/*.spec.ts", "../../testing/**/*.spec.ts"],
+    "extends": "../tsconfig.lib.json",
+    "include": ["../**/*.ts", "./*.ts", "../../ngx-change-sets/**/*.ts", "../../ngx-persistence-logger/**/*.ts", "../../ngx-tracking/**/*.ts", "../../ngx-pwa/**/*.ts", "../../ngx-auth/**/*.ts", "../../ngx-error-handling/**/*.ts", "../../ngx-navigation/**/*.ts", "../../ngx-entity/**/*.ts", "../../ngx-ecommerce/**/*.ts", "../../testing/form/*.ts", "../../testing/http/*.ts"]
+}

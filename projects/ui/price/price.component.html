@@ -1,0 +1,16 @@
+<span [class]="amountClasses()">{{ formattedAmount() }}</span>
+@if (period(); as period) {
+    <!-- screen readers would read the slash as 'slash', so they get the word for it -->
+    <span class="flex gap-1 text-body text-on-surface-variant">
+        <span aria-hidden="true">/</span>
+        <span class="sr-only">{{ labels.perLabel }}</span>
+        <span>{{ period }}</span>
+    </span>
+}
+@if (formattedOldAmount(); as oldAmount) {
+    <!-- screen readers don't read that a text is struck through, so they get a word for it -->
+    <span class="text-body text-on-surface-variant">
+        <span class="sr-only">{{ labels.oldPriceLabel }}</span>
+        <s>{{ oldAmount }}</s>
+    </span>
+}

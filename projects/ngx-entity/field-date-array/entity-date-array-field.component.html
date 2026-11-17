@@ -1,0 +1,52 @@
+<fieldset class="flex flex-col gap-2">
+    <!-- the table shows the label, with the inputs that add an item below it, in its frame, so it is clear that they
+         belong to it. The legend only names the group for screen readers. The error says that it is required to them
+         once it matters -->
+    <legend class="sr-only">{{ label() }}</legend>
+    <ui-local-table
+        [label]="label()"
+        [required]="required()"
+        [columns]="columns()"
+        [rows]="rows()"
+        [actions]="readonly() ? undefined : removeAction"
+    >
+        @if (!readonly()) {
+            <!-- a required array without an item is the error of the input that adds one, which the form then focuses -->
+            <div class="flex flex-wrap items-end gap-2">
+                <ui-input-date
+                    class="min-w-48 grow"
+                    [label]="startLabel()"
+                    [type]="type()"
+                    [required]="false"
+                    [min]="min()"
+                    [max]="max()"
+                    [customValidation]="validation"
+                    [(value)]="start"
+                    [(showValidationError)]="showError"
+                />
+                @if (isRange()) {
+                    <ui-input-date
+                        class="min-w-48 grow"
+                        [label]="labels.endLabel"
+                        [type]="type()"
+                        [required]="false"
+                        [min]="start() ?? min()"
+                        [max]="max()"
+                        [(value)]="end"
+                    />
+                }
+                <button ui-button type="button" [disabled]="!canAdd()" (click)="add()">{{ labels.addLabel }}</button>
+            </div>
+        }
+    </ui-local-table>
+    <!-- below the table, like the hint of an input -->
+    @if (hint()) {
+        <p class="text-body-sm text-on-surface-variant">{{ hint() }}</p>
+    }
+</fieldset>
+<ng-template #removeAction let-row>
+    <!-- named with the item, so the buttons of the rows can be told apart -->
+    <button ui-button type="button" variant="text" size="sm" [attr.aria-label]="resolveRemoveLabel(row)" (click)="remove(row)">
+        {{ labels.removeLabel }}
+    </button>
+</ng-template>

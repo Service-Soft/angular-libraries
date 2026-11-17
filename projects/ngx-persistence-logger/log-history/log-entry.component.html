@@ -1,0 +1,22 @@
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <span [class]="log().levelClasses">{{ log().levelLabel }}</span>
+    @if (log().application; as application) {
+        <span class="text-label">{{ application }}</span>
+    }
+    <!-- wrap-anywhere: a long path without spaces wraps instead of overflowing a narrow screen -->
+    <span class="font-code text-body-sm wrap-anywhere text-on-surface-variant">{{ log().origin }}</span>
+    <time class="text-body-sm text-on-surface-variant" [attr.datetime]="log().createdAtIso">{{ log().createdAt }}</time>
+</div>
+<!-- pre-wrap keeps the lines of the paragraphs of an error and the indentation of its causes -->
+<p class="mt-2 text-body wrap-anywhere whitespace-pre-wrap">@if (log().errorName; as errorName) {<span class="font-semibold text-error">{{ errorName }}:</span>&ngsp;}{{ log().text }}</p>
+@if (log().metadata; as metadata) {
+    <!-- drawn by its line rather than a fill, which would be about the color of the stripe of the row -->
+    <pre class="mt-2 rounded-input border border-outline-variant px-3 py-2 font-code text-body-sm wrap-anywhere whitespace-pre-wrap">{{ metadata }}</pre>
+}
+@if (log().stackTrace; as stackTrace) {
+    <!-- outlined like the metadata above it, so the stripe of the row shows through both -->
+    <ui-details class="mt-2" variant="outlined">
+        <ui-summary>{{ stackLabel() }}</ui-summary>
+        <pre class="font-code text-body-sm wrap-anywhere whitespace-pre-wrap">{{ stackTrace }}</pre>
+    </ui-details>
+}

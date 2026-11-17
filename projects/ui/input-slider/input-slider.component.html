@@ -1,0 +1,27 @@
+<ui-input-field [field]="this">
+    <div [class]="rowClasses()">
+        <!-- min, max and step before the value: the browser clamps a value to the range it has when the value is set -->
+        <input
+            #nativeInput
+            type="range"
+            [class]="sliderClasses()"
+            [id]="inputId()"
+            [attr.autofocus]="autofocus() ? '' : null"
+            [min]="min()"
+            [max]="max()"
+            [step]="step()"
+            [value]="value()"
+            [disabled]="disabled()"
+            [attr.name]="name() ?? null"
+            [attr.aria-invalid]="errorMessage() ? 'true' : null"
+            [attr.aria-describedby]="describedBy() ?? null"
+            (input)="updateValue(nativeInput)"
+            (blur)="showValidationError.set(true)"
+            (invalid)="showInsteadOfPopup($event)"
+        />
+        <!-- the native range announces its value already -->
+        <output class="min-w-8 text-end text-body text-on-surface tabular-nums" aria-hidden="true" [attr.for]="inputId()">
+            {{ value() }}
+        </output>
+    </div>
+</ui-input-field>

@@ -1,0 +1,46 @@
+<h2 class="font-heading text-title text-on-surface">{{ labels.title }}</h2>
+<ul class="mt-4 divide-y divide-outline-variant empty:hidden">
+    @for (row of rows(); track row.id) {
+        <li class="flex flex-wrap items-center gap-2 py-3">
+            <!-- &ngsp;: angular drops the whitespace between elements, and screen readers would read the name and the
+                 detail as one word -->
+            <p class="grow text-body text-on-surface">
+                <span class="me-2 text-label-lg" [id]="row.nameId">{{ row.name }}</span>&ngsp;<span class="text-on-surface-variant">{{
+                    row.detail
+                }}</span>
+            </p>
+            @for (access of row.missingAccess; track access.label) {
+                <!-- described by the name, so screen readers know which provider it asks -->
+                <button ui-button type="button" variant="outlined" [attr.aria-describedby]="row.nameId" (click)="grant(row, access)">
+                    {{ access.label }}
+                </button>
+            }
+            <button
+                ui-button
+                type="button"
+                variant="outlined"
+                color="error"
+                [attr.aria-describedby]="row.nameId"
+                (click)="remove(row)"
+            >
+                {{ labels.remove }}
+            </button>
+        </li>
+    }
+</ul>
+<div class="mt-4 flex flex-wrap gap-2 empty:hidden">
+    @for (provider of connectableProviders(); track provider.authenticator) {
+        <button ui-button type="button" variant="outlined" (click)="connect(provider)">{{ provider.label }}</button>
+    }
+    @if (config.passkeyAuthenticator; as authenticator) {
+        <button ui-button type="button" variant="outlined" (click)="addPasskey(authenticator)">{{ labels.addPasskey }}</button>
+    }
+</div>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>

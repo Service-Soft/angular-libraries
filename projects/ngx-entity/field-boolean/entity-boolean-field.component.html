@@ -1,0 +1,11 @@
+<ui-input-boolean
+    [label]="label()"
+    [hint]="hint()"
+    [appearance]="appearance()"
+    [required]="mustBeChecked()"
+    [readonly]="readonly()"
+    [customValidation]="problemValidation()"
+    [value]="value() ?? false"
+    [(showValidationError)]="showError"
+    (valueChange)="value.set($event)"
+/>

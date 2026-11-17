@@ -1,0 +1,10 @@
+@if (method(); as method) {
+    <ngx-two-factor-enrollment [method]="method" [ticket]="ticket()" [passkeyName]="email()" (enrolled)="finish($event)" />
+} @else {
+    <p class="text-body text-on-surface-variant">{{ labels.enrollmentMessage }}</p>
+    <ul class="mt-4 flex flex-col items-start gap-2">
+        @for (option of methods(); track option.method) {
+            <li><button ui-button type="button" variant="outlined" (click)="method.set(option.method)">{{ option.name }}</button></li>
+        }
+    </ul>
+}

@@ -1,0 +1,40 @@
+<ui-card class="h-full">
+    <div [class]="layoutClasses()">
+        <div [class]="photoClasses()">
+            <!-- decorative: the name is the heading right after it -->
+            @if (shownPhoto(); as photo) {
+                @if (isInlinePhoto()) {
+                    <!-- NgOptimizedImage refuses data and blob urls -->
+                    <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+                    <img class="absolute inset-0 size-full object-cover" alt="" [src]="photo" (error)="photoFailed.set(true)" />
+                } @else {
+                    <!-- fill takes the box of the 4:5 frame, which reserves its space before the photo loads -->
+                    <img class="object-cover" alt="" fill [ngSrc]="photo" (error)="photoFailed.set(true)" />
+                }
+            } @else {
+                <ui-avatar decorative [name]="name()" [size]="avatarSize()" />
+            }
+        </div>
+        <div [class]="textClasses()">
+            <div>
+                <!-- a native heading of the level the page needs -->
+                <ui-heading [class]="nameClasses()" [level]="headingLevel()">{{ name() }}</ui-heading>
+                @if (position()) {
+                    <p class="text-body-sm text-on-surface-variant">{{ position() }}</p>
+                }
+            </div>
+            <!-- empty, it takes no space: comments, which angular leaves for its blocks, don't count for :empty -->
+            <div class="flex flex-col gap-2 text-body empty:hidden"><ng-content /></div>
+            <div class="mt-auto flex flex-wrap gap-2 empty:hidden">
+                @for (contact of contacts(); track contact.href) {
+                    <!-- min-w-0, so a long email address wraps instead of widening the card -->
+                    <a ui-button variant="outlined" size="sm" [href]="contact.href">
+                        <ui-icon [icon]="contact.icon" />
+                        <span class="min-w-0 wrap-anywhere">{{ contact.text }}</span>
+                    </a>
+                }
+                <ng-content select="ui-person-card-actions" />
+            </div>
+        </div>
+    </div>
+</ui-card>

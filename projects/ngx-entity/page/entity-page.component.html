@@ -1,0 +1,12 @@
+@if (ready()) {
+    <!-- the heading of the page -->
+    <ngx-entity-editor
+        #editor
+        [service]="service"
+        [entity]="entity.value()"
+        [title]="title"
+        [headingLevel]="1"
+        (saved)="leave()"
+        (cancelled)="leave()"
+    />
+}

@@ -1,0 +1,353 @@
+/* The design tokens shared by every library, with their default values. Consumers override them in their own @theme. */
+/* Every color has an on- token for content on top of it. ThemeUtilities.validateContrast from testing/theme checks the pairs against WCAG AA. */
+/* Every color is light-dark(<light mode>, <dark mode>), see the color-scheme rules below for how the mode is chosen. */
+@theme {
+    /* main actions and the current selection, also used as text for links, outlined and text buttons */
+    --color-primary: light-dark(#0e456f, #92c3f2);
+    --color-on-primary: light-dark(#ffffff, #0a304f);
+    /* actions and highlights that should stand out less than primary */
+    --color-secondary: #00b4d8;
+    --color-on-secondary: #002732;
+    /* secondary as text and focus rings on surface, where secondary itself is too light */
+    --color-secondary-text: light-dark(#006e88, #00b4d8);
+
+    /* status, error is also used as text for validation messages */
+    --color-error: light-dark(#c11a1b, #f69b94);
+    --color-on-error: light-dark(#ffffff, #551112);
+    --color-warning: #f9ad26;
+    --color-on-warning: #2f1e02;
+    /* warning as text and icons on surfaces and on its tint, where warning itself is far too light */
+    --color-warning-text: light-dark(#875400, #f9ad26);
+    --color-success: light-dark(#1a8641, #7cd591);
+    --color-on-success: light-dark(#ffffff, #0d371a);
+    /* success as text and focus rings on surface-container and its tints, where success itself only just reaches 4.5:1 */
+    --color-success-text: light-dark(#146c34, #7cd591);
+
+    /*
+     * hover and pressed states, calculated from the colors above so they follow your overrides.
+     * -hover replaces a filled color: it moves away from the color's text, so the contrast only gets better.
+     * -tint replaces the surface behind colored text, eg. for outlined and text buttons.
+     * -pressed and -tint-pressed are the same, one and a half times as far.
+     * The percentages make the step look equally large for every default color, override them if yours need another.
+     */
+    --color-primary-hover: light-dark(
+        color-mix(in oklab, var(--color-primary), black 22%),
+        color-mix(in oklab, var(--color-primary), white 40%)
+    );
+    --color-secondary-hover: color-mix(in oklab, var(--color-secondary), white 28%);
+    --color-error-hover: light-dark(
+        color-mix(in oklab, var(--color-error), black 15%),
+        color-mix(in oklab, var(--color-error), white 36%)
+    );
+    --color-success-hover: light-dark(
+        color-mix(in oklab, var(--color-success), black 15%),
+        color-mix(in oklab, var(--color-success), white 36%)
+    );
+    --color-primary-tint: color-mix(in oklab, var(--color-surface), var(--color-primary) 10%);
+    /*
+     * a faint wash of primary behind content that sets it apart from the surface, like every second row of a striped
+     * table or list. Half of the tint, so the tint of a text button hovered on it still shows, and far enough from the
+     * container that a row that opens shows on hover. Holds on-surface, on-surface-variant, primary and error.
+     */
+    --color-primary-faint: color-mix(in oklab, var(--color-surface), var(--color-primary) 5%);
+    --color-secondary-tint: light-dark(
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 19%),
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 11%)
+    );
+    --color-error-tint: color-mix(in oklab, var(--color-surface), var(--color-error) 12%);
+    --color-success-tint: color-mix(in oklab, var(--color-surface), var(--color-success) 12%);
+    /* warning is no color of a control, so it has no hover or pressed states, only the tint behind a warning callout */
+    --color-warning-tint: color-mix(in oklab, var(--color-surface), var(--color-warning) 18%);
+    --color-primary-pressed: light-dark(
+        color-mix(in oklab, var(--color-primary), black 32%),
+        color-mix(in oklab, var(--color-primary), white 60%)
+    );
+    --color-secondary-pressed: color-mix(in oklab, var(--color-secondary), white 42%);
+    --color-error-pressed: light-dark(
+        color-mix(in oklab, var(--color-error), black 22%),
+        color-mix(in oklab, var(--color-error), white 55%)
+    );
+    --color-success-pressed: light-dark(
+        color-mix(in oklab, var(--color-success), black 22%),
+        color-mix(in oklab, var(--color-success), white 55%)
+    );
+    --color-primary-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-primary) 15%);
+    --color-secondary-tint-pressed: light-dark(
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 28%),
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 17%)
+    );
+    --color-error-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-error) 18%);
+    --color-success-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-success) 18%);
+
+    /*
+     * content on a colored surface, like a primary drawer: the surface-primary and surface-secondary classes put these
+     * in place of the surface tokens inside of them, so links, buttons and inputs follow. Calculated from the color and
+     * its on- color, so they follow your overrides.
+     * -variant is secondary text like hints, -outline the border of a control, -outline-variant a decorative one.
+     * -surface-container sets an area apart from the colored surface, like an input field, and on-X-tint and
+     * on-X-tint-pressed are behind on-X as colored text, like a text button: they move towards the -hover and -pressed
+     * of the color, away from its text, so the contrast of the text only gets better. on-X-hover and on-X-pressed
+     * replace on-X filled, like a filled button, whose text is the color itself.
+     */
+    --color-on-primary-variant: color-mix(in oklab, var(--color-on-primary), var(--color-primary) 14%);
+    --color-on-primary-outline: color-mix(in oklab, var(--color-on-primary), var(--color-primary) 35%);
+    --color-on-primary-outline-variant: color-mix(in oklab, var(--color-on-primary), var(--color-primary) 70%);
+    --color-primary-surface-container: color-mix(in oklab, var(--color-primary), var(--color-primary-hover) 45%);
+    --color-on-primary-tint: var(--color-primary-hover);
+    --color-on-primary-tint-pressed: var(--color-primary-pressed);
+    --color-on-primary-hover: color-mix(in oklab, var(--color-on-primary), var(--color-primary) 8%);
+    --color-on-primary-pressed: color-mix(in oklab, var(--color-on-primary), var(--color-primary) 13%);
+    --color-on-secondary-variant: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 14%);
+    --color-on-secondary-outline: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 35%);
+    --color-on-secondary-outline-variant: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 70%);
+    --color-secondary-surface-container: color-mix(in oklab, var(--color-secondary), var(--color-secondary-hover) 45%);
+    --color-on-secondary-tint: var(--color-secondary-hover);
+    --color-on-secondary-tint-pressed: var(--color-secondary-pressed);
+    --color-on-secondary-hover: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 8%);
+    --color-on-secondary-pressed: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 13%);
+
+    /* the background of pages and components, and its text */
+    --color-surface: light-dark(#ffffff, #11171b);
+    --color-on-surface: light-dark(#131c23, #e3e9ec);
+    /* areas set apart from the surface, eg. input fields or table headers */
+    --color-surface-container: light-dark(#f0f4f7, #1b2327);
+    /* secondary text like hints, placeholders and captions, on surface and surface-container */
+    --color-on-surface-variant: light-dark(#646f78, #a8b3b9);
+
+    /* borders that identify a control, eg. of an input */
+    --color-outline: light-dark(#808b96, #76828a);
+    /* decorative borders and dividers */
+    --color-outline-variant: light-dark(#d9dfe4, #31393f);
+
+    /*
+     * tables: the row of the headers and the bar below the rows with the pagination. Their content is on-surface,
+     * on-surface-variant and primary, like on the surface.
+     */
+    --color-table-header: var(--color-surface-container);
+    --color-table-footer: var(--color-surface-container);
+
+    /*
+     * the filled stars of a rating. A graphic, so 3:1 on surface and surface-container. The warning color is too light
+     * for that on a light surface. The empty stars are outline-variant: lighter than this, so they differ in more than
+     * the hue.
+     */
+    --color-rating: light-dark(#b87400, #f9ad26);
+
+    /* dims the page behind a modal dialog. No text is ever on it, so it has no contrast requirement. */
+    --color-scrim: light-dark(rgb(19 28 35 / 0.4), rgb(0 0 0 / 0.6));
+
+    /*
+     * fonts, the page uses the body font. The default is the font of the operating system, which needs no download.
+     * Set --font-body to your own font and headings follow it, unless you set --font-heading too.
+     */
+    --font-body: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-heading: var(--font-body);
+    --default-font-family: var(--font-body);
+    /* code and data whose characters have to line up, eg. json */
+    --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    /* the type scale, every text uses one of these roles. Each one sets the size, line height and weight, eg. text-title. */
+    /* the largest text of a page, eg. the title of a landing page */
+    --text-display: 2.25rem;
+    --text-display--line-height: calc(2.75 / 2.25);
+    --text-display--font-weight: 600;
+    /* the title of a page or a large section */
+    --text-headline: 1.75rem;
+    --text-headline--line-height: calc(2.25 / 1.75);
+    --text-headline--font-weight: 600;
+    /* the title of a component, eg. of a card or dialog */
+    --text-title: 1.25rem;
+    --text-title--line-height: calc(1.75 / 1.25);
+    --text-title--font-weight: 600;
+    /* running text */
+    --text-body: 1rem;
+    --text-body--line-height: 1.5;
+    --text-body--font-weight: 400;
+    /* secondary text, eg. hints and captions */
+    --text-body-sm: 0.875rem;
+    --text-body-sm--line-height: calc(1.25 / 0.875);
+    --text-body-sm--font-weight: 400;
+    /* the text of controls, eg. buttons and the labels of inputs */
+    --text-label: 0.875rem;
+    --text-label--line-height: calc(1.25 / 0.875);
+    --text-label--font-weight: 500;
+    /* label for small, dense content, like a badge or a count */
+    --text-label-sm: 0.75rem;
+    --text-label-sm--line-height: calc(1 / 0.75);
+    --text-label-sm--font-weight: 500;
+    /* label for large controls */
+    --text-label-lg: 1rem;
+    --text-label-lg--line-height: 1.5;
+    --text-label-lg--font-weight: 500;
+
+    /*
+     * elevation, how far something floats above the surface, from shadow-1 to shadow-5. Cards and elevated buttons
+     * sit on 1, menus and popovers on 2, dialogs on 3. Hovering raises an elevated element by one level.
+     * Each level is a sharp shadow close to the element and a soft one further away. Shadows are decorative, so they
+     * have no contrast requirement. Dark surfaces need much darker shadows to show them at all.
+     */
+    --shadow-1: 0 1px 2px light-dark(rgb(19 28 35 / 0.16), rgb(0 0 0 / 0.6)),
+        0 1px 3px 1px light-dark(rgb(19 28 35 / 0.1), rgb(0 0 0 / 0.3));
+    --shadow-2: 0 1px 2px light-dark(rgb(19 28 35 / 0.16), rgb(0 0 0 / 0.6)),
+        0 2px 6px 2px light-dark(rgb(19 28 35 / 0.1), rgb(0 0 0 / 0.3));
+    --shadow-3: 0 1px 3px light-dark(rgb(19 28 35 / 0.16), rgb(0 0 0 / 0.6)),
+        0 4px 8px 3px light-dark(rgb(19 28 35 / 0.1), rgb(0 0 0 / 0.3));
+    --shadow-4: 0 2px 3px light-dark(rgb(19 28 35 / 0.16), rgb(0 0 0 / 0.6)),
+        0 6px 10px 4px light-dark(rgb(19 28 35 / 0.1), rgb(0 0 0 / 0.3));
+    --shadow-5: 0 4px 4px light-dark(rgb(19 28 35 / 0.16), rgb(0 0 0 / 0.6)),
+        0 8px 12px 6px light-dark(rgb(19 28 35 / 0.1), rgb(0 0 0 / 0.3));
+
+    /* components */
+    --radius-button: 0.375rem;
+    /* the buttons that float in a corner of the screen, like back to top: round, which sets them apart from the buttons
+       of the page */
+    --radius-floating-button: 9999px;
+    --radius-card: 0.75rem;
+    --radius-input: 0.375rem;
+    /* the options of the cards inputs, each a card to choose */
+    --radius-input-card: 0.75rem;
+    --radius-link: 0.375rem;
+    /* links drawn as pills, like the sub pages of a section in a secondary navigation */
+    --radius-link-pill: 9999px;
+    --radius-details: 0.5rem;
+    --radius-dialog: 0.75rem;
+    --radius-menu: 0.5rem;
+    --radius-popover: 0.5rem;
+    --radius-snackbar: 0.5rem;
+    /* the list of filled tabs and the selected tab in it */
+    --radius-tabs: 0.5rem;
+    /* the outlined and card tables */
+    --radius-table: 0.5rem;
+    /* a pill, like the badges of review sites */
+    --radius-rating-badge: 9999px;
+    /* the photo in 4:5 of a person card, or the box of the initials in its place */
+    --radius-person-card-photo: 0.5rem;
+    /* the placeholder of a consent gate before the content loads, and the content after it */
+    --radius-consent-gate: 0.5rem;
+    /* an embedded page, like a map or a video. The same as the consent gate, so a gated one keeps its corners */
+    --radius-iframe: 0.5rem;
+    /* the images and blocks of code inside a rich text */
+    --radius-rich-text: 0.5rem;
+    /* the tiles of a filter, like the categories of a list */
+    --radius-filter-tile: 0.75rem;
+    /* the thumbnails of a gallery */
+    --radius-gallery: 0.5rem;
+    --radius-callout: 0.5rem;
+    /* the image or video next to the text of a media split */
+    --radius-media-split: 0.75rem;
+    /* badges, like a category, a tag or the recommended plan of a pricing card, pills by default */
+    --radius-badge: 9999px;
+    /* the sections of a page, like the ones of a website: how wide their content gets, and the space above and below it */
+    --container-section: 72rem;
+    /* not --spacing-section, which max-w-section would take before --container-section */
+    --spacing-section-padding: 4rem;
+    /* the height every logo of a logo cloud is drawn at, whatever the size of its image, so they look equally large */
+    --spacing-logo-cloud: 3rem;
+
+    /*
+     * the headlines of a news ticker, which move in from the end and out at the start. The duration is a fallback, the
+     * ticker sets its own from its width, so every ticker moves at the same speed.
+     */
+    --animate-news-ticker: news-ticker 30s linear infinite;
+    --animate-news-ticker-rtl: news-ticker-rtl 30s linear infinite;
+
+    @keyframes news-ticker {
+        to {
+            transform: translateX(-100%);
+        }
+    }
+
+    @keyframes news-ticker-rtl {
+        to {
+            transform: translateX(100%);
+        }
+    }
+}
+
+/*
+ * A colored surface, like a primary drawer: the element gets the color as its background, and the content inside of it
+ * gets the on- tokens of the color in place of the surface tokens, so links, buttons, inputs and details follow without
+ * knowing. Status colors as text, like an error message, keep the colors they have on the surface.
+ * The element takes the color and its on- color before its children change them: a token that names itself, like
+ * --color-primary: var(--color-on-primary) next to --color-on-primary: var(--color-primary), would be invalid.
+ */
+@utility surface-primary {
+    --surface-color: var(--color-primary);
+    --surface-on-color: var(--color-on-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+
+    & > * {
+        --color-surface: var(--surface-color);
+        --color-on-surface: var(--surface-on-color);
+        --color-surface-container: var(--color-primary-surface-container);
+        --color-on-surface-variant: var(--color-on-primary-variant);
+        --color-outline: var(--color-on-primary-outline);
+        --color-outline-variant: var(--color-on-primary-outline-variant);
+        --color-primary: var(--surface-on-color);
+        --color-on-primary: var(--surface-color);
+        --color-primary-hover: var(--color-on-primary-hover);
+        --color-primary-pressed: var(--color-on-primary-pressed);
+        --color-primary-tint: var(--color-on-primary-tint);
+        --color-primary-tint-pressed: var(--color-on-primary-tint-pressed);
+        --color-secondary-text: var(--surface-on-color);
+        --color-secondary-tint: var(--color-on-primary-tint);
+        --color-secondary-tint-pressed: var(--color-on-primary-tint-pressed);
+    }
+}
+
+@utility surface-secondary {
+    --surface-color: var(--color-secondary);
+    --surface-on-color: var(--color-on-secondary);
+    background-color: var(--color-secondary);
+    color: var(--color-on-secondary);
+
+    & > * {
+        --color-surface: var(--surface-color);
+        --color-on-surface: var(--surface-on-color);
+        --color-surface-container: var(--color-secondary-surface-container);
+        --color-on-surface-variant: var(--color-on-secondary-variant);
+        --color-outline: var(--color-on-secondary-outline);
+        --color-outline-variant: var(--color-on-secondary-outline-variant);
+        --color-primary: var(--surface-on-color);
+        --color-on-primary: var(--surface-color);
+        --color-primary-hover: var(--color-on-secondary-hover);
+        --color-primary-pressed: var(--color-on-secondary-pressed);
+        --color-primary-tint: var(--color-on-secondary-tint);
+        --color-primary-tint-pressed: var(--color-on-secondary-tint-pressed);
+        --color-secondary-text: var(--surface-on-color);
+        --color-secondary-tint: var(--color-on-secondary-tint);
+        --color-secondary-tint-pressed: var(--color-on-secondary-tint-pressed);
+    }
+}
+
+/*
+ * light-dark() picks its value by the color-scheme of the element it is used on. The page follows the operating
+ * system, .light and .dark fix the mode of an element and everything inside of it, eg. on <html> for a toggle.
+ */
+@layer base {
+    :root {
+        color-scheme: light dark;
+    }
+
+    .light {
+        color-scheme: light;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+}
+
+/* the dark: variant follows the same rules, for anything that tokens can't express */
+@custom-variant dark {
+    &:where(.dark, .dark *) {
+        @slot;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        &:where(:not(.light, .light *)) {
+            @slot;
+        }
+    }
+}

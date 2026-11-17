@@ -1,0 +1,7 @@
+<!-- out of the way until the top of the page is out of sight. Filled and raised, so it stands out from the content it
+     floats over -->
+@if (shown()) {
+    <button ui-button type="button" size="lg" iconOnly [color]="color()" [elevation]="3" [attr.aria-label]="labels.label" (click)="backToTop()">
+        <ui-icon [icon]="icon" />
+    </button>
+}

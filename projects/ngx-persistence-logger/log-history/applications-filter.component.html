@@ -1,0 +1,11 @@
+<button ui-button type="button" variant="outlined" [uiPopoverTrigger]="filter">
+    {{ summary() }} <ui-icon [icon]="faChevronDown" />
+</button>
+<ui-popover #filter>
+    <fieldset class="grid">
+        <legend class="mb-2 text-label">{{ label() }}</legend>
+        @for (option of options(); track option.name) {
+            <ui-input-boolean [label]="option.name" [value]="option.checked" (valueChange)="toggle(option.name)" />
+        }
+    </fieldset>
+</ui-popover>

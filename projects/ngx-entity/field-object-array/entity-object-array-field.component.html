@@ -1,0 +1,51 @@
+<fieldset class="flex flex-col gap-2">
+    <!-- the table shows the label, next to the button that adds an item, like the table of a relation. The legend only
+         names the group for screen readers. The error says that it is required to them once it matters -->
+    <legend class="sr-only">{{ label() }}</legend>
+    <ui-local-table
+        [label]="label()"
+        [required]="required()"
+        [invalid]="error() !== undefined"
+        [columns]="columns()"
+        [rows]="rows()"
+        [actions]="readonly() ? undefined : rowActions"
+    >
+        <ui-table-actions>
+            @if (!readonly()) {
+                <button #addButton ui-button type="button" [attr.aria-describedby]="error() ? errorId : null" (click)="add()">
+                    {{ labels.addLabel }}
+                </button>
+            }
+        </ui-table-actions>
+    </ui-local-table>
+    <!-- below the table, like the hint and the error of an input -->
+    @if (hint()) {
+        <p class="text-body-sm text-on-surface-variant">{{ hint() }}</p>
+    }
+    @if (!readonly()) {
+        <!-- no control holds the items, so this input is what the browser checks: invalid while a required array has
+             none, and it hands the focus the form gives it on to the button that adds one -->
+        <input
+            class="sr-only"
+            tabindex="-1"
+            aria-hidden="true"
+            [value]="rows().length > 0 ? 'filled' : ''"
+            [required]="required()"
+            (focus)="focusAddButton()"
+            (invalid)="showInvalid($event)"
+        />
+        <!-- always rendered, screen readers only announce changes of live regions that already exist -->
+        <p class="text-body-sm text-error empty:hidden" aria-live="polite" [id]="errorId">{{ error() }}</p>
+    }
+</fieldset>
+<ng-template #rowActions let-row>
+    <!-- named with the first value of the item, so the buttons of the rows can be told apart -->
+    <div class="flex flex-wrap justify-end gap-1 max-sm:justify-start">
+        <button ui-button type="button" variant="text" size="sm" [attr.aria-label]="resolveActionLabel(labels.editLabel, row)" (click)="edit(row)">
+            {{ labels.editLabel }}
+        </button>
+        <button ui-button type="button" variant="text" size="sm" [attr.aria-label]="resolveActionLabel(labels.removeLabel, row)" (click)="remove(row)">
+            {{ labels.removeLabel }}
+        </button>
+    </div>
+</ng-template>

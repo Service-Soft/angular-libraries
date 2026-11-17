@@ -1,0 +1,35 @@
+<fieldset>
+    <legend class="mb-1.5 text-label text-on-surface">{{ label() }}</legend>
+    @if (hint()) {
+        <p class="mb-1.5 text-body-sm text-on-surface-variant">{{ hint() }}</p>
+    }
+    <div class="flex flex-wrap gap-x-4 gap-y-2">
+        <ui-input-date
+            class="min-w-48 grow"
+            [label]="labels.startLabel"
+            [type]="type()"
+            [required]="required()"
+            [readonly]="readonly()"
+            [min]="min()"
+            [max]="end() ?? max()"
+            [customValidation]="startValidation"
+            [value]="start()"
+            [(showValidationError)]="showError"
+            (valueChange)="change($event, end())"
+        />
+        <!-- the end can't come before the start, which the browser checks with its min -->
+        <ui-input-date
+            class="min-w-48 grow"
+            [label]="labels.endLabel"
+            [type]="type()"
+            [required]="required()"
+            [readonly]="readonly()"
+            [min]="start() ?? min()"
+            [max]="max()"
+            [customValidation]="endValidation"
+            [value]="end()"
+            [(showValidationError)]="showError"
+            (valueChange)="change(start(), $event)"
+        />
+    </div>
+</fieldset>

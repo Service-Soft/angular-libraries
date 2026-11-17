@@ -1,0 +1,10 @@
+@for (property of properties; track property.key) {
+    <ngx-entity-field
+        [property]="property"
+        [entity]="values()"
+        [required]="isRequired(property)"
+        [problem]="problems()[property.key]"
+        [value]="getValue(property.key)"
+        (valueChange)="setValue(property.key, $event)"
+    />
+}

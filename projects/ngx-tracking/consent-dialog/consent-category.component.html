@@ -1,0 +1,45 @@
+<!-- native checkboxes inside ui-input-boolean: the browser handles their keyboard, focus and state, like indeterminate
+     for a category that is only partly checked. A required category stays checked and can't be changed. -->
+@if (showOnlyCategory()) {
+    <ui-input-boolean
+        [label]="category().title"
+        [value]="category().allChecked"
+        [indeterminate]="category().someChecked"
+        [disabled]="category().required"
+        (valueChange)="categoryToggled.emit()"
+    />
+} @else {
+    <!-- the checkbox of the category sits beside the summary, not in it: a summary is read as a button, nothing inside it
+         may be interactive. Its visible title is the summary next to it, the label stays for screen readers. -->
+    <div class="flex items-start gap-1">
+        <!-- as high as the summary, so the checkbox centers in its row -->
+        <div class="flex min-h-12 items-center">
+            <ui-input-boolean
+                hideLabel
+                [label]="category().title"
+                [value]="category().allChecked"
+                [indeterminate]="category().someChecked"
+                [disabled]="category().required"
+                (valueChange)="categoryToggled.emit()"
+            />
+        </div>
+        <ui-details class="grow" variant="plain">
+            <ui-summary><span class="font-heading text-label-lg">{{ category().title }}</span></ui-summary>
+            <div class="grid gap-3">
+                @for (option of category().options; track option.tracking.name) {
+                    <div>
+                        <ui-input-boolean
+                            [label]="option.tracking.name"
+                            [value]="option.checked"
+                            [disabled]="category().required"
+                            (valueChange)="trackingToggled.emit(option.tracking)"
+                        />
+                        @for (paragraph of option.tracking.description; track $index) {
+                            <p class="ms-7 text-body-sm text-on-surface-variant">{{ paragraph }}</p>
+                        }
+                    </div>
+                }
+            </div>
+        </ui-details>
+    </div>
+}

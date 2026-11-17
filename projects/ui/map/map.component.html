@@ -1,0 +1,23 @@
+<!-- grows into the height of the map component, for a map without a ratio. No min-h-0: the automatic minimum height is
+     what lets a box with a ratio grow with a placeholder whose text doesn't fit, instead of overflowing onto the route
+     link below. -->
+<ui-consent-gate
+    class="grow"
+    [provider]="provider().name"
+    [providerPrivacyPolicyUrl]="provider().privacyPolicyUrl"
+    [aspectRatio]="aspectRatio()"
+    [alwaysAllow]="alwaysAllow()"
+    [(consented)]="consented"
+    (alwaysAllowed)="alwaysAllowed.emit()"
+>
+    <!-- fills the box of the gate, which keeps the ratio -->
+    <ng-template><ui-iframe class="h-full" [src]="embedUrl()" [label]="label()" [aspectRatio]="undefined" /></ng-template>
+</ui-consent-gate>
+<!-- only a link, which sends nothing to the provider before the user follows it, so it needs no consent. It keeps its
+     height in a map of a fixed height, where the gate takes the rest. -->
+<div class="shrink-0">
+    <a ui-button variant="outlined" target="_blank" [href]="routeUrl()">
+        <ui-icon [icon]="routeIcon" />{{ routeLabel }}
+        <span class="sr-only">({{ newTabLabel }})</span>
+    </a>
+</div>

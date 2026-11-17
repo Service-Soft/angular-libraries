@@ -1,0 +1,9 @@
+@if (entries().length) {
+    <ul class="grid gap-3">
+        @for (entry of entries(); track entry.key) {
+            <li><ui-event-calendar-event [entry]="entry" /></li>
+        }
+    </ul>
+} @else {
+    <p class="text-body text-on-surface-variant">{{ emptyLabel() }}</p>
+}

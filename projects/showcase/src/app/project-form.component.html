@@ -1,0 +1,6 @@
+<!-- a string and a number only, so the bundle tests can check that no other field loads -->
+<ui-form class="flex flex-col gap-4" (submit)="saved.set(true)">
+    <ngx-entity-form [entity]="entity" [(value)]="value" />
+    <div><button ui-button type="submit">Save</button></div>
+</ui-form>
+<p class="mt-4 text-body-sm text-on-surface-variant" role="status">{{ saved() ? 'Saved.' : '' }}</p>

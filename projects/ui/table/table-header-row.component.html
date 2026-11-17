@@ -1,0 +1,29 @@
+@if (selectable()) {
+    <th role="columnheader" scope="col" class="w-10 px-3 py-2 text-start align-bottom">
+        <!-- mixed while only some rows of the page are selected -->
+        <input
+            type="checkbox"
+            [class]="checkboxClasses"
+            [checked]="allSelected()"
+            [indeterminate]="someSelected()"
+            [disabled]="empty()"
+            [attr.aria-label]="labels.selectAllLabel"
+            (change)="toggledAll.emit()"
+        />
+    </th>
+}
+@for (column of columns(); track column.key) {
+    <th
+        ui-table-header-cell
+        [column]="column"
+        [order]="order()"
+        [filter]="filters()[column.key]"
+        (sorted)="sorted.emit(column)"
+        (filtered)="filtered.emit({ key: column.key, value: $event })"
+    ></th>
+}
+@if (hasActions()) {
+    <th role="columnheader" scope="col" class="px-3 py-2 text-end align-bottom text-label font-semibold text-on-surface max-sm:hidden">
+        {{ labels.actionsLabel }}
+    </th>
+}

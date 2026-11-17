@@ -1,0 +1,15 @@
+<div [class]="markerClasses()">
+    <!-- decorative, the ordered list tells screen readers the number already. Filled, with a transparent border that keeps
+         the circle in forced colors mode; at least as large as the number, which can grow with larger text. -->
+    <span class="
+        flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border-2 border-transparent bg-primary px-2 text-label-lg
+        text-on-primary
+    " aria-hidden="true">{{ number() }}</span>
+    <span [class]="lineClasses()"></span>
+</div>
+<div [class]="textClasses()">
+    <p class="font-heading text-title">{{ heading() }}</p>
+    <div class="flex flex-col gap-2 text-body">
+        <ng-content />
+    </div>
+</div>

@@ -1,0 +1,13 @@
+<ui-input-chips
+    [label]="label()"
+    [hint]="hint()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [options]="options()"
+    [customValue]="customValue()"
+    [customValidation]="validation"
+    [value]="value() ?? []"
+    [(query)]="query"
+    [(showValidationError)]="showError"
+    (valueChange)="value.set($event)"
+/>

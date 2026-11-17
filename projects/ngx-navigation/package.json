@@ -1,0 +1,29 @@
+{
+    "name": "@service-soft/ngx-navigation",
+    "version": "0.0.1",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Service-Soft/ngx-navigation.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "tslib": "^2.3.0"
+    },
+    "exports": {
+        ".": {
+            "style": "./tailwind.css"
+        }
+    },
+    "peerDependencies": {
+        "@angular/common": "^22.2.0",
+        "@angular/core": "^22.2.0",
+        "@angular/router": "^22.2.0",
+        "@fortawesome/free-solid-svg-icons": "^7.3.1",
+        "@service-soft/ui": "0.0.1",
+        "tailwindcss": "^4.3.3"
+    },
+    "sideEffects": false
+}

@@ -1,0 +1,25 @@
+<ui-stepper
+    finishLabel="Book now"
+    [orientation]="orientation()"
+    [color]="color()"
+    [linear]="linear()"
+    [beforeNext]="beforeNext()"
+    [(step)]="step"
+    (finished)="booked = true"
+>
+    <ui-step label="Dates">
+        <ui-input-date label="Pick-up" [(value)]="pickUp" />
+    </ui-step>
+    <ui-step label="Car">
+        <ui-input-cards label="Car" [options]="cars" [(value)]="car" />
+    </ui-step>
+    <ui-step label="Extras">
+        <ui-input-cards-multiple label="Extras" [required]="false" [options]="extras" [(value)]="chosenExtras" />
+    </ui-step>
+    <ui-step label="Confirm">
+        <ui-input-string label="Name" autocomplete="name" [(value)]="name" />
+        @if (booked) {
+            <p class="text-body text-on-surface">Booked, see you on the day of the pick-up.</p>
+        }
+    </ui-step>
+</ui-stepper>

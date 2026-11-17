@@ -1,0 +1,9 @@
+@if (layout() === 'row') {
+    <button ui-button type="button" [variant]="element().variant ?? 'text'" (click)="run()">
+        <ngx-nav-label [name]="element().name" [icon]="element().icon" />
+    </button>
+} @else {
+    <button ui-link appearance="nav" block type="button" (click)="run()">
+        <ngx-nav-label [name]="element().name" [icon]="element().icon" />
+    </button>
+}

@@ -1,0 +1,39 @@
+name: CI
+on:
+    push:
+        branches-ignore: [release]
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                node-version: '24'
+            - run: npm ci
+            - run: npm run lint
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                node-version: '24'
+            - run: npm ci
+            - run: npx playwright install --with-deps --only-shell chromium
+            - run: npm test
+    storybook:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                node-version: '24'
+            - run: npm ci
+            # npm test builds storybook. The dev server checks its options differently than the build, so it gets
+            # started as well.
+            - run: npx ng run ui:storybook --smoke-test --ci

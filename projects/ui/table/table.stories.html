@@ -1,0 +1,40 @@
+<ui-table
+    [label]="label()"
+    [required]="required()"
+    [invalid]="invalid()"
+    [columns]="columns()"
+    [rows]="rows()"
+    [totalAmount]="matching().length"
+    [variant]="variant()"
+    [striped]="striped()"
+    [rowKey]="getId"
+    [selectable]="selectable()"
+    [opens]="opens()"
+    [actions]="withActions() ? actions : undefined"
+    [loading]="loading()"
+    [(pageSize)]="pageSize"
+    [(page)]="page"
+    [(order)]="order"
+    [(filters)]="filters"
+    [(selected)]="selected"
+    (opened)="said.set('Opened ' + $event.name + '.')"
+>
+    <!-- each its own block: a block with more than one element would all go below the label -->
+    @if (withContent()) {
+        <ui-table-actions>
+            <button ui-button type="button" (click)="said.set('Created a customer.')">Create</button>
+        </ui-table-actions>
+    }
+    @if (withContent()) {
+        <p class="text-body-sm text-on-surface-variant">Everyone who ordered in the last twelve months.</p>
+    }
+</ui-table>
+<ng-template #status let-customer>
+    <span [class]="statusClasses[customer.status]">{{ customer.status }}</span>
+</ng-template>
+<ng-template #actions let-customer>
+    <button ui-button type="button" variant="text" size="sm" (click)="said.set('Deleted ' + customer.name + '.')">Delete</button>
+</ng-template>
+<p class="mt-4 text-body-sm text-on-surface-variant" role="status">
+    {{ selected().length }} selected. {{ said() }}
+</p>

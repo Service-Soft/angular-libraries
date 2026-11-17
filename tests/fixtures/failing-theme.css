@@ -1,0 +1,15 @@
+@import "tailwindcss" source(none);
+@import "@service-soft/ui";
+
+@theme {
+    --brand-white: #ffffff;
+    --color-on-secondary: var(--brand-white);
+    --color-primary-hover: color-mix(in oklab, var(--color-primary), white 70%);
+    --color-error: initial;
+    --color-success: light-dark(#1a8641, #1a8641);
+}
+
+/* ui sets color-scheme: dark on .dark, so it is only checked in dark mode */
+.dark {
+    --color-on-surface: #11171b;
+}

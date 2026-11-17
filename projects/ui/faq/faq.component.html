@@ -1,0 +1,8 @@
+<!-- the page of the questions in schema.org, whose main entities are the questions of the items -->
+<div
+    [class]="classes()"
+    [attr.itemscope]="microdata() ? '' : null"
+    [attr.itemtype]="microdata() ? 'https://schema.org/FAQPage' : null"
+>
+    <ng-content />
+</div>

@@ -1,0 +1,47 @@
+<!-- a table rather than a description list: every item has the same values, which screen readers read with the
+     heading of their column, and the rows below the items are a row heading and an amount in the column of the amounts.
+     It scrolls instead of overflowing when a detailed one doesn't fit a narrow screen. -->
+<div class="overflow-x-auto">
+    <table class="w-full border-collapse text-body text-on-surface">
+        <!-- a heading of the consumer names the section, the caption names the table for screen readers on its own -->
+        <caption class="sr-only">{{ labels.caption }}</caption>
+        <!-- a compact summary has no room for headings, the quantity is next to each label. Screen readers still get them -->
+        <thead [class]="detailed() ? '' : 'sr-only'">
+            <tr class="border-b border-outline text-label text-on-surface-variant *:pb-2 *:font-normal">
+                <th scope="col" class="pe-4 text-start">{{ labels.item }}</th>
+                @if (detailed()) {
+                    <th scope="col" class="pe-4 text-end">{{ labels.quantity }}</th>
+                    <th scope="col" class="pe-4 text-end">{{ labels.unitPrice }}</th>
+                }
+                <th scope="col" class="text-end">{{ labels.amount }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (line of lines(); track $index) {
+                <tr class="border-b border-outline-variant align-top *:py-2">
+                    @if (detailed()) {
+                        <td class="pe-4">
+                            {{ line.label }}
+                            <!-- empty:hidden instead of an @if, nothing shows without a description -->
+                            <span class="block text-body-sm text-on-surface-variant empty:hidden">{{ line.description }}</span>
+                        </td>
+                        <td class="pe-4 text-end tabular-nums">{{ line.quantity }}</td>
+                        <td class="pe-4 text-end tabular-nums">{{ line.unitPrice }}</td>
+                    } @else {
+                        <!-- the × is read as 'times' -->
+                        <td class="pe-4"><span class="text-on-surface-variant tabular-nums">{{ line.quantity }} ×</span> {{ line.label }}</td>
+                    }
+                    <td class="text-end tabular-nums">{{ line.total }}</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            @for (row of rows(); track $index) {
+                <tr [class]="row.classes">
+                    <th scope="row" class="pe-4 text-start" [attr.colspan]="labelColumns()">{{ row.label }}</th>
+                    <td class="text-end tabular-nums">{{ row.amount }}</td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

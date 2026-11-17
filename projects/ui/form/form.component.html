@@ -1,0 +1,4 @@
+<!-- the classes of the layout, see LAYOUT_CLASSES. The submit event bubbles on to <ui-form>, where (submit) receives it. -->
+<form [class]="classes()" (submit)="preventNavigation($event)">
+    <ng-content />
+</form>

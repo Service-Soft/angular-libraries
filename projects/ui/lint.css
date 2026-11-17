@@ -1,0 +1,11 @@
+/* Only used by eslint-plugin-better-tailwindcss: removes Tailwind's built-in colors, fonts, text sizes and shadows, so libraries can only use the shared tokens. Not published. */
+@import "tailwindcss";
+
+@theme {
+    --color-*: initial;
+    --font-*: initial;
+    --text-*: initial;
+    --shadow-*: initial;
+}
+
+@import "./theme.css";

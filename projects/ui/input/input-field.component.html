@@ -1,0 +1,61 @@
+<!-- projected once and placed by the layout, a second ng-content would leave one of them empty -->
+<ng-template #control><ng-content /></ng-template>
+
+<ng-template #labelText>{{ field().label() }}</ng-template>
+
+<ng-template #label>
+    <ng-container [ngTemplateOutlet]="labelTemplate() ?? labelText" />
+    @if (field().required()) {
+        <!-- the native element is required, which screen readers announce already. The space is inside: Angular drops
+             the one between the label and the star, which come from different templates. The flex box of an inline
+             label drops it as well, its gap stands in for it there. -->
+        <span class="text-error" aria-hidden="true"> *</span>
+    }
+</ng-template>
+
+<ng-template #message>
+    <div [class]="messageRowClasses()">
+        <!-- hint, error and the reserved error share one cell, so the row is as high as the highest of them -->
+        <div class="grid min-h-0 overflow-hidden text-body-sm">
+            <!-- always rendered, screen readers only announce changes of live regions that already exist -->
+            <div class="col-start-1 row-start-1" aria-live="polite">
+                @if (field().errorMessage()) {
+                    <p class="pt-1.5 text-error" [id]="field().errorId()">{{ field().errorMessage() }}</p>
+                } @else if (field().hint()) {
+                    <p class="pt-1.5 text-on-surface-variant" [id]="field().hintId()">{{ field().hint() }}</p>
+                }
+            </div>
+            @if (field().reservedError()) {
+                <!-- invisible keeps it out of the accessibility tree, the live region above says the same -->
+                <p class="invisible col-start-1 row-start-1 pt-1.5">{{ field().reservedError() }}</p>
+            }
+        </div>
+    </div>
+</ng-template>
+
+@if (layout() === 'inline') {
+    <!-- invisible keeps it out of the accessibility tree, the space is all it is for -->
+    <span [class]="labelSpaceClasses()">&nbsp;</span>
+    <!-- the message is in the column of the label, whatever the width of the control -->
+    <div class="grid grid-cols-[auto_1fr] items-center gap-x-3">
+        <ng-container [ngTemplateOutlet]="control" />
+        <label [class]="inlineLabelClasses()" [id]="field().labelId()" [for]="field().inputId()"><ng-container [ngTemplateOutlet]="label" /></label>
+        <div [class]="inlineMessageClasses()"><ng-container [ngTemplateOutlet]="message" /></div>
+    </div>
+} @else if (layout() === 'group') {
+    <!-- a group of native elements, like radio buttons, has no one element a label could point to: the legend names
+         the group, and screen readers read it, the hint and the error once on entering it, not again for every element -->
+    <fieldset class="flex min-w-0 flex-col" [attr.aria-describedby]="field().describedBy() ?? null">
+        <legend [class]="stackedLabelClasses()" [id]="field().labelId()"><ng-container [ngTemplateOutlet]="label" /></legend>
+        <div [class]="controlClasses()">
+            <ng-container [ngTemplateOutlet]="control" />
+        </div>
+        <ng-container [ngTemplateOutlet]="message" />
+    </fieldset>
+} @else {
+    <label [class]="stackedLabelClasses()" [id]="field().labelId()" [for]="field().inputId()"><ng-container [ngTemplateOutlet]="label" /></label>
+    <div [class]="controlClasses()">
+        <ng-container [ngTemplateOutlet]="control" />
+    </div>
+    <ng-container [ngTemplateOutlet]="message" />
+}

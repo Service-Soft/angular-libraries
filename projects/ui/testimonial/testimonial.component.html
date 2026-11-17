@@ -1,0 +1,55 @@
+@let rating = this.rating();
+<!-- the parts both variants share. The quote is projected only once, so both render it from here. -->
+<ng-template #quote><ng-content /></ng-template>
+<ng-template #stars>
+    @if (rating !== undefined) {
+        <ui-rating [value]="rating" [max]="max()" />
+    }
+</ng-template>
+<ng-template #person>
+    <span class="text-label-lg">{{ name() }}</span>
+    @if (subtitle()) {
+        <span class="text-body-sm text-on-surface-variant">{{ subtitle() }}</span>
+    }
+</ng-template>
+
+<!-- a quote with its source is a figure: the blockquote holds what was said, the figcaption who said it -->
+@if (variant() === 'card') {
+    <ui-card class="h-full">
+        <figure class="flex h-full flex-col gap-4">
+            <div class="flex items-center justify-between gap-4">
+                <!-- decorative, the blockquote says it is a quote -->
+                <span class="flex text-primary [&_svg]:size-[1.75em]"><ui-icon [icon]="quoteIcon" /></span>
+                <ng-container *ngTemplateOutlet="stars" />
+            </div>
+            <!-- a gap between the paragraphs of a longer quote -->
+            <blockquote class="flex grow flex-col gap-2 text-body">
+                <ng-container *ngTemplateOutlet="quote" />
+            </blockquote>
+            <figcaption class="flex items-center gap-3">
+                <!-- decorative, the name next to it is read already -->
+                <ui-avatar decorative [name]="name()" [src]="avatar()" />
+                <span class="flex flex-col"><ng-container *ngTemplateOutlet="person" /></span>
+            </figcaption>
+        </figure>
+    </ui-card>
+} @else {
+    <!-- the portrait beside the quote once there is room for it, above it where it is narrow -->
+    <figure class="grid items-center gap-8 @3xl:grid-cols-[3fr_2fr] @3xl:gap-12">
+        @if (avatar(); as avatar) {
+            <!-- decorative, the name in the caption says who it is. NgOptimizedImage refuses data urls, which pictures of
+                 people are often stored as. -->
+            <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+            <img class="aspect-4/5 w-full max-w-sm justify-self-center rounded-card object-cover @3xl:order-last @3xl:max-w-none" alt="" [src]="avatar" />
+        }
+        <div class="flex flex-col gap-6">
+            <span class="flex text-primary [&_svg]:size-[2.5em]"><ui-icon [icon]="quoteIcon" /></span>
+            <ng-container *ngTemplateOutlet="stars" />
+            <!-- the editorial size of a quote a page is built around, the size of a title where it is narrow -->
+            <blockquote class="flex flex-col gap-4 font-heading text-title @3xl:text-headline">
+                <ng-container *ngTemplateOutlet="quote" />
+            </blockquote>
+            <figcaption class="flex flex-col"><ng-container *ngTemplateOutlet="person" /></figcaption>
+        </div>
+    </figure>
+}

@@ -1,0 +1,32 @@
+<h2 class="font-heading text-title text-on-surface">{{ labels.title }}</h2>
+@if (user(); as user) {
+    <!-- &ngsp;: angular drops the whitespace between elements, and screen readers would read the email and whether
+         it is verified as one word -->
+    <p class="mt-4 text-body text-on-surface wrap-anywhere">
+        <span class="me-2 text-label-lg">{{ user.email }}</span>&ngsp;<span class="text-on-surface-variant">{{
+            verification()
+        }}</span>
+    </p>
+    <div class="mt-2" [hidden]="verified()">
+        <button ui-button type="button" variant="outlined" (click)="sendVerification()">{{ labels.sendVerification }}</button>
+    </div>
+}
+<ui-form class="mt-6 grid gap-4" (submit)="change()">
+    <ui-input-string
+        name="new-email"
+        type="email"
+        autocomplete="email"
+        [label]="labels.newEmail"
+        [(value)]="newEmail"
+        [(showValidationError)]="newEmailErrorShown"
+    />
+    <div><button ui-button type="submit">{{ labels.change }}</button></div>
+</ui-form>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>

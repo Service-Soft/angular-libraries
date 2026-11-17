@@ -1,0 +1,35 @@
+@for (row of rows(); track row.key) {
+    <!-- the fields stack on small screens unless their widths say otherwise -->
+    <div class="grid grid-cols-12 gap-x-4 gap-y-2">
+        @for (field of row.fields; track field.property.key) {
+            <div [class]="field.classes">
+                @if (field.rows) {
+                    <!-- an inline object: its fields are a group named by its label, laid out like those of the entity -->
+                    <fieldset class="rounded-lg border border-outline-variant px-4 pt-2 pb-4">
+                        <legend class="px-1 text-label text-on-surface">{{ field.property.metadata.displayName }}</legend>
+                        @if (problems()[field.valueKey]; as problem) {
+                            <p class="mb-2 text-body-sm text-error">{{ problem }}</p>
+                        }
+                        <ngx-entity-form-rows
+                            [rows]="field.rows"
+                            [values]="values()"
+                            [problems]="problems()"
+                            (changed)="changed.emit($event)"
+                        />
+                    </fieldset>
+                } @else {
+                    <!-- the field of a relation edits its joinColumn, whose problems it shows as well -->
+                    <ngx-entity-field
+                        [property]="field.property"
+                        [entity]="getEntity(field.path)"
+                        [required]="field.required"
+                        [readonly]="field.readonly"
+                        [problem]="problems()[field.valueKey]"
+                        [value]="getValue(field.valueKey)"
+                        (valueChange)="changed.emit({ key: field.valueKey, value: $event })"
+                    />
+                }
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,19 @@
+<ui-form class="grid gap-4" [hidden]="step().state !== 'current'" (submit)="next.emit()">
+    @if (showsHeading()) {
+        <ui-stepper-heading [level]="headingLevel()" [text]="step().step.label()" [headingId]="step().headingId" [classes]="headingClasses()" />
+    }
+    <ng-container [ngTemplateOutlet]="step().step.content()" />
+    <div class="flex flex-wrap items-center gap-2 pt-2">
+        @if (!step().isFirst) {
+            <button ui-button type="button" variant="outlined" (click)="back.emit()">{{ backLabel() }}</button>
+        }
+        <!-- at the end also without a button back, where it is on every step. Busy, not disabled, while the check runs:
+             a disabled button would drop the focus, a second submit is ignored instead. -->
+        <button ui-button type="submit" class="ms-auto" [attr.aria-busy]="busy() ? 'true' : null">
+            @if (busy()) {
+                <ui-spinner size="sm" [label]="busyLabel()" />
+            }
+            {{ submitLabel() }}
+        </button>
+    </div>
+</ui-form>

@@ -1,0 +1,8 @@
+<!-- only titles and links, so the bundle tests can check that the components of the other types stay out -->
+<ngx-navbar [rows]="navbarRows" [components]="navComponents" />
+<main class="mx-auto max-w-3xl p-8">
+    <!-- read only, the showcase has no backend that undoes change sets -->
+    <ngx-change-sets changeSetsApiBaseUrl="/api/orders" [canResetAndRollback]="false" [entity]="order" />
+    <p class="mt-4 text-body-sm text-on-surface-variant" role="status">{{ changeSetService.opened() }}</p>
+    <router-outlet />
+</main>

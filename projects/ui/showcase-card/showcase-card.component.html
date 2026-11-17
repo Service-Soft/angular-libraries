@@ -1,0 +1,42 @@
+<!-- flush, so the image goes up to the edges of the card, and the text brings its own padding -->
+<ui-card class="h-full" flush [variant]="variant()" [color]="color()">
+    <article class="flex h-full flex-col">
+        @if (image(); as image) {
+            <!-- the corners of the card where it touches them, which only the image clips -->
+            <div class="relative aspect-video shrink-0 overflow-hidden rounded-ss-card rounded-se-card">
+                <img class="object-cover" fill [ngSrc]="image.src" [alt]="image.alt" [priority]="image.priority ?? false" />
+            </div>
+        }
+        <div class="flex grow flex-col gap-4 p-4 sm:p-6">
+            <!-- the period belongs to the title, like a subtitle, which is what an hgroup holds -->
+            <hgroup class="flex flex-col gap-1">
+                <ui-heading class="font-heading text-title" [level]="headingLevel()">{{ title() }}</ui-heading>
+                @if (start(); as start) {
+                    <p class="text-body-sm text-on-surface-variant">
+                        <ui-date-period [start]="start" [end]="end()" [format]="periodFormat()" />
+                    </p>
+                }
+            </hgroup>
+            @if (summary()) {
+                <p class="text-body text-on-surface-variant">{{ summary() }}</p>
+            }
+            <!-- without tags the list is empty, which hides it from screen readers as well -->
+            <ul class="flex flex-wrap gap-2 empty:hidden" [attr.aria-label]="tagsLabel">
+                @for (tag of tags(); track $index) {
+                    <li class="flex"><ui-badge color="neutral" variant="tinted" size="md">{{ tag }}</ui-badge></li>
+                }
+            </ul>
+            <!-- a logo names whose it is with its alt, so the row is a list of them -->
+            <ul class="flex flex-wrap items-center gap-x-6 gap-y-3 empty:hidden">
+                @for (logo of logos(); track $index) {
+                    <li class="flex"><img class="h-8 w-auto" [ngSrc]="logo.src" [alt]="logo.alt" [width]="logo.width" [height]="logo.height" /></li>
+                }
+            </ul>
+            <ng-content select="ui-showcase-card-details" />
+            <!-- the links sit at the bottom, so the ones of cards next to each other line up -->
+            <div class="mt-auto flex flex-wrap items-center gap-3 empty:hidden">
+                <ng-content />
+            </div>
+        </div>
+    </article>
+</ui-card>

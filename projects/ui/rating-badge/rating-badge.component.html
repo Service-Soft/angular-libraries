@@ -1,0 +1,10 @@
+<!-- the logo names the site, the stars say the rating. Their label already holds the value, so screen readers skip the
+     number that shows it again. -->
+<!-- NgOptimizedImage refuses data urls, which the default logo is -->
+<!-- eslint-disable-next-line angular/prefer-ngsrc -->
+<img class="size-[1.25em] shrink-0" [src]="logo().src" [alt]="logo().alt" />
+<ui-rating [value]="value()" [max]="max()" />
+<span aria-hidden="true">{{ formattedValue() }}</span>
+@if (opensNewTab) {
+    <span class="sr-only">({{ newTabLabel }})</span>
+}

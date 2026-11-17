@@ -1,0 +1,35 @@
+import { CachedRequestMethod } from './cached-request-method.type';
+
+/**
+ * A request that was made while the user was offline, kept in the browser until it is synced.
+ */
+export type CachedRequest = {
+    /**
+     * Identifies the request. An entity created offline gets it as its id, until the server gave it a real one.
+     */
+    id: string,
+    /**
+     * The method of the request.
+     */
+    method: CachedRequestMethod,
+    /**
+     * The url of the request, with its parameters.
+     */
+    url: string,
+    /**
+     * The body of the request, exactly as it is sent.
+     */
+    body: unknown,
+    /**
+     * The type of the entity the request changes.
+     */
+    type: string,
+    /**
+     * The property that holds the id of the entity.
+     */
+    idKey: string,
+    /**
+     * What the user sees of the request.
+     */
+    displayValue: string
+};

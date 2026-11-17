@@ -1,0 +1,19 @@
+@if (days().length) {
+    <!-- each day next to its events where there is room, above them where there isn't -->
+    <ol class="grid gap-4">
+        @for (day of days(); track day.dateTime) {
+            <li class="grid gap-2 border-t border-outline-variant pt-3 @xl:grid-cols-[14rem_1fr] @xl:gap-4">
+                <p class="text-label-lg text-on-surface">
+                    <time [attr.datetime]="day.dateTime">{{ day.label }}</time>
+                    @if (day.today) {
+                        <!-- a word, not only a color, says which day is today -->
+                        <span class="ms-2 rounded-sm border border-primary px-1 text-label-sm text-primary">{{ labels.todayLabel }}</span>
+                    }
+                </p>
+                <ui-event-calendar-event-list [entries]="day.entries" [emptyLabel]="labels.noEventsOnDayLabel" />
+            </li>
+        }
+    </ol>
+} @else {
+    <p class="text-body text-on-surface-variant">{{ labels.noEventsLabel }}</p>
+}

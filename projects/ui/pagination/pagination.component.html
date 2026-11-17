@@ -1,0 +1,87 @@
+@if (pageCount() > 1) {
+    <nav [attr.aria-label]="label()">
+        <!-- wraps on narrow screens instead of overflowing them -->
+        <ul class="flex flex-wrap items-center gap-1">
+            <li>
+                <button
+                    ui-button
+                    type="button"
+                    variant="text"
+                    size="sm"
+                    iconOnly
+                    [color]="color()"
+                    [attr.aria-label]="labels.firstLabel"
+                    [disabled]="isFirst()"
+                    (click)="goFromArrow(1)"
+                >
+                    <ui-icon [icon]="faAnglesLeft" />
+                </button>
+            </li>
+            <li>
+                <button
+                    ui-button
+                    type="button"
+                    variant="text"
+                    size="sm"
+                    iconOnly
+                    [color]="color()"
+                    [attr.aria-label]="labels.previousLabel"
+                    [disabled]="isFirst()"
+                    (click)="goFromArrow(page() - 1)"
+                >
+                    <ui-icon [icon]="faChevronLeft" />
+                </button>
+            </li>
+            <!-- tracked by position, not by page: while the pages move, the current one stays in the same button, whose
+                 color doesn't change. Tracked by page, its button would move and fade into the color of the current one,
+                 behind the numbers that already changed. -->
+            @for (item of items(); track $index) {
+                <li>
+                    <button
+                        ui-button
+                        type="button"
+                        size="sm"
+                        [color]="color()"
+                        [variant]="item.variant"
+                        [attr.aria-label]="item.label"
+                        [attr.aria-current]="item.ariaCurrent"
+                        (click)="goFromPage(item.page)"
+                    >
+                        <!-- as wide as the number of the last page, so the buttons keep their width from page to page -->
+                        <span class="inline-block text-center tabular-nums" [style.min-width.ch]="digitCount()">{{ item.page }}</span>
+                    </button>
+                </li>
+            }
+            <li>
+                <button
+                    ui-button
+                    type="button"
+                    variant="text"
+                    size="sm"
+                    iconOnly
+                    [color]="color()"
+                    [attr.aria-label]="labels.nextLabel"
+                    [disabled]="isLast()"
+                    (click)="goFromArrow(page() + 1)"
+                >
+                    <ui-icon [icon]="faChevronRight" />
+                </button>
+            </li>
+            <li>
+                <button
+                    ui-button
+                    type="button"
+                    variant="text"
+                    size="sm"
+                    iconOnly
+                    [color]="color()"
+                    [attr.aria-label]="labels.lastLabel"
+                    [disabled]="isLast()"
+                    (click)="goFromArrow(pageCount())"
+                >
+                    <ui-icon [icon]="faAnglesRight" />
+                </button>
+            </li>
+        </ul>
+    </nav>
+}

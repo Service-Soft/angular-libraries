@@ -1,0 +1,12 @@
+@for (item of items(); track item.code) {
+    <!-- the check marks the current language by more than its color, screen readers hear aria-current. The others keep
+         its space, so the names line up. -->
+    <a ui-menu-link [href]="item.href" [attr.hreflang]="item.code" [lang]="item.code" [attr.aria-current]="item.isCurrent ? 'page' : null">
+        @if (item.isCurrent) {
+            <ui-icon [icon]="currentIcon" />
+        } @else {
+            <span class="inline-block size-[1.25em] shrink-0"></span>
+        }
+        {{ item.label }}
+    </a>
+}

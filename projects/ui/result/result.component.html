@@ -1,0 +1,8 @@
+<!-- decorative: the heading says the result in words -->
+<span [class]="iconClasses()"><ui-icon [icon]="shownIcon()" /></span>
+<!-- the same look in every level -->
+<ui-heading class="font-heading text-headline text-on-surface" [level]="headingLevel()">{{ heading() }}</ui-heading>
+<div class="grid gap-2 text-body text-on-surface-variant">
+    <ng-content />
+</div>
+<ng-content select="ui-result-actions" />

@@ -1,0 +1,33 @@
+@if (column().filter; as filter) {
+    <!-- The label is hidden: the header of the column says what it filters. autofocus is how a popover focuses its
+         content as it opens, synchronously, so no key typed right after the click gets lost. Never required, whatever
+         provideInputConfig says: a filter can always be emptied again. -->
+    @if (filter.type === 'text') {
+        <ui-input-string
+            class="w-56 max-w-full"
+            type="search"
+            size="sm"
+            hideLabel
+            autofocus
+            [required]="false"
+            [label]="filterLabel()"
+            [value]="text()"
+            (valueChange)="changeText($event)"
+            (keydown.enter)="finishText($event)"
+        />
+    } @else {
+        <!-- the placeholder is the choice that filters nothing -->
+        <ui-input-select
+            class="w-56 max-w-full"
+            size="sm"
+            hideLabel
+            autofocus
+            [required]="false"
+            [label]="filterLabel()"
+            [placeholder]="allLabel"
+            [options]="options()"
+            [value]="value()"
+            (valueChange)="choose($event)"
+        />
+    }
+}

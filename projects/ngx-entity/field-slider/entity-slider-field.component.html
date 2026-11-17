@@ -1,0 +1,12 @@
+<ui-input-slider
+    [label]="label()"
+    [hint]="hint()"
+    [readonly]="readonly()"
+    [min]="range().min"
+    [max]="range().max"
+    [step]="range().step"
+    [customValidation]="problemValidation()"
+    [value]="value() ?? range().min"
+    [(showValidationError)]="showError"
+    (valueChange)="value.set($event)"
+/>

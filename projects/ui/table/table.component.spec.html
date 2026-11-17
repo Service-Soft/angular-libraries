@@ -1,0 +1,25 @@
+<ui-table
+    label="Customers"
+    [hideLabel]="hideLabel()"
+    [required]="required()"
+    [invalid]="invalid()"
+    [columns]="columns()"
+    [rows]="rows()"
+    [totalAmount]="totalAmount()"
+    [rowKey]="getId"
+    [selectable]="selectable()"
+    [opens]="opens()"
+    [actions]="actions"
+    [loading]="loading()"
+    [(pageSize)]="pageSize"
+    [(page)]="page"
+    [(order)]="order"
+    [(filters)]="filters"
+    [(selected)]="selected"
+    (opened)="opened.set($event)"
+>
+    <ui-table-actions><button type="button">Create</button></ui-table-actions>
+    <p>The customers of this month.</p>
+</ui-table>
+<ng-template #status let-customer><strong>{{ customer.status }}</strong></ng-template>
+<ng-template #actions let-customer><button type="button">Delete {{ customer.name }}</button></ng-template>

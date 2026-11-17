@@ -1,0 +1,26 @@
+<!--
+    a template can't pick the name of an element by a value, so there is one branch for each level, like in ui-heading.
+    That is all this template does, which the complexity limit, meant for templates with logic, can't tell apart.
+    The focus moves here by script only, so it isn't in the tab order.
+-->
+<!-- eslint-disable angular/cyclomatic-complexity -->
+@switch (level()) {
+    @case (1) {
+        <h1 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h1>
+    }
+    @case (2) {
+        <h2 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h2>
+    }
+    @case (3) {
+        <h3 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h3>
+    }
+    @case (4) {
+        <h4 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h4>
+    }
+    @case (5) {
+        <h5 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h5>
+    }
+    @case (6) {
+        <h6 tabindex="-1" [class]="classes()" [id]="headingId()">{{ text() }}</h6>
+    }
+}

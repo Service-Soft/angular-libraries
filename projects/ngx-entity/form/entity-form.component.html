@@ -1,0 +1,21 @@
+@if (tabs().length > 1) {
+    <ui-tabs [(selected)]="selectedTab">
+        @for (tab of tabs(); track tab.tab) {
+            <ui-tab [value]="getTabValue(tab)" [label]="tab.label">
+                <!-- tells which tab an invalid field is on, to open it -->
+                <ngx-entity-form-rows
+                    class="pt-4"
+                    [attr.data-entity-form-tab]="getTabValue(tab)"
+                    [rows]="tab.rows"
+                    [values]="value()"
+                    [problems]="problemMessages()"
+                    (changed)="change($event)"
+                />
+            </ui-tab>
+        }
+    </ui-tabs>
+} @else {
+    @for (tab of tabs(); track tab.tab) {
+        <ngx-entity-form-rows [rows]="tab.rows" [values]="value()" [problems]="problemMessages()" (changed)="change($event)" />
+    }
+}

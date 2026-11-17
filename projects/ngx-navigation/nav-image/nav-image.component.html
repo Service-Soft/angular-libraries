@@ -1,0 +1,23 @@
+@let image = element();
+<!-- a plain link keeps the look of the image, and only adds the focus ring around it -->
+@if (link()?.routerLink; as routerLink) {
+    <a
+        ui-link
+        appearance="plain"
+        routerLinkActive
+        ariaCurrentWhenActive="page"
+        [routerLink]="routerLink"
+        [fragment]="link()?.fragment"
+        [routerLinkActiveOptions]="link()?.activeOptions ?? {}"
+        [attr.target]="link()?.target"
+        [attr.rel]="link()?.rel"
+    >
+        <img class="block" [ngSrc]="image.url" [alt]="image.alt" [width]="image.width" [height]="image.height" />
+    </a>
+} @else if (link()?.href; as href) {
+    <a ui-link appearance="plain" [href]="href" [attr.target]="link()?.target" [attr.rel]="link()?.rel">
+        <img class="block" [ngSrc]="image.url" [alt]="image.alt" [width]="image.width" [height]="image.height" />
+    </a>
+} @else {
+    <img class="block" [ngSrc]="image.url" [alt]="image.alt" [width]="image.width" [height]="image.height" />
+}

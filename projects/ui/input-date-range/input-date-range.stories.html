@@ -1,0 +1,13 @@
+<div class="grid max-w-xl gap-2">
+    <ui-input-date-range
+        label="Holiday"
+        hint="From two nights to two weeks, closed on Sundays"
+        startLabel="Arrival"
+        endLabel="Departure"
+        [minDuration]="{ days: 2 }"
+        [maxDuration]="{ days: 14 }"
+        [dayValidation]="closedOnSundays"
+        [color]="color()"
+        [(value)]="value"
+    />
+</div>

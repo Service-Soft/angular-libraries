@@ -1,0 +1,17 @@
+<!-- one image for screen readers, named by the value: the stars alone say nothing to them. The filled stars lie on top of
+     the empty ones, cut off after the value, so a part of a star fills as well. The gap is the one of RatingUtilities,
+     which calculates where they are cut off. -->
+<span class="relative inline-flex align-middle" role="img" [attr.aria-label]="label()">
+    <!-- forced colors mode draws every star in the same color, so only the filled ones stay, which then say the value
+         by how many there are -->
+    <span class="inline-flex gap-[0.125em] text-outline-variant forced-colors:invisible" aria-hidden="true">
+        @for (star of stars(); track star) {
+            <ui-icon [icon]="starIcon" />
+        }
+    </span>
+    <span class="absolute inset-y-0 start-0 inline-flex gap-[0.125em] overflow-hidden text-rating" aria-hidden="true" [style.width.em]="fillWidth()">
+        @for (star of stars(); track star) {
+            <ui-icon [icon]="starIcon" />
+        }
+    </span>
+</span>

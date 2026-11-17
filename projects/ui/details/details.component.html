@@ -1,0 +1,28 @@
+<!-- the browser opens and closes it, and also closes it when another one with the same name opens -->
+<details #details [class]="detailsClasses()" [open]="open()" [attr.name]="name()" (toggle)="open.set(details.open)">
+    <!-- list-none and the webkit marker remove the triangle of the browser, the chevron replaces it -->
+    <summary #summary [class]="summaryClasses()">
+        <ng-content select="ui-summary" />
+        <!-- decorative, screen readers announce whether it is open. Turning it is movement, so only with motion-safe. -->
+        <svg viewBox="0 0 24 24" aria-hidden="true" [class]="chevronClasses()">
+            <path d="M12 15.6 5.7 9.3l1.4-1.4 4.9 4.9 4.9-4.9 1.4 1.4z" />
+        </svg>
+    </summary>
+    <!--
+        slides between no height and its own: a grid row from 0fr to 1fr, because not every browser can animate height
+        to auto. starting: gives the opening transition its start, as the content wasn't rendered while closed. The
+        padding is a level deeper, as the clipped row can't shrink below the padding of its own element.
+    -->
+    <div class="
+        grid grid-rows-[0fr]
+        group-open:grid-rows-[1fr]
+        starting:group-open:grid-rows-[0fr]
+        motion-safe:transition-[grid-template-rows] motion-safe:duration-200
+    ">
+        <div class="min-h-0 overflow-hidden">
+            <div class="px-4 pt-2 pb-4">
+                <ng-content />
+            </div>
+        </div>
+    </div>
+</details>

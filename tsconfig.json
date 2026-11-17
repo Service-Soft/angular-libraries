@@ -1,23 +1,119 @@
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 /* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "preserve"
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true
-  },
-  "files": []
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true
+    },
+    "compileOnSave": false,
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "module": "preserve",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "paths": {
+            "@service-soft/ngx-auth": ["./projects/ngx-auth/src/public-api.ts"],
+            "@service-soft/ngx-auth/*": ["./projects/ngx-auth/*/public-api.ts"],
+            "@service-soft/ngx-change-sets": ["./projects/ngx-change-sets/src/public-api.ts"],
+            "@service-soft/ngx-change-sets/*": ["./projects/ngx-change-sets/*/public-api.ts"],
+            "@service-soft/ngx-ecommerce": ["./projects/ngx-ecommerce/src/public-api.ts"],
+            "@service-soft/ngx-ecommerce/*": ["./projects/ngx-ecommerce/*/public-api.ts"],
+            "@service-soft/ngx-entity": ["./projects/ngx-entity/src/public-api.ts"],
+            "@service-soft/ngx-entity/*": ["./projects/ngx-entity/*/public-api.ts"],
+            "@service-soft/ngx-error-handling": ["./projects/ngx-error-handling/src/public-api.ts"],
+            "@service-soft/ngx-error-handling/*": ["./projects/ngx-error-handling/*/public-api.ts"],
+            "@service-soft/ngx-navigation": ["./projects/ngx-navigation/src/public-api.ts"],
+            "@service-soft/ngx-navigation/*": ["./projects/ngx-navigation/*/public-api.ts"],
+            "@service-soft/ngx-persistence-logger": ["./projects/ngx-persistence-logger/src/public-api.ts"],
+            "@service-soft/ngx-persistence-logger/*": ["./projects/ngx-persistence-logger/*/public-api.ts"],
+            "@service-soft/ngx-pwa": ["./projects/ngx-pwa/src/public-api.ts"],
+            "@service-soft/ngx-pwa/*": ["./projects/ngx-pwa/*/public-api.ts"],
+            "@service-soft/ngx-tracking": ["./projects/ngx-tracking/src/public-api.ts"],
+            "@service-soft/ngx-tracking/*": ["./projects/ngx-tracking/*/public-api.ts"],
+            "@service-soft/ui": ["./projects/ui/src/public-api.ts"],
+            "@service-soft/ui/*": ["./projects/ui/*/public-api.ts"],
+            "testing": ["./projects/testing/src/public-api.ts"],
+            "testing/*": ["./projects/testing/*/public-api.ts"]
+        },
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "ES2022"
+    },
+    "files": [],
+    "references": [
+        {
+            "path": "./projects/ui/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ui/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ui/.storybook/tsconfig.json"
+        },
+        {
+            "path": "./projects/showcase/tsconfig.app.json"
+        },
+        {
+            "path": "./projects/testing/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-change-sets/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-change-sets/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-ecommerce/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-ecommerce/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-entity/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-entity/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-persistence-logger/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-persistence-logger/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-tracking/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-tracking/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-pwa/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-pwa/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-auth/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-auth/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-error-handling/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-error-handling/tsconfig.spec.json"
+        },
+        {
+            "path": "./projects/ngx-navigation/tsconfig.lib.json"
+        },
+        {
+            "path": "./projects/ngx-navigation/tsconfig.spec.json"
+        }
+    ]
 }

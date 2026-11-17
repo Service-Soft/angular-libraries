@@ -1,0 +1,16 @@
+<div class="flex flex-1 flex-wrap items-center justify-start gap-2">
+    @for (item of groups().start; track $index) {
+        <div [class]="item.classes"><ngx-nav-element [element]="item.element" [components]="components()" /></div>
+    }
+</div>
+<div class="flex flex-wrap items-center justify-center gap-2">
+    @for (item of groups().center; track $index) {
+        <div [class]="item.classes"><ngx-nav-element [element]="item.element" [components]="components()" /></div>
+    }
+</div>
+<div class="flex flex-1 flex-wrap items-center justify-end gap-2">
+    @for (item of groups().end; track $index) {
+        <div [class]="item.classes"><ngx-nav-element [element]="item.element" [components]="components()" /></div>
+    }
+    <ng-content />
+</div>

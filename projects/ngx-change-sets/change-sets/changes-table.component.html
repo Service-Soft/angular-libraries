@@ -1,0 +1,44 @@
+@if (changes().length) {
+<!-- narrow screens drop the key column and the arrow, and show each key in a row of its own instead -->
+<table class="w-full table-fixed border-separate border-spacing-0 text-body-sm">
+    <thead>
+        <tr>
+            <th class="w-1/4 border-b border-outline-variant px-2 py-2 text-start text-label max-md:hidden" scope="col">{{ labels.key }}</th>
+            <th class="border-b border-outline-variant px-2 py-2 text-start text-label" scope="col">{{ labels.previousValue }}</th>
+            <td class="w-8 border-b border-outline-variant max-md:hidden"></td>
+            <th class="border-b border-outline-variant px-2 py-2 text-start text-label" scope="col">{{ labels.newValue }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (change of changes(); track $index) {
+            <tr class="md:hidden">
+                <th class="px-2 pt-3 text-start text-label wrap-break-word" colspan="2" scope="colgroup">{{ change.key }}</th>
+            </tr>
+            <tr>
+                <th class="px-2 py-2 text-start align-top text-label wrap-break-word max-md:hidden" scope="row">{{ change.key }}</th>
+                <!-- pre-wrap keeps the indentation of json and still wraps, so long values never get cut off -->
+                <td class="p-2 align-top">
+                    <pre
+                        class="
+                            rounded-input border-s-4 border-error bg-surface-container px-3 py-2 font-code text-body-sm whitespace-pre-wrap
+                            wrap-break-word
+                        "
+                    >{{ change.previousValue }}</pre>
+                </td>
+                <!-- the top padding puts the arrow in the middle of the first line of the values -->
+                <td class="pt-4.5 pb-2 text-center align-top text-on-surface-variant max-md:hidden">
+                    <ui-icon [icon]="arrow" />
+                </td>
+                <td class="p-2 align-top">
+                    <pre
+                        class="
+                            rounded-input border-s-4 border-success bg-surface-container px-3 py-2 font-code text-body-sm
+                            whitespace-pre-wrap wrap-break-word
+                        "
+                    >{{ change.newValue }}</pre>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

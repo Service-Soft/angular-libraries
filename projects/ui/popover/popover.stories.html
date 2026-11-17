@@ -1,0 +1,11 @@
+<button ui-button type="button" variant="outlined" [uiPopoverTrigger]="filter">
+    Applications: {{ summary() }} <ui-icon [icon]="faChevronDown" />
+</button>
+<ui-popover #filter>
+    <fieldset class="grid">
+        <legend class="mb-2 text-label">Applications</legend>
+        @for (application of applications; track application) {
+            <ui-input-boolean [label]="application" [value]="selected().includes(application)" (valueChange)="toggle(application)" />
+        }
+    </fieldset>
+</ui-popover>

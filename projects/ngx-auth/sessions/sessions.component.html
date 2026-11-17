@@ -1,0 +1,26 @@
+<h2 class="font-heading text-title text-on-surface">{{ labels.title }}</h2>
+<ul class="mt-4 divide-y divide-outline-variant empty:hidden">
+    @for (row of rows(); track row.login.id) {
+        <li class="flex flex-wrap items-center gap-2 py-3">
+            <div class="min-w-0 grow">
+                <!-- wrap-anywhere: a User-Agent has few spaces to wrap at on a narrow screen -->
+                <p class="text-label-lg text-on-surface wrap-anywhere" [id]="row.browserId">{{ row.browser }}</p>
+                <p class="text-body-sm text-on-surface-variant empty:hidden">{{ row.detail }}</p>
+            </div>
+            <button ui-button type="button" variant="outlined" [attr.aria-describedby]="row.browserId" (click)="logout(row)">
+                {{ labels.logout }}
+            </button>
+        </li>
+    }
+</ul>
+<div class="mt-4">
+    <button ui-button type="button" variant="outlined" color="error" (click)="logoutEverywhere()">{{ labels.logoutEverywhere }}</button>
+</div>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>

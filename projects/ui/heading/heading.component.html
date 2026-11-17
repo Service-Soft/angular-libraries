@@ -1,0 +1,27 @@
+<!-- the content is projected only once, so every level renders it from here -->
+<ng-template #content><ng-content /></ng-template>
+<!--
+    a template can't pick the name of an element by a value, so there is one branch for each level. That is all this
+    template does, which the complexity limit, meant for templates with logic, can't tell apart.
+-->
+<!-- eslint-disable angular/cyclomatic-complexity -->
+@switch (level()) {
+    @case (1) {
+        <h1><ng-container *ngTemplateOutlet="content" /></h1>
+    }
+    @case (2) {
+        <h2><ng-container *ngTemplateOutlet="content" /></h2>
+    }
+    @case (3) {
+        <h3><ng-container *ngTemplateOutlet="content" /></h3>
+    }
+    @case (4) {
+        <h4><ng-container *ngTemplateOutlet="content" /></h4>
+    }
+    @case (5) {
+        <h5><ng-container *ngTemplateOutlet="content" /></h5>
+    }
+    @case (6) {
+        <h6><ng-container *ngTemplateOutlet="content" /></h6>
+    }
+}

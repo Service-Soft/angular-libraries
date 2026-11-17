@@ -1,0 +1,31 @@
+<!-- a navbar sits on elevation 1 above the page. -->
+<header class="bg-surface text-on-surface shadow-1">
+    <nav [attr.aria-label]="label()">
+        @for (row of rowViews(); track $index; let first = $first) {
+            <ngx-nav-row [groups]="row" [components]="components()">
+                @if (first && menuButtonClasses(); as classes) {
+                    <div [class]="classes">
+                        <button
+                            #menuButton
+                            ui-button
+                            type="button"
+                            variant="text"
+                            [attr.aria-label]="labels.openNavigation"
+                            (click)="drawerOpen.set(true)"
+                        >
+                            <ui-icon [icon]="menuIcon" />
+                        </button>
+                    </div>
+                }
+            </ngx-nav-row>
+        }
+    </nav>
+    <!-- the drawer is labelled like the navigation, so it is a list without a navigation of its own. -->
+    <ui-drawer [label]="label()" [(open)]="drawerOpen">
+        <ul class="grid gap-1">
+            @for (item of drawerItems(); track $index) {
+                <li [class]="item.classes"><ngx-nav-element layout="drawer" [element]="item.element" [components]="components()" /></li>
+            }
+        </ul>
+    </ui-drawer>
+</header>

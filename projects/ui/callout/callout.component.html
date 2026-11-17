@@ -1,0 +1,17 @@
+<!-- no role="alert" or "status": it is part of the page, not a message that appears, so it is read where it is -->
+<div [class]="classes()">
+    <!-- decorative, the text for screen readers below says the same. As high as the first line, so it stays next to it. -->
+    <span [class]="iconClasses()"><ui-icon [icon]="shownIcon()" /></span>
+    <div class="flex min-w-0 flex-col gap-1">
+        @if (toneLabel()) {
+            <span class="sr-only">{{ toneLabel() }}</span>
+        }
+        @if (heading()) {
+            <p class="text-label-lg">{{ heading() }}</p>
+        }
+        <!-- a gap between the paragraphs of a longer content -->
+        <div class="flex flex-col gap-2">
+            <ng-content />
+        </div>
+    </div>
+</div>

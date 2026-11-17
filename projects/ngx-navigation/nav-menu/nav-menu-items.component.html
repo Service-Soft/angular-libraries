@@ -1,0 +1,20 @@
+@for (element of shown(); track $index) {
+    @switch (element.type) {
+        @case ('link') {
+            <ngx-nav-menu-link [element]="element" />
+        }
+        @case ('button') {
+            <ui-menu-item (click)="run(element)"><ngx-nav-label [name]="element.name" [icon]="element.icon" /></ui-menu-item>
+        }
+        @case ('menu') {
+            <ui-menu-item [submenu]="submenu"><ngx-nav-label [name]="element.name" [icon]="element.icon" /></ui-menu-item>
+            <ui-menu #submenu>
+                <ngx-nav-menu-items [elements]="element.elements" />
+            </ui-menu>
+        }
+        @case ('custom') {
+            <!-- inside the menu's injector, so it can show ui-menu-item and ui-menu-link -->
+            <ng-container *ngComponentOutlet="element.component; inputs: element.inputs ?? {}" />
+        }
+    }
+}

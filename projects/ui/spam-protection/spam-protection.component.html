@@ -1,0 +1,7 @@
+<!-- a honeypot: hidden from the eyes by sr-only, which a bot can't tell apart from a visible field as easily as display: none,
+     from screen readers by aria-hidden, from the keyboard by tabindex, from autofill by autocomplete and from a form draft
+     by data-form-draft. A person never fills it in. -->
+<div class="sr-only" aria-hidden="true" data-form-draft="off">
+    <label [for]="inputId">{{ label }}</label>
+    <input #honeypot type="text" tabindex="-1" autocomplete="off" [id]="inputId" [name]="name()" />
+</div>

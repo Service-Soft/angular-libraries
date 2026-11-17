@@ -1,0 +1,27 @@
+@if (metadata().restrictToOptions) {
+    <!-- only an option is the value -->
+    <ui-input-autocomplete
+        [label]="label()"
+        [hint]="hint()"
+        [required]="required()"
+        [readonly]="readonly()"
+        [options]="options()"
+        [customValidation]="problemValidation()"
+        [(value)]="value"
+        [(showValidationError)]="showError"
+    />
+} @else {
+    <!-- the text is the value, the options only suggest some -->
+    <ui-input-autocomplete
+        freeText
+        [label]="label()"
+        [hint]="hint()"
+        [required]="required()"
+        [readonly]="readonly()"
+        [options]="options()"
+        [customValidation]="validation"
+        [query]="value() ?? ''"
+        [(showValidationError)]="showError"
+        (queryChange)="changeText($event)"
+    />
+}

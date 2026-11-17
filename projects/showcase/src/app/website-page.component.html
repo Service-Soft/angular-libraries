@@ -1,0 +1,46 @@
+<!-- every component reads fixed data, so the page built ahead of time is the same on every build, which the prerender tests check -->
+<ui-section heading="Sports club Example" eyebrow="Since 1920" lead="A club for the whole family." [level]="1">
+    <ui-table-of-contents [items]="contents" />
+    <div class="grid gap-4 text-center sm:grid-cols-2">
+        <ui-stat label="Members" prefix="+" [value]="1200" />
+        <ui-stat label="Would recommend us" suffix=" %" [value]="98.5" [format]="{ maximumFractionDigits: 1 }" />
+    </div>
+</ui-section>
+
+<ui-section sectionId="news" heading="News">
+    <p>
+        Posted <ui-date-period start="2026-06-14" />, the season
+        <ui-date-period start="2025-08" end="2026-06" />, the board <ui-date-period start="2022-02" end="open" />.
+    </p>
+    <ui-rich-text [html]="post" />
+    <p>
+        The club was founded in 1920<ui-footnote [list]="sources">Chronicle of the club, page 4.</ui-footnote> and has
+        played in the league since 1975<ui-footnote [list]="sources">League archive, season 1975.</ui-footnote>.
+    </p>
+    <ui-heading class="font-heading text-title" [level]="3">Sources</ui-heading>
+    <ui-footnotes #sources idPrefix="sources" label="Sources" />
+</ui-section>
+
+<ui-section sectionId="practice" heading="Practice">
+    <ui-address
+        name="Dental practice Example"
+        phone="+49 (0) 2234 12 34-5"
+        email="info@example.com"
+        businessType="Dentist"
+        [address]="address"
+    />
+    <!-- the opening hours are properties of an item around them -->
+    <div itemscope itemtype="https://schema.org/Dentist">
+        <ui-opening-hours group timeZone="Europe/Berlin" [week]="week" />
+    </div>
+    <ui-consent-gate provider="YouTube" providerPrivacyPolicyUrl="https://policies.google.com/privacy" aspectRatio="16 / 9">
+        <ng-template><ui-iframe src="https://www.youtube-nocookie.com/embed/example" label="Video of the club" /></ng-template>
+    </ui-consent-gate>
+</ui-section>
+
+<ui-section sectionId="questions" heading="Questions">
+    <ui-faq>
+        <ui-faq-item question="How much is a membership?"><p>From 15 € a month.</p></ui-faq-item>
+        <ui-faq-item question="Can I try it?"><p>For two weeks, for free.</p></ui-faq-item>
+    </ui-faq>
+</ui-section>
