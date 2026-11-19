@@ -72,6 +72,7 @@ Every component lives in its own entry point, so a project only ships the code o
   - [Back to top](#back-to-top)
   - [News ticker](#news-ticker)
   - [Table](#table)
+  - [Scroll region](#scroll-region)
   - [Local table](#local-table)
   - [Tabs](#tabs)
   - [Event calendar](#event-calendar)
@@ -1659,7 +1660,16 @@ While `loading` is true, a [spinner](#spinner) covers the rows of the last page,
 
 The backgrounds of the header and the footer are the tokens `--color-table-header` and `--color-table-footer`, calculated from `--color-surface-container`; the stripes are `--color-primary-faint`, a faint wash of your primary color. All of them follow your theme; their content is `on-surface`, `on-surface-variant` and `primary`, which `ThemeUtilities.validateContrast` checks on each. The corner radius of an outlined table and a card is `--radius-table`.
 
-On a phone every row is a card of its values, each after the label of its column, and the header only shows the columns to order or filter by, so the page never scrolls sideways. Change the texts, the page sizes, the variant and the stripes with `provideTableConfig({ pageSize, pageSizes, variant, striped, selectAllLabel, selectRowLabel, filterLabel, allLabel, filtersLabel, removeFilterLabel, paginationLabel, rangeLabel, pageSizeLabel, actionsLabel, noRowsLabel, loadingLabel })`; `rangeLabel` takes the number of the first and the last row of the page and how many there are.
+On a phone every row is a card of its values, each after the label of its column, and the header only shows the columns to order or filter by, so the page never scrolls sideways. Wider than its frame, the table scrolls sideways inside of it, and the frame is a [scroll region](#scroll-region) the keyboard reaches. Change the texts, the page sizes, the variant and the stripes with `provideTableConfig({ pageSize, pageSizes, variant, striped, selectAllLabel, selectRowLabel, filterLabel, allLabel, filtersLabel, removeFilterLabel, paginationLabel, rangeLabel, pageSizeLabel, actionsLabel, noRowsLabel, loadingLabel })`; `rangeLabel` takes the number of the first and the last row of the page and how many there are.
+
+## Scroll region
+`uiScrollRegion` is for a box of your own that scrolls sideways, like around a wide table: while its content is wider than it, the box takes the focus, so keyboard users scroll it with the arrow keys, and is a region named by the label you give it, so screen readers say what they are in. While everything fits, it is a plain box without a tab stop. The browser measures it after the first render, the server renders a plain box. `ui-table` uses it already.
+
+```html
+<div class="overflow-x-auto" uiScrollRegion="Opening hours">
+    <table>…</table>
+</div>
+```
 
 ## Local table
 A [table](#table) that gets all of its rows at once and orders, filters and pages them itself, for a list the app already has in full. It takes the inputs and the content of `ui-table` except `totalAmount`, and `rows` are all of them:

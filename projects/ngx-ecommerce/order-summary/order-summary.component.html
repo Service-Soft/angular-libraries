@@ -1,7 +1,7 @@
 <!-- a table rather than a description list: every item has the same values, which screen readers read with the
      heading of their column, and the rows below the items are a row heading and an amount in the column of the amounts.
-     It scrolls instead of overflowing when a detailed one doesn't fit a narrow screen. -->
-<div class="overflow-x-auto">
+     It scrolls instead of overflowing when a detailed one doesn't fit a narrow screen, and the keyboard reaches it then. -->
+<div class="overflow-x-auto" [uiScrollRegion]="labels.caption">
     <table class="w-full border-collapse text-body text-on-surface">
         <!-- a heading of the consumer names the section, the caption names the table for screen readers on its own -->
         <caption class="sr-only">{{ labels.caption }}</caption>

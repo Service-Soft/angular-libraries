@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, InputSignal, LOCALE_ID, Signal } from '@angular/core';
 import { MoneyUtilities } from '@service-soft/ngx-ecommerce/money';
 import { PRICE_CONFIG } from '@service-soft/ui/price';
+import { ScrollRegionDirective } from '@service-soft/ui/scroll-region';
 
 import { OrderSummaryConfig, OrderSummaryLabels } from './order-summary-config.model';
 import { ORDER_SUMMARY_CONFIG } from './order-summary-config.provider';
@@ -36,6 +37,7 @@ const ROW_CLASSES: Record<'line' | 'total' | 'note', string> = {
 @Component({
     selector: 'ngx-order-summary',
     templateUrl: './order-summary.component.html',
+    imports: [ScrollRegionDirective],
     host: {
         class: 'block'
     }

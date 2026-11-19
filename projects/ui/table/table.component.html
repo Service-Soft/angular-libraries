@@ -9,8 +9,9 @@
     <!-- a line between it and the row of the label, while that shows -->
     <div class="border-outline-variant px-3 py-3 empty:hidden [ui-table-label-row:not(:empty)+&]:border-t"><ng-content /></div>
 </div>
-<!-- the explicit roles keep the table a table for screen readers on a phone, where its parts are blocks -->
-<div class="overflow-x-auto">
+<!-- the explicit roles keep the table a table for screen readers on a phone, where its parts are blocks. The keyboard
+     reaches the box while the table is wider than it, so the arrow keys scroll it. -->
+<div class="overflow-x-auto" [uiScrollRegion]="label()">
     <table
         role="table"
         class="w-full border-collapse max-sm:block"
