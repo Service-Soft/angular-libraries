@@ -51,7 +51,9 @@ describe('offlineInterceptor', () => {
             body: { title: 'Buy milk', dueAt: '2026-11-12T09:00:00.000Z' },
             type: 'todo',
             idKey: 'id',
-            displayValue: 'New todo'
+            displayValue: 'New todo',
+            // no scope and no headers in the OfflineConfig
+            headers: {}
         });
         // the object of the caller stays as it was
         expect(todo).toEqual({ title: 'Buy milk', dueAt: new Date('2026-11-12T09:00:00.000Z') });

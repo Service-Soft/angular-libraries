@@ -87,3 +87,29 @@ export const Default: Story = {
 export const OnlyCategories: Story = {
     decorators: [applicationConfig({ providers: [provideRouter([]), consent, provideConsentDialogConfig({ showOnlyCategories: true })] })]
 };
+
+// a page of a website that shows first, and asks once the visitor does something with it.
+export const AsksOnInteraction: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                provideRouter([]),
+                provideTrackingConsent({
+                    trackings: TRACKINGS,
+                    ui: async () => await Promise.resolve(ConsentDialogUi),
+                    askOn: 'interaction'
+                })
+            ]
+        })
+    ],
+    render: () => ({
+        template: `
+            <main class="p-4 text-body">
+                <h1 class="font-heading text-headline">Shop</h1>
+                <p>The page shows first.</p>
+            </main>
+            <ngx-privacy-settings />
+        `,
+        moduleMetadata: { imports: [PrivacySettingsComponent] }
+    })
+};

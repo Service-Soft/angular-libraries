@@ -1,14 +1,17 @@
 import { Injector, runInInjectionContext } from '@angular/core';
-import { Route } from '@angular/router';
+import { Route, Router } from '@angular/router';
 
 import { NavConditional } from './nav-conditional.model';
 import { NavElement } from './nav-element.type';
 import { NavLinkView } from './nav-link-view.model';
+import { NavLink } from './nav-link.model';
 import { NavMenuElement } from './nav-menu.model';
 import { NavPositionGroups } from './nav-position-groups.model';
+import { NavRouteCondition } from './nav-route-condition.type';
 import { NavRoute } from './nav-route.model';
 import { NavRoutesSource } from './nav-routes-source.model';
 import { NavTarget } from './nav-target.type';
+import { NAVIGATION_CONFIG } from './navigation-config.provider';
 
 /**
  * Utilities for the routes the navigation links to.
@@ -70,14 +73,16 @@ export abstract class NavigationUtilities {
     }
 
     /**
-     * Finds the elements whose condition holds, running each in the injection context of the given injector. Called in
+     * Finds the elements whose condition holds, running each in the injection context of the given injector, and, for
+     * a link to a route of the app, the routeCondition of the NavigationConfig for that route and its parents. Called in
      * a computed, it follows the signals the conditions read.
      * @param elements - The elements.
      * @param injector - What the conditions inject from.
      * @returns The elements to show.
      */
     static findShown<T extends NavConditional>(elements: T[], injector: Injector): T[] {
-        return elements.filter(element => element.condition == undefined || runInInjectionContext(injector, element.condition));
+        return elements.filter(element => (element.condition == undefined || runInInjectionContext(injector, element.condition))
+            && NavigationUtilities.isRouteShown(element, injector));
     }
 
     /**
@@ -113,6 +118,42 @@ export abstract class NavigationUtilities {
                 }
             }
         });
+    }
+
+    private static isRouteShown(element: NavConditional, injector: Injector): boolean {
+        if (!NavigationUtilities.isLink(element) || !('route' in element)) {
+            return true;
+        }
+        // a path is looked up in the routes of the router, like the router would match it, with the parents whose guards
+        // run as well. A path the routes don't have, like one with parameters, shows.
+        const routes: Route[] = typeof element.route === 'string'
+            ? NavigationUtilities.findRouteChain(injector.get(Router).config, NavigationUtilities.getUrl(element.route).slice(1))
+            : [element.route];
+        const routeCondition: NavRouteCondition = injector.get(NAVIGATION_CONFIG).routeCondition;
+        return routes.every(route => runInInjectionContext(injector, () => routeCondition(route)));
+    }
+
+    private static isLink(element: NavConditional): element is NavLink {
+        return 'type' in element && element.type === 'link';
+    }
+
+    // the route of the path and its parents, the outermost first. Only children that are loaded already are known.
+    private static findRouteChain(routes: Route[], path: string, parentPath: string = ''): Route[] {
+        for (const route of routes) {
+            const routePath: string = [parentPath, route.path ?? ''].filter(part => part.length).join('/');
+            const leadsToPath: boolean = !routePath.length || path === routePath || path.startsWith(`${routePath}/`);
+            if (route.path === '**' || route.matcher != undefined || !leadsToPath) {
+                continue;
+            }
+            const children: Route[] = NavigationUtilities.findRouteChain(route.children ?? [], path, routePath);
+            if (children.length) {
+                return [route, ...children];
+            }
+            if (path === routePath) {
+                return [route];
+            }
+        }
+        return [];
     }
 
     private static findRoute(target: NavTarget | undefined): NavRoute[] {

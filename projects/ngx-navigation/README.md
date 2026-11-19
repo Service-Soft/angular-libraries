@@ -20,6 +20,7 @@ It is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui
 - [The pages of a section](#the-pages-of-a-section)
 - [Switching the language](#switching-the-language)
 - [The page for unknown urls](#the-page-for-unknown-urls)
+- [SEO](#seo)
 - [Configuration](#configuration)
 - [Moving from ngx-material-navigation](#moving-from-ngx-material-navigation)
 - [License](#license)
@@ -138,6 +139,14 @@ Every element can have a `condition`, which says whether it is shown. Conditions
 
 A condition that reads signals is checked again whenever they change, so the element shows and hides with them.
 
+To hide the links to every route a user can't open without a condition on each, `routeCondition` of `provideNavigationConfig` decides for each link to a route of the app, from its route. It runs in an injection context too, for the route and every parent of it, as the router runs their guards as well. A path like `'admin/users'` is looked up in the routes of the router, and a link whose path they don't have, like one with parameters, shows. With [@service-soft/ngx-auth](https://www.npmjs.com/package/@service-soft/ngx-auth), a link shows only when the permissions in the data of its route pass:
+
+```ts
+provideNavigationConfig({ routeCondition: route => inject(AuthService).hasRoutePermissions(route.data ?? {}) })
+```
+
+The `condition` of the link has to pass as well.
+
 ## Sections of the page
 `<ngx-nav-anchors />` of `/anchors` links to the sections of the current page, from the anchors in the data of its route, like right below the navbar. It is a navigation labelled "On this page", and shows nothing on a page without anchors. Give the sections the ids of the fragments, and let the router scroll to them:
 
@@ -167,7 +176,7 @@ provideRouter(NavigationUtilities.resolveRoutes({
 }))
 ```
 
-It takes the routes of the navbar first, then those of the footer, then `routes`, so a route for every path (`'**'`) stays last. A path that is there several times is kept once, the first time it comes. A `NavRoute` is a route of Angular that requires `title` and `path` and types its `data`: `NavRoute<NavRouteData & MyData>`.
+It takes the routes of the navbar first, then those of the footer, then `routes`, so a route for every path (`'**'`) stays last. A path that is there several times is kept once, the first time it comes. A `NavRoute` is a route of Angular that requires `title` and `path` and types its `data`: `NavRoute<NavRouteData & MyData>`. Its `children` are `NavChildRoute`s with the same data, which need no title or path, so a function in the data of a child, like a `breadcrumb.name`, gets its route typed as well.
 
 # The footer
 `<ngx-footer [rows]="footerRows" [components]="footerComponents" />` is a `<footer>` built from rows like the navbar, with the same elements, positions and [components](#components-of-the-elements); nothing in it collapses. A menu in it opens a popover like in the navbar.
@@ -255,6 +264,38 @@ The link to the current page in a language has its code as `hreflang` and `lang`
 
 Change what it shows with `provideNotFoundConfig({ title, message, homeLabel, homeRoute, icon })`, or for one route with `notFound` in its data: `data: { notFound: { homeRoute: '/shop' } }`.
 
+# SEO
+Every page tells search engines and AI assistants about itself, next to its title, from the data of its routes. `provideSeoConfig` of `@service-soft/ngx-navigation/seo` writes it into the head of the document on every navigation, on the server too, so the prerendered html holds it: search engines and AI crawlers mostly read the html as it comes, without running its scripts. An app that doesn't use it ships none of it.
+
+```ts
+providers: [
+    provideRouter(routes),
+    provideSeoConfig({ origin: 'https://club.example', defaultImage: '/images/club.png' })
+]
+```
+
+```ts
+const routes: NavRoute[] = [{
+    path: 'teams/:team',
+    title: 'Team',
+    component: TeamPage,
+    data: {
+        description: 'The players, practice times and results of a team.',
+        structuredData: route => ({ '@context': 'https://schema.org', '@type': 'SportsTeam', name: route.paramMap.get('team') })
+    }
+}];
+```
+
+| Tag | From |
+|---|---|
+| `<meta name="description">` | `description` of the data |
+| `<link rel="canonical">` | the `origin` and the path of the url, without its query and fragment |
+| `<script type="application/ld+json">` | `structuredData`, an object as https://schema.org describes it, or a function of the route that resolves it in an injection context |
+| `<meta name="robots">` | `robots`, like `'noindex'` for a thank-you page |
+| `og:title`, `og:description`, `og:url`, `og:image` | the title of the route, the description, the canonical url and `image`, or the `defaultImage`, so a shared link and an assistant citing the page show a preview |
+
+Each value comes from the deepest route that has it, and `NavRouteData` types them. A tag the page has no value for is removed, so none of the page before survives a navigation; leave them out of your `index.html`. The JSON-LD of the site itself, like its `Organization`, can stay there: only the one of the pages is replaced.
+
 # Configuration
 Every part reads its defaults and texts from a config, which `provideXConfig` changes, in the application config for the whole app or in a component or route for only that part of it:
 
@@ -264,6 +305,8 @@ Every part reads its defaults and texts from a config, which `provideXConfig` ch
 | | `menuIcon` | `faBars` — the icon of the button that opens the drawer |
 | | `labels` | `navigation: 'Navigation'`, `openNavigation: 'Open the navigation'` |
 | `provideNavigationConfig` | `labels` | `home: 'Home'` — the first step of the breadcrumbs, `anchors: 'On this page'` — what screen readers call the links to the sections |
+| | `routeCondition` | every link shows — see [conditions and actions](#conditions-and-actions) |
+| `provideSeoConfig` | `origin`, `defaultImage` | required, none — see [SEO](#seo) |
 | `provideNotFoundConfig` | `title`, `message`, `homeLabel`, `homeRoute`, `icon` | `'Page not found'`, a sentence, `'Back to the start page'`, `'/'`, `faSignsPost` |
 | `provideLanguageSwitcherConfig` | `appearance`, `label`, `icon`, `href` | `'menu'`, `'Language'`, `faGlobe`, `(url, code) => '/' + code + url` |
 | `provideBreadcrumbsConfig` of `@service-soft/ui/breadcrumbs` | `label` | `'Breadcrumbs'` — what screen readers call the breadcrumbs |

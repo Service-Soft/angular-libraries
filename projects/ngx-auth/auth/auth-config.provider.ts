@@ -91,6 +91,8 @@ export function provideAuthConfig(config: AuthConfigChanges): Provider {
         origins: [],
         logoutStatuses: [401],
         refreshBeforeExpiryInMs: DEFAULT_REFRESH_BEFORE_EXPIRY_IN_MS,
+        beforeLogout: () => true,
+        onLogout: () => undefined,
         ...config,
         paths: { ...DEFAULT_PATHS, ...config.paths },
         headers: {

@@ -166,6 +166,9 @@ describe('authInterceptor', () => {
     test('sends the active tenant to the api, unless a request names its own', async () => {
         const [authService, http, backend] = setup('cookie');
         await login(authService, backend, createCookieData('csrf-1'));
+        // the user's only tenant, which they act in without choosing it
+        expect(authService.activeTenantId()).toBe('tenant-a');
+        authService.setActiveTenant(undefined);
         void firstValueFrom(http.get(TASKS));
         expect((await expectRequest(backend, 'GET', TASKS)).request.headers.has('x-tenant-id')).toBe(false);
 
@@ -198,6 +201,31 @@ describe('authInterceptor', () => {
         await expect(refused).rejects.toThrow();
         expect(authService.loggedIn()).toBe(false);
         expect(TestBed.inject(Router).url).toBe('/login');
+    });
+
+    test('keeps the login when a refresh doesn\'t reach the server, like offline, and sends the request on', async () => {
+        const [authService, http, backend] = setup('jwt');
+        // an access token that runs out right away, so the next request refreshes it first
+        await login(authService, backend, createJwtData('access-1', 0));
+
+        const tasks: Promise<object> = firstValueFrom(http.get(TASKS));
+        (await expectRequest(backend, 'POST', `${API}/refresh-login?strategy=jwt`)).error(new ProgressEvent('error'));
+        // on to the interceptors after this one and the network, without the token that ran out
+        const sent: TestRequest = await expectRequest(backend, 'GET', TASKS);
+        expect(sent.request.headers.has('Authorization')).toBe(false);
+        sent.error(new ProgressEvent('error'));
+        await expect(tasks).rejects.toThrow();
+        expect(authService.loggedIn()).toBe(true);
+
+        // the same after the server refused the token, for a refresh that doesn't reach it
+        await login(authService, backend, createJwtData('access-2'));
+        const refused: Promise<object> = firstValueFrom(http.get(TASKS));
+        refuse(await expectRequest(backend, 'GET', TASKS), 401, 'UnauthorizedError');
+        // the answer of the service worker of Angular when it couldn't reach the server
+        (await expectRequest(backend, 'POST', `${API}/refresh-login?strategy=jwt`))
+            .flush('', { status: 504, statusText: 'Gateway Timeout' });
+        await expect(refused).rejects.toThrow();
+        expect(authService.loggedIn()).toBe(true);
     });
 
     test('keeps the login when a request is refused for its second factor', async () => {

@@ -4,6 +4,9 @@
         @if (status(); as status) {
             <ui-icon [icon]="status.icon" />
             {{ status.message }}
+            @if (status.loadedAt) {
+                · {{ labels.loadedAt }} {{ status.loadedAt | date: 'short' }}
+            }
         }
     </p>
     @if (count()) {

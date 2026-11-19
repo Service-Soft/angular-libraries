@@ -6,6 +6,7 @@ import { OfflineStatusBarConfig } from './offline-status-bar-config.model';
 const DEFAULT_OFFLINE_STATUS_BAR_CONFIG: OfflineStatusBarConfig = {
     labels: {
         offline: 'Offline',
+        loadedAt: 'Data from',
         unsavedChanges: 'Unsaved changes',
         sync: 'Sync'
     }

@@ -7,6 +7,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { CurrentUserProfile } from 'zibri-contract';
 
+import { AnyLevelPermission } from './any-level-permission.model';
 import { AuthData } from './auth-data.model';
 import { AuthRouteData } from './auth-route-data.model';
 import { authInterceptor } from './auth.interceptor';
@@ -21,12 +22,12 @@ const API: string = 'https://api.example.com/auth';
 /**
  * The permissions of the app of the tests in a tenant.
  */
-type Permission = 'invoices.export' | 'invoices.read';
+type Permission = 'invoices.export' | 'invoices.read' | 'members.read';
 
 /**
  * The permissions of the app of the tests by the roles of a user's own.
  */
-type PlatformPermission = 'tenants.create';
+type PlatformPermission = 'tenants.create' | 'users.read';
 
 /**
  * A route of the app, whose data the permissionGuard reads.
@@ -45,10 +46,13 @@ const PROFILE: CurrentUserProfile<Permission, PlatformPermission> = {
     email: 'ada@example.com',
     memberships: [
         { tenantId: 'tenant-a', permissions: ['invoices.read'] },
-        { tenantId: 'tenant-b', permissions: ['invoices.read', 'invoices.export'] }
+        { tenantId: 'tenant-b', permissions: ['invoices.read', 'invoices.export', 'members.read'] }
     ],
     platformPermissions: []
 };
+
+// the members of the active tenant, or every user for a platform admin.
+const USERS: AnyLevelPermission<Permission, PlatformPermission> = { permission: 'members.read', platformPermission: 'users.read' };
 
 const ROUTES: AppRoute[] = [
     { path: 'login', component: PageComponent, canActivate: [notLoggedInGuard] },
@@ -62,6 +66,13 @@ const ROUTES: AppRoute[] = [
     },
     { path: 'tenants/new', component: PageComponent, canActivate: [permissionGuard], data: { platformPermission: 'tenants.create' } },
     { path: 'unnamed', component: PageComponent, canActivate: [permissionGuard] },
+    { path: 'users', component: PageComponent, canActivate: [permissionGuard], data: { anyLevelPermission: USERS } },
+    {
+        path: 'users/new',
+        component: PageComponent,
+        canActivate: [permissionGuard],
+        data: { anyLevelPermission: USERS, platformPermission: 'tenants.create' }
+    },
     { path: '**', component: PageComponent }
 ];
 
@@ -88,6 +99,15 @@ function setup(login?: Partial<AuthData<string, Permission, PlatformPermission>>
 async function create(login?: Partial<AuthData<string, Permission, PlatformPermission>>): Promise<[RouterTestingHarness, Router, HttpTestingController]> {
     const [, router, backend] = setup(login);
     return [await RouterTestingHarness.create(), router, backend];
+}
+
+// a visit of its own with the login: where the user ends up when opening the url.
+async function resolveUrlAfterNavigation(login: Partial<AuthData<string, Permission, PlatformPermission>>, url: string): Promise<string> {
+    TestBed.resetTestingModule();
+    localStorage.clear();
+    const [harness, router] = await create(login);
+    await harness.navigateByUrl(url);
+    return router.url;
 }
 
 describe('auth guards', () => {
@@ -144,6 +164,27 @@ describe('auth guards', () => {
         const [creator, creatorRouter] = await create({ user: { ...PROFILE, platformPermissions: ['tenants.create'] } });
         await creator.navigateByUrl('/tenants/new');
         expect(creatorRouter.url).toBe('/tenants/new');
+    });
+
+    test('open a route of an any level permission with the permission in the tenant or the platform permission', async () => {
+        const platformAdmin: CurrentUserProfile<Permission, PlatformPermission> = { ...PROFILE, platformPermissions: ['users.read'] };
+        const cases: [string, Partial<AuthData<string, Permission, PlatformPermission>>, string][] = [
+            ['only the permission', { user: PROFILE, activeTenantId: 'tenant-b' }, '/users'],
+            ['only the platform permission', { user: platformAdmin, activeTenantId: 'tenant-a' }, '/users'],
+            ['both', { user: platformAdmin, activeTenantId: 'tenant-b' }, '/users'],
+            ['the platform permission without a tenant', { user: platformAdmin }, '/users'],
+            ['neither', { user: { ...PROFILE, memberships: [] } }, '/forbidden'],
+            ['the permission in another tenant', { user: PROFILE, activeTenantId: 'tenant-a' }, '/forbidden'],
+            ['the permission without an active tenant', { user: PROFILE }, '/forbidden']
+        ];
+        for (const [name, login, url] of cases) {
+            expect(await resolveUrlAfterNavigation(login, '/users'), name).toBe(url);
+        }
+
+        // next to a platformPermission, both need to pass
+        expect(await resolveUrlAfterNavigation({ user: platformAdmin }, '/users/new')).toBe('/forbidden');
+        const creator: CurrentUserProfile<Permission, PlatformPermission> = { ...PROFILE, platformPermissions: ['users.read', 'tenants.create'] };
+        expect(await resolveUrlAfterNavigation({ user: creator }, '/users/new')).toBe('/users/new');
     });
 
     test('load the user first when the login has none yet', async () => {

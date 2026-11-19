@@ -50,11 +50,23 @@ providers: [
 ]
 ```
 
-`provideTrackingConsent` creates every tracking when the app starts, so they track from the first navigation on. Add the `consentGuard` to your routes, which asks on the first visit and never blocks the navigation:
+`provideTrackingConsent` creates every tracking when the app starts, so they track from the first navigation on. Say when the user is asked with `askOn`:
+
+| `askOn` | Asks |
+|---|---|
+| `'interaction'` | at the first click, tap, key, scroll, wheel or mouse move on the page, once. The best for a website: the visitor sees the page first and still decides before doing anything with it, and the dialog is not part of how fast the page loads. Opened with the page, it would be its largest paint, and rated as the page loading slowly |
+| `'navigation'` | at the end of every navigation, like the `consentGuard` on every route |
+| left out | only where the `consentGuard` is, which asks when a route opens and never blocks the navigation. Like to leave it off the imprint and the privacy policy |
+
+```ts
+provideTrackingConsent({ trackings, ui: () => import('@service-soft/ngx-tracking/consent-dialog').then(m => m.ConsentDialogUi), askOn: 'interaction' })
+```
 
 ```ts
 const routes: Routes = [{ path: '', component: HomeComponent, canActivate: [consentGuard] }];
 ```
+
+Either way, a user who chose already is not asked until their choices expire, and nothing is asked on the server, so no prerendered page holds any of the dialog and nobody who chose sees it flicker. The code of the dialog stays in the chunk of `ui`, loaded only when it opens.
 
 Let the user change their choices later, as easily as they made them, on every page. `PrivacySettingsComponent` of `@service-soft/ngx-tracking/privacy-settings` is a button in the bottom start corner of the screen that opens the dialog again. Put it once in the layout of your app:
 
@@ -81,6 +93,7 @@ protected readonly consentService: ConsentService = inject(ConsentService);
 | `ui` | required — loads what the user sees, with a dynamic `import()` |
 | `choicesDuration` | one month — how long the choices are kept before the user is asked again, in milliseconds |
 | `respectDoNotTrack` | `true` — a browser that sends Global Privacy Control or Do Not Track gets only what is required, without asking, and a notice that says so |
+| `askOn` | only where the `consentGuard` is — `'interaction'` or `'navigation'` to ask on every page |
 
 # Trackings
 Each tracking is in its own entry point, so only the ones you import end up in your bundle. They load nothing and send nothing before the user allowed them, events included.

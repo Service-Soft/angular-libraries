@@ -1,3 +1,4 @@
+export * from './consent-ask-on.type';
 export * from './consent-config-changes.model';
 export * from './consent-config.model';
 export * from './consent-config.provider';
@@ -6,5 +7,6 @@ export * from './consent.guard';
 export * from './consent.service';
 export * from './gdpr-category.enum';
 export * from './script.service';
+export * from './tracking-consent.provider';
 export * from './tracking.model';
 export * from './tracking.service';

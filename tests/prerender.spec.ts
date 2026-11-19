@@ -56,6 +56,18 @@ describe('prerendered page of a website', () => {
         expect(findTexts(website, 'ui-section hgroup > p')).toEqual(['Since 1920']);
     });
 
+    test('has the description, the canonical url and the structured data of its route in the head, for crawlers that run no script', () => {
+        expect(website.head.querySelector('meta[name="description"]')?.getAttribute('content'))
+            .toBe('The sports club of the town, with its news, its practice times and answers to your questions.');
+        // the path of the page alone, whatever query it was opened with
+        expect(website.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://showcase.example/website');
+        const structuredData: unknown[] = [...website.head.querySelectorAll('script[type="application/ld+json"]')]
+            .map(script => JSON.parse(script.textContent) as unknown);
+        expect(structuredData).toEqual([{ '@context': 'https://schema.org', '@type': 'SportsClub', name: 'Sports club Example' }]);
+        expect(website.head.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe('Website');
+        expect(website.head.querySelector('meta[property="og:url"]')?.getAttribute('content')).toBe('https://showcase.example/website');
+    });
+
     test('has the html of a rich text with its headings and lists, without its script', () => {
         const richText: Element | null = website.querySelector('ui-rich-text');
         expect(findTexts(richText ?? website, 'h2')).toEqual(['Summer party']);

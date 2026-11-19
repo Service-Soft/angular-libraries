@@ -1,10 +1,11 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { afterNextRender, Component, inject } from '@angular/core';
+import { afterNextRender, Component, inject, input, InputSignal } from '@angular/core';
 import { CachedRequest, offlineInterceptor } from '@service-soft/ngx-pwa/offline';
 import { ButtonComponent } from '@service-soft/ui/button';
 import { DialogService } from '@service-soft/ui/dialog';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 
+import { SyncDialogData } from './sync-dialog-data.model';
 import { SyncDialogComponent } from './sync-dialog.component';
 
 // a new todo, a change of it that waits for it, and a deleted one.
@@ -49,12 +50,18 @@ function startWith(online: boolean): () => Promise<object> {
 class SyncButtonComponent {
     private readonly dialogService: DialogService = inject(DialogService);
 
+    /**
+     * Whether the dialog asks before the user logs out, like syncBeforeLogout opens it.
+     */
+    readonly beforeLogout: InputSignal<boolean> = input(false);
+
     constructor() {
         afterNextRender(() => this.open());
     }
 
     open(): void {
-        this.dialogService.open(SyncDialogComponent);
+        const data: SyncDialogData = { beforeLogout: this.beforeLogout() };
+        this.dialogService.open(SyncDialogComponent, data);
     }
 }
 
@@ -74,4 +81,9 @@ export const Default: Story = {
 
 export const Offline: Story = {
     loaders: [startWith(false)]
+};
+
+export const BeforeLogout: Story = {
+    loaders: [startWith(true)],
+    render: () => ({ template: '<ngx-sync-button [beforeLogout]="true" />', moduleMetadata: { imports: [SyncButtonComponent] } })
 };

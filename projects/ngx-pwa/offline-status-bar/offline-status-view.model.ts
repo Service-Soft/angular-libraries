@@ -11,5 +11,9 @@ export type OfflineStatusView = {
     /**
      * The icon before it, which repeats the text.
      */
-    icon: IconDefinition
+    icon: IconDefinition,
+    /**
+     * When the oldest data the app shows from the offline cache was loaded, or undefined while it shows none.
+     */
+    loadedAt?: Date
 };

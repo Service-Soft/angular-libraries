@@ -45,6 +45,28 @@ describe('consent dialog in the browser', () => {
         await page.close();
     });
 
+    test('asks once the visitor moves the mouse, not before, and not again once they chose', async () => {
+        const context: BrowserContext = await browser.newContext();
+        const page: Page = await context.newPage();
+        await StorybookUtilities.renderStory(page, 'tracking-consent-dialog--asks-on-interaction');
+        const dialog: Locator = page.getByRole('dialog', { name: 'Privacy settings' });
+        // the page shows, and nothing opens by itself
+        await page.waitForTimeout(500);
+        expect(await dialog.count()).toBe(0);
+
+        await page.mouse.move(100, 100);
+        await expect.poll(() => dialog.isVisible()).toBe(true);
+        await dialog.getByRole('button', { name: 'Only required' }).click();
+        await expect.poll(() => dialog.count()).toBe(0);
+
+        await StorybookUtilities.renderStory(page, 'tracking-consent-dialog--asks-on-interaction');
+        await page.mouse.move(200, 200);
+        await page.mouse.wheel(0, 100);
+        await page.waitForTimeout(500);
+        expect(await dialog.count()).toBe(0);
+        await context.close();
+    });
+
     test('fits a 320px wide screen without scrolling sideways', async () => {
         const context: BrowserContext = await browser.newContext({ viewport: { width: 320, height: 640 } });
         const page: Page = await context.newPage();
