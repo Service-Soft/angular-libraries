@@ -10,7 +10,9 @@ export abstract class AvatarUtilities {
      * @returns The initials, empty for a name without words.
      */
     static resolveInitials(name: string, locale: string): string {
-        const words: string[] = name.trim().split(/\s+/).filter(word => word !== '');
+        const words: string[] = name.trim()
+            .split(/\s+/)
+            .filter(word => word !== '');
         const first: string | undefined = words.at(0);
         const last: string | undefined = words.length > 1 ? words.at(-1) : undefined;
         return [first, last]

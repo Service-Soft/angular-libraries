@@ -9,8 +9,8 @@ import { AvatarUtilities } from './avatar.utilities';
 // a min-w and aspect-square instead of a fixed size: initials that grow with the user's text size make the circle larger
 // instead of overflowing it. The transparent border keeps the circle in forced colors mode, which removes backgrounds.
 const BASE_CLASSES: string = `
-    relative inline-flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full border
-    border-transparent align-middle select-none
+    relative inline-flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full border border-transparent
+    align-middle select-none
 `;
 
 const SIZE_CLASSES: Record<AvatarSize, string> = {

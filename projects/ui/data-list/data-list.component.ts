@@ -39,19 +39,17 @@ export class DataListComponent {
     protected readonly shownItems: Signal<DataListShownItem[]> = computed(() => this.items().map(item => this.toShownItem(item)));
 
     private toShownItem(item: DataListItem): DataListShownItem {
-        if (item.value instanceof TemplateRef) {
-            return { label: item.label, text: '', template: item.value };
-        }
-        return { label: item.label, text: this.resolveText(item.value, item), template: undefined };
+        return item.value instanceof TemplateRef
+            ? { label: item.label, text: '', template: item.value }
+            : { label: item.label, text: this.resolveText(item.value, item), template: undefined };
     }
 
     private resolveText(value: Exclude<DataListValue, TemplateRef<unknown>>, item: DataListItem): string {
         if (value instanceof Date) {
             return new Intl.DateTimeFormat(this.locale, item.dateFormat ?? this.config.dateFormat).format(value);
         }
-        if (typeof value === 'number') {
-            return new Intl.NumberFormat(this.locale, item.numberFormat ?? this.config.numberFormat).format(value);
-        }
-        return value ?? '';
+        return typeof value === 'number'
+            ? new Intl.NumberFormat(this.locale, item.numberFormat ?? this.config.numberFormat).format(value)
+            : value ?? '';
     }
 }

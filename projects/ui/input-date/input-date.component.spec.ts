@@ -369,7 +369,7 @@ describe('InputDateCalendarComponent', () => {
         const [fixture, root] = await render(UnboundedCalendarHostComponent);
         const header: HTMLButtonElement = getHeaderButton(root);
         expect(header.querySelector('[aria-live]')?.textContent?.trim()).toBe('November 2026');
-        expect(header.querySelector('.sr-only')?.textContent).toBe(', Choose a year');
+        expect(header.getAttribute('aria-label')).toBe('November 2026, Choose a year');
         expect(header.getAttribute('aria-expanded')).toBe('false');
 
         header.click();

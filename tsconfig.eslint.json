@@ -1,9 +1,11 @@
 {
     "compilerOptions": {
+        // the scripts import each other with their extension, which node needs to run them as they are
+        "allowImportingTsExtensions": true,
         "noEmit": true,
         "types": ["node"]
     },
     "extends": "./tsconfig.json",
     "files": [],
-    "include": ["projects/**/*.ts", "projects/*/.storybook/*.ts", "tests/**/*.ts"]
+    "include": ["projects/**/*.ts", "projects/*/.storybook/*.ts", "tests/**/*.ts", "scripts/**/*.ts"]
 }

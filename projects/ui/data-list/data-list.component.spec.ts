@@ -7,6 +7,7 @@ import { DataListComponent } from './data-list.component';
 
 @Component({
     selector: 'ui-data-list-host',
+    // eslint-disable-next-line angular/component-max-inline-declarations
     template: `
         <ng-template #links><a href="https://example.com">Website</a></ng-template>
         <ui-data-list
@@ -40,7 +41,7 @@ async function render(): Promise<HTMLElement> {
 
 // Intl puts non-breaking spaces into some formats, like the one before € in German
 function findEntries(root: HTMLElement): Entry[] {
-    const normalize: (text: string | null | undefined) => string = text => text?.replace(/\s+/g, ' ').trim() ?? '';
+    const normalize: (text: string | null | undefined) => string = text => text?.replaceAll(/\s+/g, ' ').trim() ?? '';
     return Array.from(root.querySelectorAll('dt'), label => {
         const value: Element | null = label.nextElementSibling;
         return [normalize(label.textContent), value?.tagName === 'DD' ? normalize(value.textContent) : '(no dd)'];

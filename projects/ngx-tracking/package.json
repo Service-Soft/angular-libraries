@@ -1,10 +1,11 @@
 {
     "name": "@service-soft/ngx-tracking",
-    "version": "0.0.1",
+    "version": "22.0.0",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Service-Soft/ngx-tracking.git"
+        "url": "git+https://github.com/Service-Soft/angular-libraries.git",
+        "directory": "projects/ngx-tracking"
     },
     "publishConfig": {
         "access": "public"
@@ -22,7 +23,7 @@
         "@angular/core": "^22.2.0",
         "@angular/router": "^22.2.0",
         "@fortawesome/free-solid-svg-icons": "^7.3.1",
-        "@service-soft/ui": "0.0.1",
+        "@service-soft/ui": "^22.0.0",
         "tailwindcss": "^4.3.3"
     },
     "peerDependenciesMeta": {

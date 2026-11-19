@@ -20,6 +20,13 @@ export const INPUT_DATE_CALENDAR_HEADER_COLOR_CLASSES: Record<InputCalendarColor
 };
 
 /**
+ * The tailwind classes of a cell of a grid of a calendar, around the shape that shows its day, year or month.
+ */
+// the cell is what the grid focuses, the circle inside of it shows the day: preflight collapses the borders of tables,
+// which ignores the radius of a cell. So the cell shows nothing itself, and the circle shows its hover and focus.
+export const INPUT_DATE_CALENDAR_CELL_CLASSES: string = 'group cursor-pointer p-0.5 outline-none aria-disabled:pointer-events-none';
+
+/**
  * The tailwind classes of the circle that shows a day of a calendar. Add the classes of its state. Inside a cell with
  * the class group, it shows the hover and focus of the cell.
  */

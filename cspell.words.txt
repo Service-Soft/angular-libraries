@@ -42,3 +42,6 @@ Français
 Nederlands
 prerendered
 noteref
+alan
+aria-valuenow
+uppercased

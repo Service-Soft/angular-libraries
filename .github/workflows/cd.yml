@@ -1,0 +1,105 @@
+name: CD
+on:
+    pull_request:
+        types: [closed]
+        # `release-<major>` is where a fix for an older major of angular would be released from, the day one is
+        branches: [release, 'release-*']
+
+permissions:
+    id-token: write  # for npm's trusted publishing, and the provenance attestation
+    contents: write  # to tag the released commit and create its GitHub release
+
+jobs:
+    deploy:
+        if: github.event.pull_request.merged
+        runs-on: ubuntu-latest
+        env:
+            # every published library, in the order they depend on each other, as tests/global-setup.ts builds them:
+            # a library is published after the ones it names as peers, so it can always be installed.
+            # tests/release-version.spec.ts checks it names every library that isn't private.
+            LIBRARIES: ui ngx-change-sets ngx-persistence-logger ngx-tracking ngx-pwa ngx-auth ngx-error-handling ngx-navigation ngx-entity ngx-ecommerce
+        steps:
+            # the merge itself rather than the branch, which may have moved on by the time this runs
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                ref: ${{ github.event.pull_request.merge_commit_sha }}
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                node-version: '24'
+                registry-url: 'https://registry.npmjs.org'
+            # the client that signs the provenance attestation, at a version rather than whatever npm shipped that
+            # morning; 11.5.1 is the first that attests
+            - run: npm install -g npm@12.2.1
+            - run: npm ci
+
+            # Everything that can refuse the release happens before anything is published. A publish can't be taken
+            # back, and the libraries name each other as peers by version: half of a release is one consumers can
+            # install and can't resolve.
+            # The version every library shares, the npm tag it goes out under (`latest`, `latest-<major>` for a fix to
+            # an older major, `next` for a prerelease), and the libraries the registry doesn't have at that version
+            # yet, by their directory and separated by spaces: a release that went out halfway is finished by the next
+            # run.
+            - name: read the version this release publishes, and what of it isn't published yet
+              id: version
+              run: node scripts/release-version.ts >> "$GITHUB_OUTPUT"
+            # trusted publishing is set up on npmjs.com per package, so a package the registry has never seen has
+            # nowhere to be set up: its first version is published by hand.
+            - name: refuse a library the registry has never seen
+              run: |
+                for library in $LIBRARIES; do
+                  if ! npm view "@service-soft/$library" name > /dev/null 2>&1; then
+                    echo "@service-soft/$library is not on the registry, and trusted publishing can't create it: publish its first version by hand"
+                    exit 1
+                  fi
+                done
+            # the tag is made after the publishes, so what could stop it has to be asked here
+            - name: refuse a version that already has a tag
+              run: |
+                if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.version }}" > /dev/null; then
+                  echo "the tag v${{ steps.version.outputs.version }} already exists"
+                  exit 1
+                fi
+
+            # every build before any publish, and the tests on what is about to be published: npm test builds each
+            # library into dist, in the order of tests/global-setup.ts
+            - run: npx playwright install --with-deps --only-shell chromium
+            - run: npm test
+
+            # a rehearsal of each, because npm refuses a package for reasons a build never sees, like a name this
+            # account may not publish under. A library the registry already has at this version is skipped: npm
+            # refuses to publish over it.
+            # matched by whole names between spaces: as a substring, 'ui' would match nothing else today, but
+            # 'ngx-auth' would match an 'ngx-auth-x' tomorrow
+            - name: rehearse the publishes
+              env:
+                PUBLISH: ${{ steps.version.outputs.publish }}
+                DIST_TAG: ${{ steps.version.outputs.dist_tag }}
+              run: |
+                for library in $LIBRARIES; do
+                  case " $PUBLISH " in
+                    *" $library "*) npm publish "./dist/$library" --provenance --tag "$DIST_TAG" --dry-run ;;
+                  esac
+                done
+            - name: publish
+              env:
+                PUBLISH: ${{ steps.version.outputs.publish }}
+                DIST_TAG: ${{ steps.version.outputs.dist_tag }}
+              run: |
+                for library in $LIBRARIES; do
+                  case " $PUBLISH " in
+                    *" $library "*) npm publish "./dist/$library" --provenance --tag "$DIST_TAG" ;;
+                  esac
+                done
+
+            # last, because a tag says a version exists, on the commit that produced it. Marked latest only when npm's
+            # `latest` is this release too.
+            - name: tag the release
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                gh release create "v${{ steps.version.outputs.version }}" \
+                  --target "$(git rev-parse HEAD)" \
+                  --title "v${{ steps.version.outputs.version }}" \
+                  --generate-notes \
+                  --latest=${{ steps.version.outputs.dist_tag == 'latest' }} \
+                  --prerelease=${{ steps.version.outputs.dist_tag == 'next' }}

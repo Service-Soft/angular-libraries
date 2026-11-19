@@ -23,7 +23,7 @@ class OpenCalendarComponent {
         afterNextRender(() => element.querySelector<HTMLButtonElement>('button[popovertarget]')?.click());
         afterEveryRender(() => {
             const header: HTMLButtonElement | null = element.querySelector('button[aria-expanded="false"]');
-            if (this.showYears() && !this.yearsShown && header != null) {
+            if (this.showYears() && !this.yearsShown && header != undefined) {
                 this.yearsShown = true;
                 header.click();
             }
@@ -35,6 +35,7 @@ const meta: Meta<InputDateComponent> = {
     title: 'UI/Input date',
     component: InputDateComponent,
     argTypes: {
+        // eslint-disable-next-line sonar/no-duplicate-string
         type: { control: 'inline-radio', options: ['date', 'datetime-local'] },
         size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
         color: { control: 'inline-radio', options: ['neutral', 'primary', 'secondary'] },

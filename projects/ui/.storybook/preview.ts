@@ -2,6 +2,11 @@ import { Preview } from '@storybook/angular';
 
 import { PAGE_LEVEL_RULES } from './page-level-rules';
 
+// whether the app runs on a server, which the angular cli defines in every bundle, but storybook's webpack doesn't.
+// Angular reads it unguarded since 22.2.6 (`ngDevMode || ngServerMode`), so every story threw a ReferenceError in a
+// production build. The cli sets it on globalThis as well, for its server bundles.
+globalThis.ngServerMode ??= false;
+
 const preview: Preview = {
     parameters: {
         a11y: {

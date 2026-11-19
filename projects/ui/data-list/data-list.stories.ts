@@ -60,7 +60,10 @@ export const LongValues: Story = {
             <div class="max-w-md">
                 <ui-data-list
                     [items]="[
-                        { label: 'Description', value: 'Orders ship within two working days, and every order can be returned within 30 days of its delivery.' },
+                        { 
+                            label: 'Description',
+                            value: 'Orders ship within two working days, and every order can be returned within 30 days of its delivery.'
+                        },
                         { label: 'Callback url', value: 'https://example.com/api/webhooks/orders/created/with/a/very/long/path' }
                     ]"
                 />

@@ -1,5 +1,4 @@
-import { Grid, GridCell, GridRow } from '@angular/aria/grid';
-import { afterNextRender, Component, computed, inject, Injector, input, InputSignal, linkedSignal, LOCALE_ID, output, OutputEmitterRef, signal, Signal, viewChildren, WritableSignal } from '@angular/core';
+import { afterNextRender, Component, computed, inject, Injector, input, InputSignal, linkedSignal, LOCALE_ID, output, OutputEmitterRef, signal, Signal, viewChild, WritableSignal } from '@angular/core';
 import { faChevronDown, faChevronLeft, faChevronRight, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { ButtonComponent } from '@service-soft/ui/button';
 import { IconComponent, IconDefinition } from '@service-soft/ui/icon';
@@ -7,14 +6,12 @@ import { INPUT_CONFIG, InputCalendarColor, InputConfig, InputValidation } from '
 
 import { INPUT_DATE_CALENDAR_DAY_CLASSES, INPUT_DATE_CALENDAR_DAY_STATE_CLASSES, INPUT_DATE_CALENDAR_HEADER_CLASSES, INPUT_DATE_CALENDAR_HEADER_COLOR_CLASSES, INPUT_DATE_CALENDAR_TODAY_CLASSES } from './input-date-calendar-classes';
 import { InputDateCalendarDay } from './input-date-calendar-day.model';
+import { InputDateCalendarDaysComponent } from './input-date-calendar-days.component';
 import { InputDateCalendarOption } from './input-date-calendar-option.model';
+import { InputDateCalendarOptionsComponent } from './input-date-calendar-options.component';
 import { InputDateCalendarView } from './input-date-calendar-view.type';
 import { InputDateWeekdayName } from './input-date-weekday-name.model';
 import { InputDateUtilities } from './input-date.utilities';
-
-// the cell is what the grid focuses, the circle inside of it shows the day: preflight collapses the borders of tables,
-// which ignores the radius of a cell. So the cell shows nothing itself, and the circle shows its hover and focus.
-const CELL_CLASSES: string = 'group cursor-pointer p-0.5 outline-none aria-disabled:pointer-events-none';
 
 // a year or a month fills its cell, they have no fixed size like the days.
 const OPTION_CLASSES: string = `
@@ -32,8 +29,8 @@ const OPTION_STATE_CLASSES: Record<'selected' | 'other', string> = {
 // the month and year at the top, as text that hovers like a day rather than a colored text button. A transparent border
 // keeps its shape in forced colors mode while hovered.
 const HEADER_BUTTON_CLASSES: string = `
-    mx-auto inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-button border border-transparent px-2
-    text-center text-label-lg text-on-surface transition-colors
+    mx-auto inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-button border border-transparent px-2 text-center
+    text-label-lg text-on-surface transition-colors
     hover:bg-surface-container
     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
     [&_svg]:size-[1em]
@@ -58,7 +55,7 @@ let nextId: number = 0;
 @Component({
     selector: 'ui-input-date-calendar',
     templateUrl: './input-date-calendar.component.html',
-    imports: [ButtonComponent, IconComponent, Grid, GridRow, GridCell],
+    imports: [ButtonComponent, IconComponent, InputDateCalendarDaysComponent, InputDateCalendarOptionsComponent],
     host: {
         class: 'block'
     }
@@ -127,11 +124,6 @@ export class InputDateCalendarComponent {
     protected readonly chooseYearLabel: string = this.config.chooseYearLabel;
 
     /**
-     * The tailwind classes of a cell of a grid.
-     */
-    protected readonly cellClasses: string = CELL_CLASSES;
-
-    /**
      * The tailwind classes of the header, in its color.
      */
     protected readonly headerClasses: Signal<string> = computed(() => {
@@ -189,6 +181,13 @@ export class InputDateCalendarComponent {
      * The name of the month that shows, like 'November 2026'.
      */
     protected readonly monthLabel: Signal<string> = computed(() => this.monthFormat.format(this.shownMonth()));
+
+    // the name of the button as one text: as a hidden text after the month, chromium reads the two with a space between
+    // them, "November 2026 , Choose a year". It starts with the month it shows, so a voice command saying it still works.
+    /**
+     * The name of the button with the month and year at the top, like 'November 2026, Choose a year'.
+     */
+    protected readonly headerButtonLabel: Signal<string> = computed(() => `${this.monthLabel()}, ${this.chooseYearLabel}`);
 
     /**
      * The year of the month that shows, like '2026', which names the grid of its months.
@@ -255,14 +254,14 @@ export class InputDateCalendarComponent {
         return max != undefined && this.shownMonth().getTime() >= InputDateUtilities.resolveMonthStart(max).getTime();
     });
 
-    private readonly cells: Signal<readonly GridCell[]> = viewChildren(GridCell);
+    // only the grid of the view that shows exists.
+    private readonly daysGrid: Signal<InputDateCalendarDaysComponent | undefined> = viewChild(InputDateCalendarDaysComponent);
 
-    // while the cells take what the days say after a choice, see syncSelectionAfterRender.
-    private syncingSelection: boolean = false;
+    private readonly optionsGrid: Signal<InputDateCalendarOptionsComponent | undefined> = viewChild(InputDateCalendarOptionsComponent);
 
     constructor() {
         // the calendar is created when it opens, and focus moves into it like into a dialog: to the chosen day, or today,
-        // or the first day of the month. Focusing a cell makes it the active one of the grid.
+        // or the first day of the month.
         this.focusInitialCellAfterRender();
     }
 
@@ -288,89 +287,28 @@ export class InputDateCalendarComponent {
     }
 
     /**
-     * Chooses a day, when the grid selected or deselected it because the user chose it.
-     * @param day - The day.
-     * @param active - Whether its cell is the active one of the grid.
-     */
-    // choosing another day first deselects the chosen one, whose cell isn't the active one. Deselecting the chosen day
-    // itself means the user chose it again, which takes it as well.
-    protected choose(day: InputDateCalendarDay, active: boolean): void {
-        if (active && !this.syncingSelection) {
-            this.chosen.emit(day.date);
-            this.syncSelectionAfterRender();
-        }
-    }
-
-    /**
-     * Shows the months of a year, when the grid selected or deselected it because the user chose it. Like choose.
+     * Shows the months of the year the user chose.
      * @param year - The year.
-     * @param active - Whether its cell is the active one of the grid.
      */
-    protected chooseYear(year: InputDateCalendarOption, active: boolean): void {
-        if (!active) {
-            return;
-        }
+    protected chooseYear(year: InputDateCalendarOption): void {
         this.shownMonth.update(month => new Date(year.date.getFullYear(), month.getMonth(), 1));
         this.view.set('months');
         this.focusInitialCellAfterRender();
     }
 
     /**
-     * Shows the days of a month, when the grid selected or deselected it because the user chose it. Like choose.
+     * Shows the days of the month the user chose.
      * @param month - The month.
-     * @param active - Whether its cell is the active one of the grid.
      */
-    protected chooseMonth(month: InputDateCalendarOption, active: boolean): void {
-        if (!active) {
-            return;
-        }
+    protected chooseMonth(month: InputDateCalendarOption): void {
         this.shownMonth.set(month.date);
         this.view.set('days');
         this.focusInitialCellAfterRender();
     }
 
-    // the grid selects the cell that was chosen and deselects every other one, or deselects the chosen cell when it was
-    // selected already. That isn't always what the days say once the input took the day, like the start of a range,
-    // which stays chosen when the end is chosen: a cell whose binding doesn't change would keep what the grid set.
-    // Setting it emits selectedChange like a choice of the user, which choose ignores meanwhile.
-    private syncSelectionAfterRender(): void {
-        afterNextRender(() => {
-            const days: InputDateCalendarDay[] = this.weeks().flat();
-            this.syncingSelection = true;
-            for (const [index, cell] of this.cells().entries()) {
-                cell.selected.set(days[index]?.selected ?? false);
-            }
-            this.syncingSelection = false;
-        }, { injector: this.injector });
-    }
-
     // choosing a year or a month removes the grid that had focus, which would leave it on the body.
     private focusInitialCellAfterRender(): void {
-        afterNextRender(() => this.findInitialCell()?.element.focus(), { injector: this.injector });
-    }
-
-    private findInitialCell(): GridCell | undefined {
-        switch (this.view()) {
-            case 'days': {
-                return this.cells()[this.findInitialDayIndex()];
-            }
-            case 'years': {
-                return this.cells()[this.years().flat().findIndex(year => year.selected)];
-            }
-            case 'months': {
-                return this.cells()[this.months().flat().findIndex(month => month.selected)];
-            }
-        }
-    }
-
-    private findInitialDayIndex(): number {
-        const days: InputDateCalendarDay[] = this.weeks().flat();
-        const month: number = this.shownMonth().getMonth();
-        return [
-            days.findIndex(day => day.selected),
-            days.findIndex(day => day.today && day.date.getMonth() === month),
-            days.findIndex(day => !day.disabled && day.date.getMonth() === month)
-        ].find(found => found >= 0) ?? -1;
+        afterNextRender(() => (this.daysGrid() ?? this.optionsGrid())?.focusInitialCell(), { injector: this.injector });
     }
 
     private toDay(date: Date, month: Date): InputDateCalendarDay {
@@ -407,7 +345,13 @@ export class InputDateCalendarComponent {
     }
 
     private toOption(date: Date, label: string, selected: boolean, disabled: boolean): InputDateCalendarOption {
-        return { date, label, selected, disabled, classes: [OPTION_CLASSES, OPTION_STATE_CLASSES[selected ? 'selected' : 'other']].join(' ') };
+        return {
+            date,
+            label,
+            selected,
+            disabled,
+            classes: [OPTION_CLASSES, OPTION_STATE_CLASSES[selected ? 'selected' : 'other']].join(' ')
+        };
     }
 
     private toRows(options: InputDateCalendarOption[], perRow: number): InputDateCalendarOption[][] {

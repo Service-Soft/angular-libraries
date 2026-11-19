@@ -17,6 +17,7 @@ class LinkHostComponent {}
 
 @Component({
     selector: 'ui-external-link-host',
+    // eslint-disable-next-line angular/component-max-inline-declarations
     template: `
         <a ui-link href="https://example.com/terms">Terms</a>
         <a ui-link href="/help" target="_blank">Help</a>
@@ -129,6 +130,7 @@ describe('LinkUtilities.isExternal', () => {
         expect(LinkUtilities.isExternal('#terms', origin)).toBe(false);
         expect(LinkUtilities.isExternal('mailto:help@example.com', origin)).toBe(false);
         expect(LinkUtilities.isExternal('tel:+49123', origin)).toBe(false);
+        // eslint-disable-next-line unicorn/no-null
         expect(LinkUtilities.isExternal(null, origin)).toBe(false);
     });
 });

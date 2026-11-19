@@ -1,3 +1,4 @@
+/* eslint-disable cspell/spellchecker */
 import { Component, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, test } from 'vitest';

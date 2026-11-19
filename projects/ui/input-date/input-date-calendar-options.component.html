@@ -1,0 +1,30 @@
+<!-- a table grows with its content, so its height is only the least one -->
+<table
+    ngGrid
+    enableSelection
+    selectionMode="explicit"
+    rowWrap="nowrap"
+    colWrap="continuous"
+    class="w-full"
+    [class.h-68]="fullHeight()"
+    [attr.aria-label]="label()"
+>
+    <tbody>
+        @for (row of options(); track $index) {
+            <tr ngGridRow>
+                @for (option of row; track option.label) {
+                    <td
+                        #cell="ngGridCell"
+                        ngGridCell
+                        [class]="cellClasses"
+                        [selected]="option.selected"
+                        [disabled]="option.disabled"
+                        (selectedChange)="choose(option, cell.active())"
+                    >
+                        <span [class]="option.classes">{{ option.label }}</span>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

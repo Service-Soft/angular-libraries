@@ -92,12 +92,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, Record<ButtonColor, string>> = {
             focus-visible:outline-secondary-text
         `,
         error: 'border-error text-error hover:bg-error-tint active:bg-error-tint-pressed focus-visible:outline-error',
-        success: `
-            border-success text-success-text
-            hover:bg-success-tint
-            active:bg-success-tint-pressed
-            focus-visible:outline-success-text
-        `
+        success: 'border-success text-success-text hover:bg-success-tint active:bg-success-tint-pressed focus-visible:outline-success-text'
     },
     text: {
         primary: 'border-transparent text-primary hover:bg-primary-tint active:bg-primary-tint-pressed focus-visible:outline-primary',

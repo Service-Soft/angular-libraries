@@ -1,0 +1,32 @@
+<table ngGrid enableSelection selectionMode="explicit" rowWrap="nowrap" colWrap="continuous" class="w-full" [attr.aria-labelledby]="labelledBy()">
+    <thead>
+        <tr>
+            @for (weekday of weekdays(); track $index) {
+                <th class="h-8 w-10 text-center text-label-sm text-on-surface-variant" scope="col">
+                    <span aria-hidden="true">{{ weekday.short }}</span>
+                    <span class="sr-only">{{ weekday.long }}</span>
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (week of weeks(); track $index) {
+            <tr ngGridRow>
+                @for (day of week; track day.label) {
+                    <td
+                        #cell="ngGridCell"
+                        ngGridCell
+                        [class]="cellClasses"
+                        [selected]="day.selected"
+                        [disabled]="day.disabled"
+                        [attr.aria-label]="day.label"
+                        [attr.aria-current]="day.today ? 'date' : null"
+                        (selectedChange)="choose(day, cell.active())"
+                    >
+                        <span [class]="day.classes">{{ day.dayOfMonth }}</span>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

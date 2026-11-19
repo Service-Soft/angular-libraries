@@ -15,9 +15,14 @@
     }
     <!-- expanded while the years or months show instead of the days, which the button switches back to. The month is a
          live region, so screen readers announce the month the buttons switched to. -->
-    <button type="button" [class]="headerButtonClasses" [attr.aria-expanded]="view() !== 'days'" (click)="toggleYears()">
+    <button
+        type="button"
+        [class]="headerButtonClasses"
+        [attr.aria-label]="headerButtonLabel()"
+        [attr.aria-expanded]="view() !== 'days'"
+        (click)="toggleYears()"
+    >
         <span aria-live="polite" [id]="monthId">{{ monthLabel() }}</span>
-        <span class="sr-only">, {{ chooseYearLabel }}</span>
         <ui-icon [icon]="headerIcon()" />
     </button>
     @if (view() === 'days') {
@@ -42,86 +47,24 @@
          start of the next one, colWrap is what the grid applies to the arrows left and right. -->
     @switch (view()) {
         @case ('days') {
-            <table ngGrid enableSelection selectionMode="explicit" rowWrap="nowrap" colWrap="continuous" class="w-full" [attr.aria-labelledby]="monthId">
-                <thead>
-                    <tr>
-                        @for (weekday of weekdays; track $index) {
-                            <th class="h-8 w-10 text-center text-label-sm text-on-surface-variant" scope="col">
-                                <span aria-hidden="true">{{ weekday.short }}</span>
-                                <span class="sr-only">{{ weekday.long }}</span>
-                            </th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (week of weeks(); track $index) {
-                        <tr ngGridRow>
-                            @for (day of week; track day.label) {
-                                <td
-                                    #cell="ngGridCell"
-                                    ngGridCell
-                                    [class]="cellClasses"
-                                    [selected]="day.selected"
-                                    [disabled]="day.disabled"
-                                    [attr.aria-label]="day.label"
-                                    [attr.aria-current]="day.today ? 'date' : null"
-                                    (selectedChange)="choose(day, cell.active())"
-                                >
-                                    <span [class]="day.classes">{{ day.dayOfMonth }}</span>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <ui-input-date-calendar-days
+                [weeks]="weeks()"
+                [weekdays]="weekdays"
+                [month]="shownMonth()"
+                [labelledBy]="monthId"
+                (chosen)="chosen.emit($event)"
+            />
         }
         @case ('years') {
             <!-- as high as the days, and scrolled to the shown year by focusing it. The padding keeps the focus outline
                  of the cells at the edges inside of what scrolls. -->
             <div class="max-h-68 overflow-y-auto p-1">
-                <table ngGrid enableSelection selectionMode="explicit" rowWrap="nowrap" colWrap="continuous" class="w-full" [attr.aria-label]="chooseYearLabel">
-                    <tbody>
-                        @for (row of years(); track $index) {
-                            <tr ngGridRow>
-                                @for (year of row; track year.label) {
-                                    <td
-                                        #cell="ngGridCell"
-                                        ngGridCell
-                                        [class]="cellClasses"
-                                        [selected]="year.selected"
-                                        (selectedChange)="chooseYear(year, cell.active())"
-                                    >
-                                        <span [class]="year.classes">{{ year.label }}</span>
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                <ui-input-date-calendar-options [options]="years()" [label]="chooseYearLabel" (chosen)="chooseYear($event)" />
             </div>
         }
         @case ('months') {
-            <!-- a table grows with its content, so its height is only the least one: as high as the days -->
-            <table ngGrid enableSelection selectionMode="explicit" rowWrap="nowrap" colWrap="continuous" class="h-68 w-full" [attr.aria-label]="yearLabel()">
-                <tbody>
-                    @for (row of months(); track $index) {
-                        <tr ngGridRow>
-                            @for (month of row; track month.label) {
-                                <td
-                                    #cell="ngGridCell"
-                                    ngGridCell
-                                    [class]="cellClasses"
-                                    [selected]="month.selected"
-                                    [disabled]="month.disabled"
-                                    (selectedChange)="chooseMonth(month, cell.active())"
-                                >
-                                    <span [class]="month.classes">{{ month.label }}</span>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <!-- as high as the days -->
+            <ui-input-date-calendar-options fullHeight [options]="months()" [label]="yearLabel()" (chosen)="chooseMonth($event)" />
         }
     }
 </div>
