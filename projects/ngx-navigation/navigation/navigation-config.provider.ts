@@ -6,7 +6,8 @@ const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
     labels: {
         home: 'Home',
         anchors: 'On this page'
-    }
+    },
+    routeCondition: () => true
 };
 
 /**
@@ -18,7 +19,7 @@ export const NAVIGATION_CONFIG: InjectionToken<NavigationConfig> = new Injection
 });
 
 /**
- * Changes what every part of the navigation shares, like the labels to translate them.
+ * Changes what every part of the navigation shares, like the labels to translate them, or which links show.
  * Provide it in the application config for the whole app, or in a component or route for only that part of it.
  * Values you leave out are taken from the parent injector, including single labels.
  * @param config - The values to change.
@@ -29,7 +30,11 @@ export function provideNavigationConfig(config: NavigationConfigChanges): Provid
         provide: NAVIGATION_CONFIG,
         useFactory: (): NavigationConfig => {
             const parent: NavigationConfig = inject(NAVIGATION_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_NAVIGATION_CONFIG;
-            return { ...parent, labels: { ...parent.labels, ...config.labels } };
+            return {
+                ...parent,
+                labels: { ...parent.labels, ...config.labels },
+                routeCondition: config.routeCondition ?? parent.routeCondition
+            };
         }
     };
 }

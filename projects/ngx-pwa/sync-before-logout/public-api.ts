@@ -1,0 +1,1 @@
+export * from './sync-before-logout.function';

@@ -50,6 +50,17 @@ export type AuthConfig = {
      */
     refreshBeforeExpiryInMs: number,
     /**
+     * Runs before a logout and a logout everywhere, while the user is still logged in, like to sync what they changed
+     * offline first. It runs in an injection context, so it can use inject(). The user stays logged in when it answers
+     * false. Logs out by default.
+     */
+    beforeLogout: () => boolean | Promise<boolean>,
+    /**
+     * Runs whenever the login of this browser ends, once it is gone: at a logout, and when the server ended it. Like to
+     * delete what the app kept of the user. It runs in an injection context, so it can use inject().
+     */
+    onLogout: () => void | Promise<void>,
+    /**
      * Loads what asks the user for a second factor when a request needs one, with a dynamic import(). Without it, such
      * a request fails.
      */

@@ -1,10 +1,12 @@
 import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
+import { inject, InjectionToken, Provider, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { CachedRequest } from './cached-request.model';
+import { provideOfflineConfig } from './offline-config.provider';
 import { OFFLINE_REQUEST_METADATA } from './offline-request-metadata.provider';
 import { offlineInterceptor } from './offline.interceptor';
 import { OfflineService } from './offline.service';
@@ -26,9 +28,20 @@ function setConnection(online: boolean): void {
     window.dispatchEvent(new Event(online ? 'online' : 'offline'));
 }
 
-function setup(online: boolean = false): [OfflineService, HttpClient, HttpTestingController] {
+// who is logged in and the tenant they act in, like the AuthService of ngx-auth tells them.
+const USER: InjectionToken<WritableSignal<string | undefined>> = new InjectionToken('USER', { providedIn: 'root', factory: () => signal('ada') });
+const TENANT: InjectionToken<WritableSignal<string | undefined>> = new InjectionToken('TENANT', { providedIn: 'root', factory: () => signal('tenant-a') });
+
+const BY_USER_AND_TENANT: Provider = provideOfflineConfig({
+    headers: { 'x-tenant-id': () => inject(TENANT)() },
+    scope: () => inject(USER)()
+});
+
+function setup(online: boolean = false, providers: Provider[] = []): [OfflineService, HttpClient, HttpTestingController] {
     setConnection(online);
-    TestBed.configureTestingModule({ providers: [provideHttpClient(withInterceptors([offlineInterceptor])), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+        providers: [provideHttpClient(withInterceptors([offlineInterceptor])), provideHttpClientTesting(), ...providers]
+    });
     return [TestBed.inject(OfflineService), TestBed.inject(HttpClient), TestBed.inject(HttpTestingController)];
 }
 
@@ -91,6 +104,54 @@ describe('OfflineService', () => {
             { id: created.id, title: 'Buy milk', done: true }
         ]);
         expect(loaded).toEqual([{ id: 1, title: 'Water plants' }, { id: 11, title: 'Pay rent' }, { id: 12, title: 'Clean up' }]);
+    });
+
+    test('syncs a change in the tenant it was made in after the user switched, and shows it only there', async () => {
+        const [offlineService, http, backend] = setup(false, [BY_USER_AND_TENANT]);
+        const loaded: Todo[] = [{ id: 1, title: 'Call Bob' }];
+        await createTodoOffline(http, 'Buy milk');
+        // a request that names a tenant itself keeps its own
+        await firstValueFrom(http.post<Todo>('/api/todos', { title: 'Shared' }, { context: TODO_CONTEXT, headers: { 'x-tenant-id': 'tenant-c' } }));
+        expect(offlineService.applyOfflineData('todo', loaded).map(todo => todo.title)).toEqual(['Call Bob', 'Buy milk']);
+
+        TestBed.inject(TENANT).set('tenant-b');
+        expect(offlineService.applyOfflineData('todo', loaded).map(todo => todo.title)).toEqual(['Call Bob']);
+        // the sync dialog still lists them, so the user can sync them from anywhere
+        expect(offlineService.cachedRequests().map(request => request.headers)).toEqual([{ 'x-tenant-id': 'tenant-a' }, { 'x-tenant-id': 'tenant-c' }]);
+
+        setConnection(true);
+        const synced: Promise<void> = offlineService.syncAll();
+        const first: TestRequest = await expectRequest(backend, 'POST', '/api/todos');
+        expect(first.request.headers.get('x-tenant-id')).toBe('tenant-a');
+        first.flush({ id: 2, title: 'Buy milk' });
+        const second: TestRequest = await expectRequest(backend, 'POST', '/api/todos');
+        expect(second.request.headers.get('x-tenant-id')).toBe('tenant-c');
+        second.flush({ id: 3, title: 'Shared' });
+        await synced;
+        expect(offlineService.cachedRequests()).toEqual([]);
+    });
+
+    test('never sends a change with the login of somebody else, and shows it only to who made it', async () => {
+        const [offlineService, http, backend] = setup(false, [BY_USER_AND_TENANT]);
+        await createTodoOffline(http, 'Buy milk');
+        const [byAda] = offlineService.cachedRequests();
+        expect(byAda.scope).toBe('ada');
+
+        // another user logs in on the same device
+        TestBed.inject(USER).set('grace');
+        expect(offlineService.cachedRequests()).toEqual([]);
+        expect(offlineService.applyOfflineData('todo', [])).toEqual([]);
+        setConnection(true);
+        await offlineService.syncAll();
+        await expect(offlineService.sync(byAda)).rejects.toThrow('made by somebody else');
+        offlineService.removeAll();
+        backend.expectNone('/api/todos');
+
+        TestBed.inject(USER).set('ada');
+        expect(offlineService.cachedRequests()).toEqual([byAda]);
+        const synced: Promise<void> = offlineService.syncAll();
+        (await expectRequest(backend, 'POST', '/api/todos')).flush({ id: 2, title: 'Buy milk' });
+        await synced;
     });
 
     test('syncs every request once, oldest first, and gives the later ones the id the server created', async () => {

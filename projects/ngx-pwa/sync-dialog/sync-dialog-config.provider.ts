@@ -20,6 +20,8 @@ const DEFAULT_SYNC_DIALOG_CONFIG: SyncDialogConfig = {
         discardAllMessage: 'The changes are deleted from this device without being synced. This can\'t be undone.',
         cancel: 'Cancel',
         close: 'Close',
+        beforeLogout: 'Sync or discard your changes before you log out.',
+        stayLoggedIn: 'Stay logged in',
         synced: 'Synced.',
         discarded: 'Discarded.',
         syncFailed: 'Syncing failed. Please try again later.',

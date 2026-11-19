@@ -1,5 +1,8 @@
-import { isPlatformBrowser } from '@angular/common';
-import { inject, Injector, PLATFORM_ID, Service } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { DestroyRef, inject, Injector, PLATFORM_ID, Service } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
 import { ConsentConfig } from './consent-config.model';
 import { CONSENT_CONFIG } from './consent-config.provider';
@@ -8,6 +11,10 @@ import { Tracking } from './tracking.model';
 import { TrackingService } from './tracking.service';
 
 const CHOICES_KEY: string = 'trackingConsentChoices';
+
+// what counts as the user doing something with the page: a click or tap, a key, scrolling, and moving the mouse,
+// which opens the dialog within the first second on a desktop, but doesn't end the measurement of the largest paint.
+const INTERACTIONS: (keyof DocumentEventMap)[] = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel', 'mousemove'];
 
 /**
  * When the user made their choices, as it is stored in the browser.
@@ -34,8 +41,8 @@ type PrivacySignals = {
 };
 
 /**
- * Asks the user which trackings they allow and keeps their choices. The consentGuard asks on the first navigation;
- * call openDialog to let the user change their choices later, like from a link in the footer.
+ * Asks the user which trackings they allow and keeps their choices. The consentGuard or the askOn of
+ * provideTrackingConsent ask; call openDialog to let the user change their choices later, like from a link in the footer.
  */
 @Service()
 export class ConsentService {
@@ -44,6 +51,10 @@ export class ConsentService {
     private readonly injector: Injector = inject(Injector);
 
     private readonly isBrowser: boolean = isPlatformBrowser(inject(PLATFORM_ID));
+
+    private readonly document: Document = inject(DOCUMENT);
+
+    private readonly destroyRef: DestroyRef = inject(DestroyRef);
 
     private dialogOpen: boolean = false;
 
@@ -79,6 +90,41 @@ export class ConsentService {
             return;
         }
         await this.openDialog();
+    }
+
+    /**
+     * Starts asking the user for their choices when the askOn of the config says, unless they made them: at the end of
+     * every navigation, or once at their first interaction with the page. Only in the browser, so nothing of the dialog
+     * is in prerendered html. Called by provideTrackingConsent.
+     */
+    startAsking(): void {
+        if (!this.isBrowser || this.config.askOn == undefined) {
+            return;
+        }
+        if (this.config.askOn === 'navigation') {
+            this.injector.get(Router).events
+                .pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+                .subscribe(() => void this.requestChoices());
+            return;
+        }
+        // nobody who chose already waits for their first interaction, which would only ask nothing
+        if (this.hasMadeChoices) {
+            return;
+        }
+        // the visitor sees the page first, and the dialog is not what it loaded with: one that opens with the page
+        // counts as its largest paint, rated as the page loading slowly.
+        const firstInteraction: AbortController = new AbortController();
+        this.destroyRef.onDestroy(() => firstInteraction.abort());
+        for (const interaction of INTERACTIONS) {
+            this.document.addEventListener(
+                interaction,
+                () => {
+                    firstInteraction.abort();
+                    void this.requestChoices();
+                },
+                { once: true, passive: true, signal: firstInteraction.signal }
+            );
+        }
     }
 
     /**

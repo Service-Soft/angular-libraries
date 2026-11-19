@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 
 import { AuthErrorBody } from './auth-error-body.model';
 
@@ -52,5 +52,17 @@ export abstract class AuthErrorUtilities {
     static findErrorParagraphs(error: unknown): string[] | undefined {
         const paragraphs: string[] | undefined = this.findErrorBody(error)?.paragraphs;
         return paragraphs?.length ? paragraphs : undefined;
+    }
+
+    /**
+     * Whether a request failed without an answer of the server, like while the browser is offline: with no answer at
+     * all, or with the 504 of a gateway that couldn't reach it, which the service worker of Angular answers as well. The
+     * server refused nothing then, so a login it was about may still be good.
+     * @param error - What the request failed with.
+     * @returns True when the request didn't reach the server or its answer didn't arrive.
+     */
+    static isNetworkError(error: unknown): boolean {
+        return error instanceof HttpErrorResponse
+            && (error.status === 0 || error.status === HttpStatusCode.GatewayTimeout);
     }
 }

@@ -7,6 +7,10 @@ export type OfflineStatusBarLabels = {
      */
     offline: string,
     /**
+     * Shown while the app shows data of the offline cache, before when the oldest of it was loaded.
+     */
+    loadedAt: string,
+    /**
      * Shown while the user is online and has changes that aren't synced.
      */
     unsavedChanges: string,

@@ -20,6 +20,7 @@ A table shows the entities a page at a time from the server, with the columns, o
   - [Arrays](#arrays)
   - [Relations](#relations)
 - [Reading and writing entities](#reading-and-writing-entities)
+  - [Working offline](#working-offline)
 - [The table of an entity](#the-table-of-an-entity)
 - [The form of an entity](#the-form-of-an-entity)
 - [Pages of an entity](#pages-of-an-entity)
@@ -36,7 +37,7 @@ Angular 22 and Tailwind CSS 4. The models shared with zibri, like `PaginationRes
 npm install @service-soft/ngx-entity @service-soft/ui @service-soft/ngx-error-handling zibri-contract
 ```
 
-The decorators need `"experimentalDecorators": true` in your `tsconfig.json`, like zibri.
+The decorators need `"experimentalDecorators": true` in your `tsconfig.json`, like zibri. To [work offline](#working-offline), install `@service-soft/ngx-pwa` as well.
 
 # Setup
 Your Tailwind generates the css. Add both packages to your global stylesheet:
@@ -172,7 +173,31 @@ export class TaskService extends EntityService<Task, typeof taskFilter, typeof t
 | `update(original, current)` | `PATCH baseUrl/:id` with only the values that changed | the entity as the server saved it |
 | `delete(entity)` | `DELETE baseUrl/:id` | nothing |
 
-The filter and order are typed by the configs, with `FilterValue` and `OrderValue` of zibri-contract, so a request can only ask for what the controller allows. Without an `order`, the list may be ordered like zibri's default; `false` orders nothing. The id of an entity is its `id`; override `getId` for one of another name, and any method for routes of your own.
+The filter and order are typed by the configs, with `FilterValue` and `OrderValue` of zibri-contract, so a request can only ask for what the controller allows. Without an `order`, the list may be ordered like zibri's default; `false` orders nothing. The id of an entity is its `id`; override `findId` for one of another name, which `getId` uses as well, and any method for routes of your own.
+
+## Working offline
+With [@service-soft/ngx-pwa](https://www.npmjs.com/package/@service-soft/ngx-pwa), every `EntityService` of the app can create, change and delete entities while the user is offline. It is opt-in: install ngx-pwa and add `provideOfflineEntities` of `@service-soft/ngx-entity/offline`, next to the `offlineInterceptor` of ngx-pwa. Without it, nothing of ngx-pwa is loaded and the requests go like any other.
+
+```ts
+providers: [
+    provideHttpClient(withInterceptors([authInterceptor, offlineCacheInterceptor, offlineInterceptor])),
+    provideOfflineConfig({ headers: { 'x-tenant-id': () => inject(AuthService).activeTenantId() }, scope: () => inject(AuthService).authData()?.userId }),
+    provideOfflineCache({ urls: ['https://api.example.com/'] }),
+    provideOfflineEntities()
+]
+```
+
+- `create`, `update` and `delete` mark their requests for ngx-pwa, with the `baseUrl` of the service as the type of the entity. While offline, they are kept and answered right away, a new entity with an id like `offline-…`, and the user syncs them later in the sync dialog.
+- `resolvePage` applies the changes made offline to its page: changed and deleted entities on every page, created ones on the first, and `totalAmount` counts every created one more and every deleted one less. Only the changes of the current user and tenant count, as `provideOfflineConfig` tells them apart.
+- The sync dialog names a change by `getLabel` of the service, the url of the entity by default. Override it to show what the user knows the entity by:
+
+```ts
+override getLabel(user: Partial<User>): string {
+    return `${user.firstName} ${user.lastName}`;
+}
+```
+
+It gets the values of a new entity too, so any of them may still be missing. Reading offline is the offline cache of ngx-pwa, which answers the GET requests of the table with what was loaded last.
 
 # The table of an entity
 `ngx-entity-table` of `@service-soft/ngx-entity/table` shows the entities of a service a page at a time, on the `ui-table` of `@service-soft/ui/table`. Name the columns by the keys of their properties:
@@ -322,7 +347,7 @@ It is not finished: many-to-many relations and files (which wait for the next ma
 - It needs `@service-soft/ui` and Tailwind instead of Angular Material, and no `reflect-metadata`.
 - The decorators are `Property.string`, `.number`, `.boolean`, `.date`, `.object` and `.array`, with zibri's option names (`minLength`, `regex`, `enum`, `min`, `after`, `cls`, `items`, …). `isReadOnly` is `readonly`, and the rules that depend on the entity get it typed. `defaultWidths` and `position` stay as they were. A select is a string or number with an `enum`. A password is `password: true`, with `confirmation` for `needsConfirmation`, `confirmationDisplayName` and `passwordStrength` for `displayPasswordStrength`. An `@object` is inline or a `'dropdown'` with `options`, and an `@array` says what it holds in `items` instead of `itemType`, with `options` for `autocompleteValues`. A string with `autocompleteValues` is `displayStyle: 'autocomplete'` with `options`, a `'daterange'` date is `Property.dateRange` (without the list of its days, `values`), and `@custom` is `Property.custom` with `data` for `customMetadata`; validation is the native one of its component instead of `isValid`.
 - Entities don't have to be built with `new`: the metadata lives with the class, not the instance.
-- `EntityService` takes a filter and an order config typed against the entity, pages on the server, sends only the changed values with `PATCH`, and keeps no cache. The id is `getId`, which you can override, instead of `entity.id`.
+- `EntityService` takes a filter and an order config typed against the entity, pages on the server, sends only the changed values with `PATCH`, and keeps no cache. The id is `getId`, which reads it with `findId`, which you can override, instead of `entity.id`.
 - The form validates with the native rules of the inputs, and shows zibri's problems at their fields.
 - The create and edit pages come from `EntityRouteUtilities.resolveRoutes`, with the title of each route as its heading, and `UnsavedChangesGuard` is the function `unsavedChangesGuard` for any component with a `hasUnsavedChanges()`.
 - `ngx-mat-entity-table` loaded every entity and searched, sorted and paged them in the browser. `ngx-entity-table` asks the server for one page, ordered and filtered by the configs of the service, and has no search over all columns; `ui-local-table` of `@service-soft/ui/local-table` is the table for rows you have in full.

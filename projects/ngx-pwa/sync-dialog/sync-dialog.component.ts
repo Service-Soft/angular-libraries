@@ -2,18 +2,20 @@ import { afterNextRender, Component, computed, ElementRef, inject, Injector, Sig
 import { faCloudArrowUp, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { CachedRequest, OfflineService } from '@service-soft/ngx-pwa/offline';
 import { ButtonComponent } from '@service-soft/ui/button';
-import { ConfirmDialogComponent, ConfirmDialogData, DialogRef, DialogService } from '@service-soft/ui/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData, DIALOG_DATA, DialogRef, DialogService } from '@service-soft/ui/dialog';
 import { IconComponent } from '@service-soft/ui/icon';
 import { SnackbarService } from '@service-soft/ui/snackbar';
 
 import { SyncDialogLabels } from './sync-dialog-config.model';
 import { SYNC_DIALOG_CONFIG } from './sync-dialog-config.provider';
+import { SyncDialogData } from './sync-dialog-data.model';
 import { SyncRequestView } from './sync-request-view.model';
 
 /**
  * The dialog where the user syncs or discards the changes they made offline, opened with the DialogService:
  * `dialogService.open(SyncDialogComponent)`. The OfflineStatusBarComponent opens it from its sync button. It closes by
- * itself once no change is left.
+ * itself once no change is left, with true. Opened with the SyncDialogData `{ beforeLogout: true }`, it asks before
+ * the user logs out, see syncBeforeLogout.
  */
 @Component({
     selector: 'ngx-sync-dialog',
@@ -46,6 +48,16 @@ export class SyncDialogComponent {
      * The texts of the dialog.
      */
     protected readonly labels: SyncDialogLabels = inject(SYNC_DIALOG_CONFIG).labels;
+
+    /**
+     * Whether the dialog asks before the user logs out.
+     */
+    protected readonly beforeLogout: boolean = inject<SyncDialogData | undefined>(DIALOG_DATA)?.beforeLogout === true;
+
+    /**
+     * The button that closes the dialog, which keeps the user logged in before a logout.
+     */
+    protected readonly closeLabel: string = this.beforeLogout ? this.labels.stayLoggedIn : this.labels.close;
 
     /**
      * The icon of the buttons that sync a change.
@@ -103,7 +115,7 @@ export class SyncDialogComponent {
     protected discard(request: CachedRequest): void {
         this.offlineService.remove(request);
         if (!this.offlineService.cachedRequests().length) {
-            this.dialogRef.close();
+            this.dialogRef.close(true);
             return;
         }
         this.status.set(this.labels.discarded);
@@ -126,7 +138,7 @@ export class SyncDialogComponent {
             return;
         }
         this.offlineService.removeAll();
-        this.dialogRef.close();
+        this.dialogRef.close(true);
     }
 
     private async runSync(syncRequests: () => Promise<void>): Promise<void> {
@@ -145,7 +157,7 @@ export class SyncDialogComponent {
             this.syncing = false;
         }
         if (!this.offlineService.cachedRequests().length) {
-            this.dialogRef.close();
+            this.dialogRef.close(true);
             this.snackbarService.open(this.labels.allSynced);
             return;
         }
