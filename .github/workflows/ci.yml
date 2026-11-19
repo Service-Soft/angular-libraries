@@ -25,7 +25,29 @@ jobs:
                 node-version: '24'
             - run: npm ci
             - run: npx playwright install --with-deps --only-shell chromium
-            - run: npm test
+            # what npm test runs, without the AXE checks of every story, which the accessibility jobs split up
+            - run: npx ng test
+            - run: npm run test:workspace -- --exclude tests/accessibility.spec.ts
+    # the AXE checks of every story in light and dark mode take longer than everything else together, so they are split
+    # over several jobs. Each builds storybook itself, which is quicker than waiting for a job to hand it over.
+    accessibility:
+        runs-on: ubuntu-latest
+        strategy:
+            # every part reports its own violations, rather than the first one cancelling the others
+            fail-fast: false
+            matrix:
+                shard: [1, 2, 3, 4]
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                node-version: '24'
+            - run: npm ci
+            - run: npx playwright install --with-deps --only-shell chromium
+            - run: npm run build-storybook
+            - run: npx vitest run --config tests/vitest.accessibility.config.mts
+              env:
+                ACCESSIBILITY_SHARD: ${{ matrix.shard }}/4
     storybook:
         runs-on: ubuntu-latest
         steps:
