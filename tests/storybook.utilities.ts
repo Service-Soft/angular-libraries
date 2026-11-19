@@ -33,6 +33,27 @@ export abstract class StorybookUtilities {
         return Object.values(index.entries).filter(entry => entry.type === 'story');
     }
 
+    // vitest only shards by file, and checking every story is one file which takes long, so a CI job takes a part of
+    // the stories itself. Every n-th story rather than a block, so the parts of a component are spread over the jobs.
+    /**
+     * Finds the part of the stories one of several jobs checks.
+     * @param shard - Which part, like '2/4' for the second of four. Without one, every story.
+     * @returns The stories of the part.
+     * @throws {Error} When the shard is no part, like '5/4'.
+     */
+    static findStoriesOfShard(shard: string | undefined): StoryIndexEntry[] {
+        const stories: StoryIndexEntry[] = this.findStories();
+        if (shard == undefined || shard === '') {
+            return stories;
+        }
+        const [index, count] = shard.split('/').map(Number);
+        const isPart: boolean = index != undefined && count != undefined && Number.isInteger(index) && Number.isInteger(count);
+        if (!isPart || index < 1 || index > count) {
+            throw new Error(`The shard '${shard}' is no part like '2/4'.`);
+        }
+        return stories.filter((_, position) => position % count === index - 1);
+    }
+
     /**
      * Opens a story on its own, like the canvas of storybook shows it.
      * @param page - The page to open the story in.

@@ -1,5 +1,6 @@
 import { afterNextRender, booleanAttribute, Component, computed, ElementRef, inject, Injector, input, InputSignal, InputSignalWithTransform, model, ModelSignal, output, OutputEmitterRef, Signal, TemplateRef, viewChild } from '@angular/core';
 import { EmptyStateComponent, EmptyStateVariant } from '@service-soft/ui/empty-state';
+import { ScrollRegionDirective } from '@service-soft/ui/scroll-region';
 import { SpinnerComponent } from '@service-soft/ui/spinner';
 
 import { TableActiveFilter } from './table-active-filter.model';
@@ -90,7 +91,8 @@ const LOADING_CELL_CLASSES: Record<'overlay' | 'empty', string> = {
         TableRowComponent,
         TableFooterComponent,
         SpinnerComponent,
-        EmptyStateComponent
+        EmptyStateComponent,
+        ScrollRegionDirective
     ],
     host: { '[class]': 'classes()' }
 })

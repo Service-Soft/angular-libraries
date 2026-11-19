@@ -17,7 +17,8 @@ type StoryCheck = StoryIndexEntry & {
     colorScheme: 'light' | 'dark'
 };
 
-const STORY_CHECKS: StoryCheck[] = StorybookUtilities.findStories()
+// every story, or the part of them a CI job checks, like ACCESSIBILITY_SHARD=2/4
+const STORY_CHECKS: StoryCheck[] = StorybookUtilities.findStoriesOfShard(process.env['ACCESSIBILITY_SHARD'])
     .flatMap(entry => [{ ...entry, colorScheme: 'light' }, { ...entry, colorScheme: 'dark' }]);
 
 describe('accessibility', () => {
