@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { EntityRouteUtilities } from '@service-soft/ngx-entity/routes';
+import { NavRouteData } from '@service-soft/ngx-navigation/navigation';
 
 import { ProjectService } from './project.service';
 
@@ -8,7 +9,12 @@ export const routes: Routes = [
     {
         path: 'website',
         title: 'Website',
-        loadComponent: async () => (await import('./website-page.component')).WebsitePageComponent
+        loadComponent: async () => (await import('./website-page.component')).WebsitePageComponent,
+        // written into the head by provideSeoConfig, on the server too, which the prerender tests read
+        data: {
+            description: 'The sports club of the town, with its news, its practice times and answers to your questions.',
+            structuredData: { '@context': 'https://schema.org', '@type': 'SportsClub', name: 'Sports club Example' }
+        } satisfies NavRouteData
     },
     {
         path: 'projects',

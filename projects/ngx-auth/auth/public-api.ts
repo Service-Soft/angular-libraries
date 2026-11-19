@@ -1,3 +1,4 @@
+export * from './any-level-permission.model';
 export * from './auth-config-changes.model';
 export * from './auth-config.model';
 export * from './auth-config.provider';

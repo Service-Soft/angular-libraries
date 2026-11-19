@@ -170,9 +170,13 @@ async function resolveAuthorizedRequest(
         const scheme: string = config.dpop ? DPOP_SCHEME : 'Bearer';
         return accessToken == undefined ? request : request.clone({ setHeaders: { Authorization: `${scheme} ${accessToken}` } });
     }
-    catch {
-        // the refresh token was refused: the login is over, and the request goes without it
-        await authService.forgetLogin();
+    catch (error) {
+        // the refresh token was refused: the login is over, and the request goes without it. A refresh that didn't reach
+        // the server, like offline, refused nothing: the login stays, and the request fails, or is answered from a cache
+        // of an interceptor after this one, by itself.
+        if (!AuthErrorUtilities.isNetworkError(error)) {
+            await authService.forgetLogin();
+        }
         return request;
     }
 }
@@ -211,17 +215,31 @@ async function resolveRetry(
     }
     if (!retried && refusal.status === HttpStatusCode.Unauthorized) {
         // like a clock that is off, or a session that ran out: a refresh tells whether the login is still good
-        try {
-            await authService.refreshLogin();
-            return request;
-        }
-        catch {
-            await authService.forgetLogin();
-            return undefined;
-        }
+        return await resolveRefreshedRetry(authService, request);
     }
     if (config.logoutStatuses.includes(refusal.status)) {
         await authService.forgetLogin();
     }
     return undefined;
+}
+
+/**
+ * Refreshes the login for a request the server refused, and ends the login of this browser when the server refuses
+ * the refresh as well.
+ * @param authService - The AuthService of the app.
+ * @param request - The request that was refused.
+ * @returns The request to send once more, or undefined when the refresh failed.
+ */
+async function resolveRefreshedRetry(authService: AuthService, request: HttpRequest<unknown>): Promise<HttpRequest<unknown> | undefined> {
+    try {
+        await authService.refreshLogin();
+        return request;
+    }
+    catch (error) {
+        // like in resolveAuthorizedRequest, a refresh that didn't reach the server refused nothing
+        if (!AuthErrorUtilities.isNetworkError(error)) {
+            await authService.forgetLogin();
+        }
+        return undefined;
+    }
 }

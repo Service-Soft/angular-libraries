@@ -6,7 +6,7 @@ import { NavElementComponents, NavElementLayout } from '@service-soft/ngx-naviga
 import { NavLinkComponent } from '@service-soft/ngx-navigation/nav-link';
 import { NavMenuComponent } from '@service-soft/ngx-navigation/nav-menu';
 import { NavTitleComponent } from '@service-soft/ngx-navigation/nav-title';
-import { NavbarRow, NavLink } from '@service-soft/ngx-navigation/navigation';
+import { NavbarRow, NavLink, NavRouteCondition, provideNavigationConfig } from '@service-soft/ngx-navigation/navigation';
 import { MenuComponent, MenuItemComponent } from '@service-soft/ui/menu';
 import { DialogTestingUtilities } from 'testing/dialog';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
@@ -23,6 +23,16 @@ class StarLinkComponent {
     readonly element: InputSignal<NavLink> = input.required<NavLink>();
     readonly layout: InputSignal<NavElementLayout> = input.required<NavElementLayout>();
 }
+
+/**
+ * The data of a route of the tests that only a role may open.
+ */
+type RoleRouteData = {
+    /**
+     * The role that may open it.
+     */
+    role?: string
+};
 
 const LOGGED_IN: InjectionToken<WritableSignal<boolean>> = new InjectionToken('LOGGED_IN', { providedIn: 'root', factory: () => signal(false) });
 
@@ -154,6 +164,45 @@ describe('NavbarComponent', () => {
 
         expect(TestBed.inject(LOGGED_IN)()).toBe(false);
         expect(root.textContent).not.toContain('Log out');
+    });
+
+    test('shows a link to a route while the routeCondition passes for the route and its parents, following the signals it reads', async () => {
+        const role: WritableSignal<string> = signal('clerk');
+        // like the permissions of a route the permissionGuard of ngx-auth reads from its data
+        const routeCondition: NavRouteCondition = route => {
+            const data: RoleRouteData = route.data ?? {};
+            return data.role == undefined || data.role === role();
+        };
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter([
+                    { path: '', component: PageComponent },
+                    { path: 'orders', component: PageComponent, data: { role: 'clerk' } },
+                    { path: 'admin', data: { role: 'admin' }, children: [{ path: 'users', component: PageComponent }] }
+                ]),
+                provideNavigationConfig({ routeCondition })
+            ]
+        });
+        const fixture: ComponentFixture<NavbarHostComponent> = TestBed.createComponent(NavbarHostComponent);
+        fixture.componentInstance.rows = [
+            {
+                elements: [
+                    { type: 'link', name: 'Orders', route: 'orders', collapse: 'never' },
+                    { type: 'link', name: 'Users', route: '/admin/users', collapse: 'never' },
+                    { type: 'link', name: 'Reports', route: { path: 'reports', title: 'Reports', data: { role: 'admin' } }, collapse: 'never' },
+                    { type: 'link', name: 'Unknown', route: 'orders/1', collapse: 'never' },
+                    { type: 'link', name: 'Docs', url: 'https://example.com/docs', collapse: 'never' }
+                ]
+            }
+        ];
+        fixture.componentInstance.components = { link: NavLinkComponent };
+        await fixture.whenStable();
+        const root: HTMLElement = fixture.nativeElement as HTMLElement;
+        expect(findTexts(root.querySelectorAll('header > nav a'))).toEqual(['Orders', 'Unknown', 'Docs']);
+
+        role.set('admin');
+        await fixture.whenStable();
+        expect(findTexts(root.querySelectorAll('header > nav a'))).toEqual(['Users', 'Reports', 'Unknown', 'Docs']);
     });
 
     test('shows a type with a component of the app in place of the one of the library', async () => {

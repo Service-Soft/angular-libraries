@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { faArrowsRotate, faCloudArrowUp, faPlugCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { OfflineService } from '@service-soft/ngx-pwa/offline';
@@ -17,12 +18,13 @@ const BAR_CLASSES: string = `
 
 /**
  * A bar that says when the user is offline or has changes that aren't synced, with a button that opens the sync
- * dialog. Shows nothing otherwise. Put it at the top of the app: `<ngx-offline-status-bar />`.
+ * dialog, and how old the data of the offline cache is that the app shows. Shows nothing otherwise. Put it at the top
+ * of the app: `<ngx-offline-status-bar />`.
  */
 @Component({
     selector: 'ngx-offline-status-bar',
     templateUrl: './offline-status-bar.component.html',
-    imports: [ButtonComponent, IconComponent],
+    imports: [ButtonComponent, IconComponent, DatePipe],
     host: {
         class: 'block'
     }
@@ -51,8 +53,10 @@ export class OfflineStatusBarComponent {
      * What the bar says, or undefined while there is nothing to say.
      */
     protected readonly status: Signal<OfflineStatusView | undefined> = computed(() => {
-        if (this.offlineService.offline()) {
-            return { message: this.labels.offline, icon: faPlugCircleXmark };
+        // the cache also answers while the browser thinks it is online, but the server can't be reached
+        const loadedAt: Date | undefined = this.offlineService.cachedSince();
+        if (this.offlineService.offline() || loadedAt != undefined) {
+            return { message: this.labels.offline, icon: faPlugCircleXmark, loadedAt };
         }
         return this.count() ? { message: this.labels.unsavedChanges, icon: faCloudArrowUp } : undefined;
     });

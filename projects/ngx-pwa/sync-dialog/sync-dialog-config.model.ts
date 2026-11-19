@@ -49,6 +49,14 @@ export type SyncDialogLabels = {
      */
     close: string,
     /**
+     * Says why the dialog asks before the user logs out.
+     */
+    beforeLogout: string,
+    /**
+     * The button that closes the dialog before a logout, which keeps the user logged in.
+     */
+    stayLoggedIn: string,
+    /**
      * Announced when one change was synced.
      */
     synced: string,

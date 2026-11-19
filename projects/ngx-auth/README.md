@@ -64,6 +64,8 @@ providers: [
 | `logoutStatuses` | `[401]` — statuses of a refused request that end the login of this browser, once a refresh didn't help |
 | `refreshBeforeExpiryInMs` | 30 seconds — how long before the access token runs out it is refreshed |
 | `secondFactorPrompt` | — what asks the user for a second factor, see [a second factor for a request](#a-second-factor-for-a-request) |
+| `beforeLogout` | logs out — runs before `logout()` and `logoutEverywhere()`, see [logging out](#logging-in) |
+| `onLogout` | nothing — runs whenever the login of this browser ends, see [logging out](#logging-in) |
 | `paths`, `headers` | what zibri serves by default — change them when your app renamed routes or the headers of `ZIBRI_DI_TOKENS` |
 
 # Logging in
@@ -89,13 +91,26 @@ Each step answers a `LoginResult` again, as a second factor can be followed by a
 
 `logout()` ends the login at zibri and on this browser, and sends the user to `afterLogout`, or to the provider the login was started at, which ends its login too. `authData()`, `loggedIn()` and `roles()` are signals, and other tabs of the app follow a login or logout.
 
+Two hooks of `provideAuth` run around it, in an injection context, so they can use `inject()`. `beforeLogout` runs before `logout()` and `logoutEverywhere()` while the user is still logged in, like to sync what they changed offline, and keeps them logged in when it answers `false`. `onLogout` runs once the login is gone, whenever it ends: at a logout, and when the server ended it. Like to delete what the app kept of the user:
+
+```ts
+provideAuth(AppAuthService, {
+    apiUrl,
+    strategy: 'jwt',
+    beforeLogout: syncBeforeLogout,
+    onLogout: () => inject(OfflineCacheService).clearCache()
+})
+```
+
+`syncBeforeLogout` and `OfflineCacheService` are from [@service-soft/ngx-pwa](https://www.npmjs.com/package/@service-soft/ngx-pwa).
+
 # Staying logged in
 | Strategy | How |
 |---|---|
 | `'cookie'` | zibri keeps the login in httpOnly cookies, which scripts can't read. Every request that changes something sends the csrf token, which the interceptor keeps up to date from every response and fetches again after a reload. The safer choice for a website. On another origin, the api has to allow it in its CORS options with `credentials: true` |
 | `'jwt'` | the browser keeps an access token and a refresh token in the `localStorage`, and sends the access token with every request. Refreshed before it runs out, once for all requests at the same time. For an app whose api can't share cookies with it |
 
-A request zibri refuses with a `401` gets a refresh and is sent once more; when the refresh fails too, the login of this browser ends and the user goes to the login route. A refusal about a second factor or a code keeps the login.
+A request zibri refuses with a `401` gets a refresh and is sent once more; when the refresh fails too, the login of this browser ends and the user goes to the login route. A refusal about a second factor or a code keeps the login. So does a refresh that doesn't reach the server, like offline, which fails without an answer or with the `504` of the service worker of Angular: the request goes on without the token that ran out and fails by itself, or is answered by an interceptor after `authInterceptor`, like the offline cache of [@service-soft/ngx-pwa](https://www.npmjs.com/package/@service-soft/ngx-pwa).
 
 ## DPoP
 Tokens in the `localStorage` can be read by any script on the page. `provideAuth(MyAuthService, { apiUrl, strategy: 'jwt', dpop: true })` binds them to a key of the browser instead (DPoP, RFC 9449), so stolen tokens are of no use anywhere else:
@@ -113,9 +128,12 @@ this.authService.setActiveTenant(tenant.id);
 this.authService.hasPermission('invoices.export');              // in the active tenant
 this.authService.hasPermission('invoices.export', otherTenantId); // in another one
 this.authService.hasPlatformPermission('tenants.create');        // by the user's own roles
+this.authService.hasAnyLevelPermission({ permission: 'members.read', platformPermission: 'users.read' }); // either
 ```
 
-`hasPermission` and `hasPlatformPermission` check like `@Auth.hasPermission` and `@Auth.hasPlatformPermission` of zibri, and answer at once. The active tenant is kept with the login, the same in every tab, and every request to your api sends it as `x-tenant-id`, which zibri reads the tenant of a request from. A request that sets the header itself keeps its own.
+`hasPermission`, `hasPlatformPermission` and `hasAnyLevelPermission` check like `@Auth.hasPermission`, `@Auth.hasPlatformPermission` and `@Auth.hasAnyLevelPermission` of zibri, and answer at once. `hasAnyLevelPermission` passes with the permission in the active tenant (or the one given) or with the platform permission, like a page a tenant admin sees for their members and a platform admin for every user; without a tenant, only the platform permission counts. The active tenant is kept with the login, the same in every tab, and every request to your api sends it as `x-tenant-id`, which zibri reads the tenant of a request from. A request that sets the header itself keeps its own.
+
+A user with exactly one membership and no platform permission has nothing to choose: once `GET /me` answered, they act in that tenant. When it answers that the membership of the active tenant is gone, the tenant is unset. A tenant the user was never a member of, like one a platform admin picked, stays.
 
 # Protecting routes
 ```ts
@@ -131,11 +149,25 @@ const routes: AppRoute[] = [
         canActivate: [permissionGuard],
         data: { permission: 'invoices.export', tenantId: route => route.paramMap.get('tenantId') ?? undefined }
     },
-    { path: 'tenants/new', component: NewTenantComponent, canActivate: [permissionGuard], data: { platformPermission: 'tenants.create' } }
+    { path: 'tenants/new', component: NewTenantComponent, canActivate: [permissionGuard], data: { platformPermission: 'tenants.create' } },
+    {
+        path: 'users',
+        component: UsersComponent,
+        canActivate: [permissionGuard],
+        data: { anyLevelPermission: { permission: 'members.read', platformPermission: 'users.read' } }
+    }
 ];
 ```
 
-A user who isn't logged in goes to the login route, with the page they wanted as `returnUrl`. A logged in user without the permission goes to `forbidden` and stays logged in. `AuthRouteData` types what the `permissionGuard` reads: a `permission` in the active tenant or the `tenantId` of the route, and a `platformPermission`. With both, the user needs both; with neither, nobody opens the route. Combine it with the data of other libraries, like `NavRoute<DefaultNavRouteDataType & AuthRouteData<Permission, PlatformPermission>>`. zibri checks every request again, so the guards only keep users from pages they can't use. On the server, which knows no login, the guards let every route render: render protected routes on the client.
+A user who isn't logged in goes to the login route, with the page they wanted as `returnUrl`. A logged in user without the permission goes to `forbidden` and stays logged in. `AuthRouteData` types what the `permissionGuard` reads: a `permission` in the active tenant or the `tenantId` of the route, a `platformPermission`, and an `anyLevelPermission`, which passes with either of its two. With several of them, the user needs all; with none, nobody opens the route. Combine it with the data of other libraries, like `NavRoute<NavRouteData & AuthRouteData<Permission, PlatformPermission>>` of [@service-soft/ngx-navigation](https://www.npmjs.com/package/@service-soft/ngx-navigation), which types the data of the children of a route as well. zibri checks every request again, so the guards only keep users from pages they can't use. On the server, which knows no login, the guards let every route render: render protected routes on the client.
+
+`hasRoutePermissions(data)` checks the same as the guard, and is true for data that names no permission, so the navigation can show a link only to those who may open it. With [@service-soft/ngx-navigation](https://www.npmjs.com/package/@service-soft/ngx-navigation), every link to a route of the app then follows the data of its route:
+
+```ts
+provideNavigationConfig({ routeCondition: route => inject(AuthService).hasRoutePermissions(route.data ?? {}) })
+```
+
+A link knows no parameters of the url, so a `tenantId` that is a function of the route is checked in the active tenant.
 
 # A second factor for a request
 zibri asks for a second factor on routes guarded by `@Auth.require2fa`. The interceptor asks the user for one with the `secondFactorPrompt` and sends the request once more with it:

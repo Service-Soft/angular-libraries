@@ -1,16 +1,18 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
-import { computed, DestroyRef, inject, Injector, PLATFORM_ID, Signal, signal, Type, WritableSignal } from '@angular/core';
-import { Router } from '@angular/router';
+import { computed, DestroyRef, inject, Injector, PLATFORM_ID, runInInjectionContext, Signal, signal, Type, WritableSignal } from '@angular/core';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
 import { CookieAuthData, CsrfToken, CurrentUserProfile, EmailConfirmation, FederatedLinkIdentityStart, JwtAuthData, LogoutResult, PasskeyTicketCredentials, PasswordResetTokenValidity, TwoFactorRegistrations, UserLogin } from 'zibri-contract';
 
+import { AnyLevelPermission } from './any-level-permission.model';
 import { AuthConfig } from './auth-config.model';
 import { AUTH_CONFIG } from './auth-config.provider';
 import { AuthData } from './auth-data.model';
 import { AuthErrorBody } from './auth-error-body.model';
 import { AuthErrorUtilities } from './auth-error.utilities';
 import { AuthPaths } from './auth-paths.model';
+import { AuthRouteData } from './auth-route-data.model';
 import { DpopService } from './dpop.service';
 import { LinkedIdentity } from './linked-identity.model';
 import { LoginResult } from './login-result.model';
@@ -102,7 +104,8 @@ export abstract class AuthService<
 
     /**
      * The tenant the user acts in: requests to the api name it, and hasPermission checks in it. Kept with the login,
-     * and the same in every tab.
+     * and the same in every tab. A user with one membership and no platform permission acts in its tenant without
+     * choosing it, and a tenant the user is no longer a member of is unset once `GET /me` answers so.
      */
     readonly activeTenantId: Signal<string | undefined> = computed(() => this.data()?.activeTenantId);
 
@@ -184,13 +187,21 @@ export abstract class AuthService<
 
     /**
      * Logs out at zibri and on this browser, and sends the user to the afterLogout route, or to the provider the login
-     * was started at, which ends its login too.
+     * was started at, which ends its login too. Asks beforeLogout of the config first, which may keep the user logged in.
      */
     async logout(): Promise<void> {
         const data: AuthData<Role, Permission, PlatformPermission> | undefined = this.data();
+        if (data != undefined) {
+            const consent: boolean | Promise<boolean> = runInInjectionContext(this.injector, this.config.beforeLogout);
+            // awaited only when it asks somebody: without that, the login is gone as soon as logout is called
+            if (!(typeof consent === 'boolean' ? consent : await consent)) {
+                return;
+            }
+        }
         // the browser forgets the login first: it is gone here, whatever the server answers
         this.writeData(undefined);
         if (data != undefined) {
+            await runInInjectionContext(this.injector, this.config.onLogout);
             try {
                 const result: LogoutResult = await firstValueFrom(this.http.post<LogoutResult>(
                     this.resolveUrl('logout', { strategy: data.strategy }),
@@ -219,6 +230,7 @@ export abstract class AuthService<
         const hadLogin: boolean = this.data() != undefined;
         this.writeData(undefined);
         if (hadLogin) {
+            await runInInjectionContext(this.injector, this.config.onLogout);
             await this.forgetDpopKey();
         }
         await this.router.navigateByUrl(this.config.routes.login);
@@ -278,6 +290,41 @@ export abstract class AuthService<
      */
     hasPlatformPermission(permission: PlatformPermission): boolean {
         return this.currentUser()?.platformPermissions.includes(permission) === true;
+    }
+
+    /**
+     * Whether the logged in user may do something either in a tenant or by their own roles, like
+     * `@Auth.hasAnyLevelPermission` of zibri checks it. Without a tenant, only the platform permission counts. Answers
+     * from what `GET /me` answered, false until it did.
+     * @param anyLevelPermission - The permission in the tenant and the one by their own roles, either of which is enough.
+     * @param tenantId - The tenant, the active one by default.
+     * @returns Whether a role of their membership in the tenant carries the permission, or one of their own roles the
+     * platform permission.
+     */
+    hasAnyLevelPermission(
+        anyLevelPermission: AnyLevelPermission<Permission, PlatformPermission>,
+        tenantId: string | undefined = this.activeTenantId()
+    ): boolean {
+        return this.hasPermission(anyLevelPermission.permission, tenantId)
+            || this.hasPlatformPermission(anyLevelPermission.platformPermission);
+    }
+
+    /**
+     * Whether the logged in user has every permission the AuthRouteData of a route names, as the permissionGuard checks
+     * them, like to show a link only to those who may open it. Answers from what `GET /me` answered.
+     * @param data - The data of the route.
+     * @param route - The route, for a `tenantId` of the data that is a function of it. Without it, such a route is
+     * checked in the active tenant.
+     * @returns Whether the user has all of them, true for data that names none.
+     */
+    hasRoutePermissions(data: AuthRouteData<Permission, PlatformPermission>, route?: ActivatedRouteSnapshot): boolean {
+        // undefined checks in the active tenant, as the default of each check
+        const tenantId: string | undefined = typeof data.tenantId === 'function'
+            ? route == undefined ? undefined : data.tenantId(route)
+            : data.tenantId;
+        return (data.permission == undefined || this.hasPermission(data.permission, tenantId))
+            && (data.platformPermission == undefined || this.hasPlatformPermission(data.platformPermission))
+            && (data.anyLevelPermission == undefined || this.hasAnyLevelPermission(data.anyLevelPermission, tenantId));
     }
 
     /**
@@ -673,11 +720,16 @@ export abstract class AuthService<
     }
 
     /**
-     * Ends every login of the logged in user, the one of this browser too, and sends the user to afterLogout.
+     * Ends every login of the logged in user, the one of this browser too, and sends the user to afterLogout. Asks
+     * beforeLogout of the config first, which may keep the user logged in.
      */
     async logoutEverywhere(): Promise<void> {
+        if (!await runInInjectionContext(this.injector, this.config.beforeLogout)) {
+            return;
+        }
         await firstValueFrom(this.http.post(this.resolveUrl('logoutEverywhere'), undefined));
         this.writeData(undefined);
+        await runInInjectionContext(this.injector, this.config.onLogout);
         await this.forgetDpopKey();
         await this.router.navigateByUrl(this.config.routes.afterLogout);
     }
@@ -892,8 +944,24 @@ export abstract class AuthService<
         // the login may have ended or changed while the request was on its way
         const current: AuthData<Role, Permission, PlatformPermission> | undefined = this.data();
         if (current?.userId === user.id) {
-            this.writeData({ ...current, user });
+            this.writeData({ ...current, user, activeTenantId: this.resolveActiveTenantId(current, user) });
         }
+    }
+
+    private resolveActiveTenantId(
+        data: AuthData<Role, Permission, PlatformPermission>,
+        user: CurrentUserProfile<Permission, PlatformPermission>
+    ): string | undefined {
+        const activeTenantId: string | undefined = data.activeTenantId;
+        // the tenant goes only with a membership that is gone: a platform admin may act in one they were never a member of
+        const lostMembership: boolean = data.user?.memberships.some(membership => membership.tenantId === activeTenantId) === true
+            && !user.memberships.some(membership => membership.tenantId === activeTenantId);
+        if (activeTenantId != undefined && !lostMembership) {
+            return activeTenantId;
+        }
+        // GET /me lists only active memberships. With one and nothing to do without a tenant, there is nothing to choose.
+        const [onlyMembership] = user.memberships;
+        return user.memberships.length === 1 && !user.platformPermissions.length ? onlyMembership?.tenantId : undefined;
     }
 
     private async reloadCurrentUserQuietly(): Promise<void> {

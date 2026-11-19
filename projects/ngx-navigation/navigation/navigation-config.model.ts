@@ -1,3 +1,5 @@
+import { NavRouteCondition } from './nav-route-condition.type';
+
 /**
  * The texts of the navigation that every part of it shares.
  */
@@ -19,7 +21,12 @@ export type NavigationConfig = {
     /**
      * The texts.
      */
-    labels: NavigationLabels
+    labels: NavigationLabels,
+    /**
+     * Whether a link to a route of the app is shown, checked for the route and every parent of it. Shows every link by
+     * default.
+     */
+    routeCondition: NavRouteCondition
 };
 
 /**
@@ -29,5 +36,11 @@ export type NavigationConfigChanges = {
     /**
      * The texts to change.
      */
-    labels?: Partial<NavigationLabels>
+    labels?: Partial<NavigationLabels>,
+    /**
+     * Whether a link to a route of the app is shown, checked for the route and every parent of it, like
+     * `route => inject(AuthService).hasRoutePermissions(route.data ?? {})` of `@service-soft/ngx-auth`. The `condition`
+     * of the link has to pass as well.
+     */
+    routeCondition?: NavRouteCondition
 };

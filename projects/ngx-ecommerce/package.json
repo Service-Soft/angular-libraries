@@ -1,6 +1,6 @@
 {
     "name": "@service-soft/ngx-ecommerce",
-    "version": "22.0.1",
+    "version": "22.1.0",
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -22,7 +22,7 @@
         "@angular/common": "^22.2.0",
         "@angular/core": "^22.2.0",
         "@fortawesome/free-solid-svg-icons": "^7.3.1",
-        "@service-soft/ui": "^22.0.1",
+        "@service-soft/ui": "^22.1.0",
         "tailwindcss": "^4.3.3"
     },
     "sideEffects": false

@@ -1,13 +1,14 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
-import { Component, Service } from '@angular/core';
+import { Component, inject, Service } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { HttpTestingUtilities } from 'testing/http';
 import { AddedPasskeyDevice, PasskeyTestingUtilities } from 'testing/passkey';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { CookieAuthData, CurrentUserProfile, JwtAuthData, OtpRegistration } from 'zibri-contract';
+import { CookieAuthData, CurrentUserMembership, CurrentUserProfile, JwtAuthData, OtpRegistration } from 'zibri-contract';
 
+import { AnyLevelPermission } from './any-level-permission.model';
 import { AuthConfigChanges } from './auth-config-changes.model';
 import { AuthStrategyName } from './auth-strategy-name.type';
 import { authInterceptor } from './auth.interceptor';
@@ -94,17 +95,31 @@ async function expectRequest(backend: HttpTestingController, method: string, url
 }
 
 // a login and a refresh load the user right after.
-async function answerCurrentUser(backend: HttpTestingController): Promise<TestRequest> {
+async function answerCurrentUser(
+    backend: HttpTestingController,
+    profile: CurrentUserProfile<Permission, PlatformPermission> = PROFILE
+): Promise<TestRequest> {
     const request: TestRequest = await expectRequest(backend, 'GET', `${API}/me`);
-    request.flush(PROFILE);
+    request.flush(profile);
     return request;
 }
 
-async function loginWithJwt(authService: AppAuthService, backend: HttpTestingController, data: JwtAuthData<Role> = createJwtData()): Promise<void> {
+async function loginWithJwt(
+    authService: AppAuthService,
+    backend: HttpTestingController,
+    data: JwtAuthData<Role> = createJwtData(),
+    profile: CurrentUserProfile<Permission, PlatformPermission> = PROFILE
+): Promise<void> {
     const loggedIn: Promise<LoginResult> = authService.login({ email: 'ada@example.com', password: 'secret' });
     (await expectRequest(backend, 'POST', `${API}/login?authenticator=password&strategy=jwt`)).flush(data);
-    await answerCurrentUser(backend);
+    await answerCurrentUser(backend, profile);
     expect(await loggedIn).toEqual({ type: 'loggedIn' });
+}
+
+async function reloadWith(authService: AppAuthService, backend: HttpTestingController, profile: CurrentUserProfile<Permission, PlatformPermission>): Promise<void> {
+    const reloaded: Promise<unknown> = authService.reloadCurrentUser();
+    await answerCurrentUser(backend, profile);
+    await reloaded;
 }
 
 describe('AuthService', () => {
@@ -211,6 +226,37 @@ describe('AuthService', () => {
         expect(localStorage.getItem('authData')).toBeNull();
     });
 
+    test('asks beforeLogout first, and runs onLogout whenever the login ends', async () => {
+        let consent: boolean = false;
+        const ended: (string | undefined)[] = [];
+        const [authService, backend] = setup('jwt', {
+            beforeLogout: async () => await Promise.resolve(consent && inject(AppAuthService).loggedIn()),
+            onLogout: () => {
+                ended.push(inject(AppAuthService).authData()?.userId);
+            }
+        });
+        await loginWithJwt(authService, backend);
+
+        await authService.logout();
+        await authService.logoutEverywhere();
+        expect(authService.loggedIn()).toBe(true);
+        expect(ended).toEqual([]);
+        backend.expectNone(`${API}/logout?strategy=jwt`);
+
+        consent = true;
+        const loggedOut: Promise<void> = authService.logout();
+        (await expectRequest(backend, 'POST', `${API}/logout?strategy=jwt`)).flush({});
+        await loggedOut;
+        // once the login is gone
+        expect(ended).toEqual([undefined]);
+
+        // and when the server ended it, without asking
+        consent = false;
+        await loginWithJwt(authService, backend);
+        await authService.forgetLogin();
+        expect(ended).toEqual([undefined, undefined]);
+    });
+
     test('shares one refresh between requests at the same time, and keeps the new tokens', async () => {
         const [authService, backend] = setup('jwt');
         await loginWithJwt(authService, backend);
@@ -247,6 +293,71 @@ describe('AuthService', () => {
         await answerCurrentUser(afterReloadBackend);
         await reloaded;
         expect(afterReload.activeTenantId()).toBe('tenant-a');
+    });
+
+    test('answers a permission at any level by the one in the tenant or by the platform permission', async () => {
+        const [authService, backend] = setup('jwt');
+        // export only in tenant-b, and no platform permission yet
+        await loginWithJwt(authService, backend, createJwtData(), { ...PROFILE, platformPermissions: [] });
+        const exportOrCreate: AnyLevelPermission<Permission, PlatformPermission> = { permission: 'invoices.export', platformPermission: 'tenants.create' };
+
+        // no active tenant: only the platform permission could pass
+        expect(authService.activeTenantId()).toBeUndefined();
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(false);
+        // the permission in another tenant than the active one
+        authService.setActiveTenant('tenant-a');
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(false);
+        // only the permission, in the active tenant or the one given
+        expect(authService.hasAnyLevelPermission(exportOrCreate, 'tenant-b')).toBe(true);
+        authService.setActiveTenant('tenant-b');
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(true);
+
+        await reloadWith(authService, backend, PROFILE);
+        // both
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(true);
+        // only the platform permission, in a tenant without the permission and in none
+        authService.setActiveTenant('tenant-a');
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(true);
+        authService.setActiveTenant(undefined);
+        expect(authService.hasAnyLevelPermission(exportOrCreate)).toBe(true);
+
+        // what the permissionGuard checks, for a route the router has no snapshot of, like the one of a link
+        expect(authService.hasRoutePermissions({})).toBe(true);
+        expect(authService.hasRoutePermissions({ permission: 'invoices.read', anyLevelPermission: exportOrCreate })).toBe(false);
+        expect(authService.hasRoutePermissions({ permission: 'invoices.read', anyLevelPermission: exportOrCreate, tenantId: () => 'tenant-a' })).toBe(false);
+        authService.setActiveTenant('tenant-a');
+        expect(authService.hasRoutePermissions({ permission: 'invoices.read', anyLevelPermission: exportOrCreate, tenantId: () => 'tenant-b' })).toBe(true);
+        expect(authService.hasRoutePermissions({ permission: 'invoices.export', tenantId: 'tenant-b' })).toBe(true);
+    });
+
+    test('acts in the only tenant of a user without a platform permission, and leaves a tenant whose membership is gone', async () => {
+        const memberOfA: CurrentUserMembership<Permission> = { tenantId: 'tenant-a', permissions: ['invoices.read'] };
+        const memberOfB: CurrentUserMembership<Permission> = { tenantId: 'tenant-b', permissions: ['invoices.read'] };
+        const onlyA: CurrentUserProfile<Permission, PlatformPermission> = { ...PROFILE, memberships: [memberOfA], platformPermissions: [] };
+        const [authService, backend] = setup('jwt');
+        await loginWithJwt(authService, backend, createJwtData(), onlyA);
+        expect(authService.activeTenantId()).toBe('tenant-a');
+        expect(authService.hasPermission('invoices.read')).toBe(true);
+
+        // several tenants, or a platform permission that counts without one: the user chooses
+        await reloadWith(authService, backend, PROFILE);
+        expect(authService.activeTenantId()).toBe('tenant-a');
+        authService.setActiveTenant(undefined);
+        await reloadWith(authService, backend, { ...onlyA, platformPermissions: ['tenants.create'] });
+        expect(authService.activeTenantId()).toBeUndefined();
+
+        // a tenant a platform admin was never a member of stays
+        authService.setActiveTenant('tenant-c');
+        await reloadWith(authService, backend, PROFILE);
+        expect(authService.activeTenantId()).toBe('tenant-c');
+
+        // the membership in the active tenant ended
+        authService.setActiveTenant('tenant-b');
+        await reloadWith(authService, backend, { ...onlyA, platformPermissions: ['tenants.create'] });
+        expect(authService.activeTenantId()).toBeUndefined();
+        authService.setActiveTenant('tenant-a');
+        await reloadWith(authService, backend, { ...PROFILE, memberships: [memberOfB], platformPermissions: [] });
+        expect(authService.activeTenantId()).toBe('tenant-b');
     });
 
     test('enrolls and removes two factor methods, also for a login that waits for its first one', async () => {
