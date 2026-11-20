@@ -38,7 +38,10 @@ const DEFAULT_PATHS: AuthPaths = {
     requestPasswordReset: '/request-password-reset',
     verifyPasswordResetToken: '/verify-password-reset-token',
     confirmPasswordReset: '/confirm-password-reset',
-    changePassword: '/change-password'
+    changePassword: '/change-password',
+    verifyInvitationToken: '/verify-invitation-token',
+    acceptInvitation: '/accept-invitation',
+    declineInvitation: '/decline-invitation'
 };
 
 // the defaults of zibri's ZIBRI_DI_TOKENS, which an app can rename.

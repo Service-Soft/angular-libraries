@@ -125,5 +125,18 @@ export type AuthPaths = {
     /**
      * Changes the password of the logged in user.
      */
-    changePassword: string
+    changePassword: string,
+    /**
+     * Whether the token of the link of an invitation still works, and how it is accepted. With `invitationRoutes` of
+     * the AuthController.
+     */
+    verifyInvitationToken: string,
+    /**
+     * Accepts an invitation with the token of its link.
+     */
+    acceptInvitation: string,
+    /**
+     * Declines an invitation with the token of its link.
+     */
+    declineInvitation: string
 };

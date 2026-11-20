@@ -19,12 +19,13 @@ Everything works with server-side rendering: on the server nobody is logged in, 
 - [Providers](#providers)
 - [Sessions and email](#sessions-and-email)
 - [Passwords](#passwords)
+- [Invitations](#invitations)
 - [The pages](#the-pages)
 - [Moving from ngx-material-auth](#moving-from-ngx-material-auth)
 - [License](#license)
 
 # Requirements
-Angular 22 with the router, and a backend with the `AuthController` of zibri 3.1 or later. What the routes answer and take, like `CurrentUserProfile`, `UserLogin` and `OtpRegistration`, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
+Angular 22 with the router, and a backend with the `AuthController` of zibri 3.1 or later, 3.2 with `invitationRoutes: true` for [invitations](#invitations). What the routes answer and take, like `CurrentUserProfile`, `UserLogin` and `OtpRegistration`, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
 
 ```sh
 npm install @service-soft/ngx-auth zibri-contract
@@ -239,6 +240,17 @@ The links of these emails open `ConfirmEmailComponent` of `@service-soft/ngx-aut
 # Passwords
 `requestPasswordReset(email)` mails a link, `verifyPasswordResetToken(token)` says whether its token still works, and `confirmPasswordReset(token, newPassword)` sets the new password. `changePassword(currentPassword, newPassword)` changes the password of the logged in user.
 
+# Invitations
+With `invitationRoutes: true` of the `AuthController` of zibri 3.2, zibri mails invitations to an app or to a tenant, whose link is answered here:
+
+| Method | Does |
+|---|---|
+| `verifyInvitationToken(token)` | Answers an `InvitationTokenValidity`: whether the link works, whether a new one was mailed for one that ran out, and for a link that works the invited email, its tenant, whether accepting needs a login (`requiresLogin`) and whether it may be declined (`declinable`) |
+| `acceptInvitation(token, password?)` | Accepts with the password of the account the invitation creates, or, without one, as the logged in account of the invited email |
+| `declineInvitation(token)` | Declines it, which needs no login |
+
+zibri finds an invitation by its token in every tenant, so the requests name none, and a link zibri refuses ends no login. The [`AcceptInvitationComponent`](#the-pages) does all of it.
+
 # The pages
 Ready pages for these, built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui), each in its own entry point, so an app only loads the ones it uses:
 
@@ -252,6 +264,11 @@ const routes: Routes = [
     {
         path: 'reset-password/:token',
         loadComponent: () => import('@service-soft/ngx-auth/confirm-password-reset').then(m => m.ConfirmPasswordResetComponent)
+    },
+    // no guard: accepting works logged out and logged in
+    {
+        path: 'accept-invitation/:token',
+        loadComponent: () => import('@service-soft/ngx-auth/accept-invitation').then(m => m.AcceptInvitationComponent)
     }
 ];
 ```
@@ -262,6 +279,7 @@ const routes: Routes = [
 | `RequestPasswordResetComponent` | Has zibri mail a link to reset the password |
 | `ConfirmPasswordResetComponent` | The page of that link: zibri adds the token to its `CONFIRM_PASSWORD_RESET_URL` as the last segment, so set that to the url of this route, like `https://app.example.com/reset-password`. Checks the link in the browser, and offers a new one when it doesn't work anymore |
 | `ChangePasswordComponent` | The current and a new password, for the page of the user's account, with a `h2` heading |
+| `AcceptInvitationComponent` | The page of the link of an [invitation](#invitations): zibri adds the token to the `acceptInvitationUrl` of its `INVITATION_OPTIONS` as the last segment, so set that to the url of this route, like `https://app.example.com/accept-invitation`. Checks the link in the browser, and says when it doesn't work, and when a new one was mailed. An invitation that creates its account asks for its password, then links to the login. One to an email with an account links to the login while nobody is logged in, and back here once they are; offers logging out to another account; and accepts with one button as that account, which then acts in the tenant of the invitation. A decline button shows next to accepting when the invitation may be declined |
 
 A refused attempt shows the message of zibri, in the language of the request, and keeps what the user typed. Each page has a `provideXConfig`, like `provideLoginConfig`, for its texts and options. Values you leave out keep their defaults, so a translation can change single labels:
 
