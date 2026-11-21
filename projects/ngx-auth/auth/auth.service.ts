@@ -3,7 +3,7 @@ import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 import { computed, DestroyRef, inject, Injector, PLATFORM_ID, runInInjectionContext, Signal, signal, Type, WritableSignal } from '@angular/core';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
-import { CookieAuthData, CsrfToken, CurrentUserProfile, EmailConfirmation, FederatedLinkIdentityStart, JwtAuthData, LogoutResult, PasskeyTicketCredentials, PasswordResetTokenValidity, TwoFactorRegistrations, UserLogin } from 'zibri-contract';
+import { AcceptInvitationInput, CookieAuthData, CsrfToken, CurrentUserProfile, EmailConfirmation, FederatedLinkIdentityStart, InvitationTokenValidity, JwtAuthData, LogoutResult, PasskeyTicketCredentials, PasswordResetTokenValidity, TwoFactorRegistrations, UserLogin } from 'zibri-contract';
 
 import { AnyLevelPermission } from './any-level-permission.model';
 import { AuthConfig } from './auth-config.model';
@@ -360,6 +360,43 @@ export abstract class AuthService<
             { resetToken, newPassword },
             this.resolveOwnOptions()
         ));
+    }
+
+    /**
+     * Resolves whether the token of the link of an invitation still works, and how the invitation is accepted. Zibri
+     * finds the invitation by its token in every tenant, so the request names none.
+     * @param token - The token of the link.
+     * @returns Whether it works, whether a new link was mailed for an expired one, and for a link that works the invited
+     * email, its tenant, whether accepting needs a login and whether it may be declined.
+     */
+    async verifyInvitationToken(token: string): Promise<InvitationTokenValidity> {
+        return await firstValueFrom(this.http.post<InvitationTokenValidity>(
+            this.resolveUrl('verifyInvitationToken'),
+            { token },
+            this.resolveOwnOptions()
+        ));
+    }
+
+    /**
+     * Accepts an invitation with the token of its link: with the password of the account it creates, or, for an email
+     * with an account already, with the login of that account, which has to be logged in.
+     * @param token - The token of the link.
+     * @param password - The password of the account the invitation creates, when its validity doesn't require a login.
+     */
+    async acceptInvitation(token: string, password?: string): Promise<void> {
+        const input: AcceptInvitationInput = { token, password };
+        // past the interceptor like every request of an invitation's link: it names no tenant, and a link zibri refuses
+        // with a 401 ends no login. Accepting as an account of its own reads the login, which is added here instead.
+        const headers: Record<string, string> = password == undefined ? await this.resolveLoginHeaders() : {};
+        await firstValueFrom(this.http.post(this.resolveUrl('acceptInvitation'), input, this.resolveOwnOptions(headers)));
+    }
+
+    /**
+     * Declines an invitation with the token of its link, when its validity says it may be declined.
+     * @param token - The token of the link.
+     */
+    async declineInvitation(token: string): Promise<void> {
+        await firstValueFrom(this.http.post(this.resolveUrl('declineInvitation'), { token }, this.resolveOwnOptions()));
     }
 
     /**
@@ -1017,6 +1054,17 @@ export abstract class AuthService<
         const search: string = new URLSearchParams(query).toString();
         const url: string = `${this.config.apiUrl}${this.config.paths[path]}`;
         return search ? `${url}?${search}` : url;
+    }
+
+    // what the interceptor adds of the login, for a request past it: the access token with the scheme of the login, or
+    // the csrf token of the cookies, which every request that changes something sends. None while nobody is logged in.
+    private async resolveLoginHeaders(): Promise<Record<string, string>> {
+        const accessToken: string | undefined = await this.resolveAccessToken();
+        if (accessToken != undefined) {
+            return { Authorization: `${this.config.dpop ? 'DPoP' : 'Bearer'} ${accessToken}` };
+        }
+        const csrfToken: string | undefined = await this.resolveCsrfToken();
+        return csrfToken == undefined ? {} : { [this.config.headers.csrfToken]: csrfToken };
     }
 
     private resolveOwnOptions(headers: Record<string, string> = {}): OwnRequestOptions {

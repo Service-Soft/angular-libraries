@@ -1,0 +1,33 @@
+<!-- takes the focus once a request is answered without a link to go on with -->
+<h1 #heading class="font-heading text-headline text-on-surface" tabindex="-1">{{ labels.title }}</h1>
+@for (paragraph of paragraphs(); track $index) {
+    <p class="mt-4 text-body text-on-surface">{{ paragraph }}</p>
+}
+@if (state() === 'password') {
+    <ngx-accept-invitation-password
+        class="mt-6"
+        [labels]="labels"
+        [minLength]="config.newPasswordMinLength"
+        [declinable]="declinable()"
+        (accepted)="accept($event)"
+        (declined)="decline()"
+    />
+}
+<div class="mt-6 flex flex-wrap gap-2 empty:hidden">
+    @for (action of actions(); track action.label) {
+        @if (action.kind === 'link') {
+            <a #actionLink ui-button [variant]="action.variant" [routerLink]="action.route" [queryParams]="action.queryParams">{{ action.label }}</a>
+        }
+        @else {
+            <button ui-button type="button" [variant]="action.variant" (click)="action.run()">{{ action.label }}</button>
+        }
+    }
+</div>
+<!-- always rendered, screen readers only announce changes of live regions that already exist. empty:hidden: it takes
+     no space while nothing was refused -->
+<div class="mt-4 text-body text-error empty:hidden" role="alert">
+    @for (paragraph of errorParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+    }
+</div>
+<p class="mt-4 text-body text-on-surface" role="status">{{ status() }}</p>
