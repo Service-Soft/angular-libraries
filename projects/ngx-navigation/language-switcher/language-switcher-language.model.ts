@@ -13,6 +13,11 @@ export type LanguageSwitcherLanguage = {
      */
     label: string,
     /**
+     * The path the build of the language is served below, like 'de' for /de/orders of a language with the code 'de-CH',
+     * as the i18n.locales of angular.json name it, and the subPath of its SeoLocale. Its code when it has none.
+     */
+    subPath?: string,
+    /**
      * Where its link goes: a fixed address, or one built from the url of the current page. The href of
      * provideLanguageSwitcherConfig when it has none.
      */

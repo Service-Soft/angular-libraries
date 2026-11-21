@@ -9,6 +9,7 @@ import { NavTitleComponent } from '@service-soft/ngx-navigation/nav-title';
 import { NavbarRow, NavLink, NavRouteCondition, provideNavigationConfig } from '@service-soft/ngx-navigation/navigation';
 import { MenuComponent, MenuItemComponent } from '@service-soft/ui/menu';
 import { DialogTestingUtilities } from 'testing/dialog';
+import { ErrorHandlerTestingUtilities } from 'testing/error-handler';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { provideNavbarConfig } from './navbar-config.provider';
@@ -216,13 +217,18 @@ describe('NavbarComponent', () => {
     test('throws in development builds for a type without a component, and for a component nothing uses', async () => {
         const { button, ...withoutButton } = COMPONENTS;
         expect(button).toBe(NavButtonComponent);
+        // the error handler of the app gets them first, whose default would log them
+        const errors: unknown[] = [];
+        TestBed.configureTestingModule({ providers: [ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         // the button is hidden by its condition, but it may show later, so it needs its component anyway
         await expect(render(ROWS, withoutButton))
             .rejects.toThrow('The navbar needs a component for "button", which are used but missing in its components.');
 
         TestBed.resetTestingModule();
+        TestBed.configureTestingModule({ providers: [ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         await expect(render([{ elements: [{ type: 'link', name: 'Orders', route: 'orders' }] }], { link: NavLinkComponent, menu: NavMenuComponent }))
             .rejects.toThrow('The navbar has a component for "menu", which nothing uses.');
+        expect(errors).toHaveLength(2);
     });
 
     test('shows a custom component inside a menu, as menu items there and as itself in the drawer', async () => {

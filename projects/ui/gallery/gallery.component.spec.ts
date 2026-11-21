@@ -1,5 +1,6 @@
-import { Component, ErrorHandler, signal, WritableSignal } from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ErrorHandlerTestingUtilities } from 'testing/error-handler';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { provideGalleryConfig } from './gallery-config.provider';
@@ -114,7 +115,7 @@ describe('GalleryComponent', () => {
 
     test('reports a picture without an alt to the error handler', async () => {
         const errors: unknown[] = [];
-        TestBed.configureTestingModule({ providers: [{ provide: ErrorHandler, useValue: { handleError: (error: unknown) => errors.push(error) } }] });
+        TestBed.configureTestingModule({ providers: [ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         const [fixture] = await render();
         fixture.componentInstance.images.set([{ src: '/photos/stage.jpg', alt: ' ' }]);
         await fixture.whenStable();

@@ -1,5 +1,6 @@
-import { Component, ErrorHandler } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ErrorHandlerTestingUtilities } from 'testing/error-handler';
 import { describe, expect, test } from 'vitest';
 
 import { provideButtonConfig } from './button-config.provider';
@@ -136,7 +137,7 @@ describe('ButtonComponent', () => {
 
     test('reports an icon-only button without a name to the error handler', async () => {
         const errors: unknown[] = [];
-        TestBed.configureTestingModule({ providers: [{ provide: ErrorHandler, useValue: { handleError: (error: unknown) => errors.push(error) } }] });
+        TestBed.configureTestingModule({ providers: [ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         await render(UnlabeledIconHostComponent);
         expect(errors).toEqual([new Error('An iconOnly ui-button needs an aria-label or aria-labelledby, it has no text that screen readers could read.')]);
 
