@@ -3,23 +3,30 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 import { OrderSummaryConfigChanges } from './order-summary-config-changes.model';
 import { OrderSummaryConfig } from './order-summary-config.model';
 
-const DEFAULT_ORDER_SUMMARY_CONFIG: OrderSummaryConfig = {
-    variant: 'compact',
-    taxMode: 'gross',
-    taxRate: undefined,
-    labels: {
-        caption: 'Order summary',
-        item: 'Item',
-        quantity: 'Quantity',
-        unitPrice: 'Unit price',
-        amount: 'Amount',
-        subtotal: 'Subtotal',
-        netTotal: 'Net total',
-        tax: 'VAT',
-        includedTax: 'Includes VAT',
-        total: 'Total'
-    }
-};
+/**
+ * The values of an order summary when nothing changes them. Its texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultOrderSummaryConfig(): OrderSummaryConfig {
+    return {
+        variant: 'compact',
+        taxMode: 'gross',
+        taxRate: undefined,
+        labels: {
+            caption: $localize`:@@ngx-ecommerce.order-summary.caption:Order summary`,
+            item: $localize`:@@ngx-ecommerce.order-summary.item:Item`,
+            quantity: $localize`:@@ngx-ecommerce.order-summary.quantity:Quantity`,
+            unitPrice: $localize`:@@ngx-ecommerce.order-summary.unitPrice:Unit price`,
+            amount: $localize`:@@ngx-ecommerce.order-summary.amount:Amount`,
+            subtotal: $localize`:@@ngx-ecommerce.order-summary.subtotal:Subtotal`,
+            netTotal: $localize`:@@ngx-ecommerce.order-summary.netTotal:Net total`,
+            tax: $localize`:@@ngx-ecommerce.order-summary.tax:VAT`,
+            includedTax: $localize`:@@ngx-ecommerce.order-summary.includedTax:Includes VAT`,
+            total: $localize`:@@ngx-ecommerce.order-summary.total:Total`
+        }
+    };
+}
 
 /**
  * The values every order summary below this injector uses when its inputs are not set.
@@ -29,7 +36,7 @@ export const ORDER_SUMMARY_CONFIG: InjectionToken<OrderSummaryConfig> = new Inje
     'ORDER_SUMMARY_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_ORDER_SUMMARY_CONFIG
+        factory: () => getDefaultOrderSummaryConfig()
     }
 );
 
@@ -45,7 +52,7 @@ export function provideOrderSummaryConfig(config: OrderSummaryConfigChanges): Pr
         provide: ORDER_SUMMARY_CONFIG,
         useFactory: (): OrderSummaryConfig => {
             const parent: OrderSummaryConfig = inject(ORDER_SUMMARY_CONFIG, { skipSelf: true, optional: true })
-                ?? DEFAULT_ORDER_SUMMARY_CONFIG;
+                ?? getDefaultOrderSummaryConfig();
             return { ...parent, ...config, labels: { ...parent.labels, ...config.labels } };
         }
     };

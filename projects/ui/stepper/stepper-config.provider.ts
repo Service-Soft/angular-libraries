@@ -2,19 +2,26 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { StepperConfig } from './stepper-config.model';
 
-const DEFAULT_STEPPER_CONFIG: StepperConfig = {
-    orientation: 'horizontal',
-    linear: true,
-    color: 'primary',
-    headingLevel: 2,
-    label: 'Steps',
-    backLabel: 'Back',
-    nextLabel: 'Next',
-    finishLabel: 'Finish',
-    doneLabel: 'completed',
-    busyLabel: 'Checking',
-    progressLabel: (current, total) => `Step ${current} of ${total}`
-};
+/**
+ * The values of a stepper when nothing changes them. Its texts are $localize, which an app translates like its own, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultStepperConfig(): StepperConfig {
+    return {
+        orientation: 'horizontal',
+        linear: true,
+        color: 'primary',
+        headingLevel: 2,
+        label: $localize`:@@ui.stepper.label:Steps`,
+        backLabel: $localize`:@@ui.stepper.backLabel:Back`,
+        nextLabel: $localize`:@@ui.stepper.nextLabel:Next`,
+        finishLabel: $localize`:@@ui.stepper.finishLabel:Finish`,
+        doneLabel: $localize`:@@ui.stepper.doneLabel:completed`,
+        busyLabel: $localize`:@@ui.stepper.busyLabel:Checking`,
+        progressLabel: (current, total) => $localize`:@@ui.stepper.progressLabel:Step ${current}:current: of ${total}:total:`
+    };
+}
 
 /**
  * The values every stepper below this injector uses when its inputs are not set.
@@ -22,7 +29,7 @@ const DEFAULT_STEPPER_CONFIG: StepperConfig = {
  */
 export const STEPPER_CONFIG: InjectionToken<StepperConfig> = new InjectionToken<StepperConfig>('STEPPER_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_STEPPER_CONFIG
+    factory: () => getDefaultStepperConfig()
 });
 
 /**
@@ -36,7 +43,7 @@ export function provideStepperConfig(config: Partial<StepperConfig>): Provider {
     return {
         provide: STEPPER_CONFIG,
         useFactory: (): StepperConfig => ({
-            ...inject(STEPPER_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_STEPPER_CONFIG,
+            ...inject(STEPPER_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultStepperConfig(),
             ...config
         })
     };

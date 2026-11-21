@@ -11,8 +11,9 @@ import { SeoService } from './seo.service';
  * Writes what each page tells search engines and AI assistants about itself into the head of the document, on every
  * navigation and on the server too, so the prerendered html holds it: the description, the canonical url, the
  * structured data, the robots, the og tags of a shared link and, for a site in several languages, the url of the page
- * in each of them, from the NavRouteData of its routes. On the server, it also runs the data.sitemap of the routes for
- * SeoServerUtilities.resolvePages of `@service-soft/ngx-navigation/seo-server`. Provide it in the application config:
+ * in each of them, from the NavRouteData of its routes. On the server, it also hands SeoServerUtilities.resolvePages of
+ * `@service-soft/ngx-navigation/seo-server` the routes of the pages, with what their data.sitemap lists. Provide it in
+ * the application config:
  * `provideSeoConfig({ origin: 'https://example.com' })`, with `locales` for a site Angular i18n builds in several
  * languages.
  * @param config - The origin of the site, a default image and the languages if you like.
@@ -34,7 +35,7 @@ export function provideSeoConfig(config: SeoConfigChanges): EnvironmentProviders
             const context: unknown = inject(REQUEST_CONTEXT);
             if (SeoRouteUtilities.isSitemapContext(context)) {
                 // the page renders once they are done
-                context.ngxSeoSitemap = await SeoRouteUtilities.resolveListedPages(inject(Router).config, inject(EnvironmentInjector));
+                context.ngxSeoSitemap = await SeoRouteUtilities.resolveSitemapRoutes(inject(Router).config, inject(EnvironmentInjector));
             }
         })
     ]);

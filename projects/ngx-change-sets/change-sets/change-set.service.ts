@@ -53,7 +53,7 @@ export abstract class ChangeSetService {
      * @returns The createdBy of the change set by default, or 'System' when it has none.
      */
     resolveCreatedByName(changeSet: ChangeSet): string | Promise<string> {
-        return changeSet.createdBy ?? 'System';
+        return changeSet.createdBy ?? $localize`:@@ngx-change-sets.change-sets.system:System`;
     }
 
     /**

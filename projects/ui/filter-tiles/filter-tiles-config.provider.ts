@@ -3,12 +3,22 @@ import { faBorderAll } from '@fortawesome/free-solid-svg-icons';
 
 import { FilterTilesConfig } from './filter-tiles-config.model';
 
-const DEFAULT_FILTER_TILES_CONFIG: FilterTilesConfig = {
-    color: 'primary',
-    allLabel: 'All',
-    allIcon: faBorderAll,
-    countLabel: count => count === 1 ? '1 item' : `${count} items`
-};
+/**
+ * The values of filter tiles when nothing changes them. Their texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultFilterTilesConfig(): FilterTilesConfig {
+    return {
+        color: 'primary',
+        allLabel: $localize`:@@ui.filter-tiles.allLabel:All`,
+        allIcon: faBorderAll,
+        // a text of its own for each form, as $localize has no plurals.
+        countLabel: count => count === 1
+            ? $localize`:@@ui.filter-tiles.countLabel.one:1 item`
+            : $localize`:@@ui.filter-tiles.countLabel.other:${count}:count: items`
+    };
+}
 
 /**
  * The values every filter tiles below this injector use when their inputs are not set.
@@ -16,7 +26,7 @@ const DEFAULT_FILTER_TILES_CONFIG: FilterTilesConfig = {
  */
 export const FILTER_TILES_CONFIG: InjectionToken<FilterTilesConfig> = new InjectionToken<FilterTilesConfig>('FILTER_TILES_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_FILTER_TILES_CONFIG
+    factory: () => getDefaultFilterTilesConfig()
 });
 
 /**
@@ -30,7 +40,7 @@ export function provideFilterTilesConfig(config: Partial<FilterTilesConfig>): Pr
     return {
         provide: FILTER_TILES_CONFIG,
         useFactory: (): FilterTilesConfig => ({
-            ...inject(FILTER_TILES_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_FILTER_TILES_CONFIG,
+            ...inject(FILTER_TILES_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultFilterTilesConfig(),
             ...config
         })
     };

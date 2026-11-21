@@ -3,9 +3,9 @@ import { AxeResults } from 'axe-core';
 import { Browser, BrowserContext, chromium, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
+import { PAGE_LEVEL_RULES } from '../projects/ui/.storybook/page-level-rules';
 import { StoryIndexEntry } from './story-index-entry.model';
 import { StorybookUtilities } from './storybook.utilities';
-import { PAGE_LEVEL_RULES } from '../projects/ui/.storybook/page-level-rules';
 
 /**
  * A story and the color scheme of the operating system it gets checked in.

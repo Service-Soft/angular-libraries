@@ -27,14 +27,16 @@ A table shows the entities a page at a time from the server, with the columns, o
 - [Leaving unsaved changes](#leaving-unsaved-changes)
 - [Fields of your own](#fields-of-your-own)
 - [Configuration](#configuration)
+  - [Translating](#translating)
 - [Moving from ngx-material-entity](#moving-from-ngx-material-entity)
 - [License](#license)
 
 # Requirements
-Angular 22 and Tailwind CSS 4. The models shared with zibri, like `PaginationResult`, `FilterConfig` and `ValidationProblem`, come from [zibri-contract](https://www.npmjs.com/package/zibri-contract).
+Angular 22 with `@angular/localize`, which [translates the texts](#translating), and Tailwind CSS 4. The models shared with zibri, like `PaginationResult`, `FilterConfig` and `ValidationProblem`, come from [zibri-contract](https://www.npmjs.com/package/zibri-contract).
 
 ```sh
 npm install @service-soft/ngx-entity @service-soft/ui @service-soft/ngx-error-handling zibri-contract
+ng add @angular/localize
 ```
 
 The decorators need `"experimentalDecorators": true` in your `tsconfig.json`, like zibri. To [work offline](#working-offline), install `@service-soft/ngx-pwa` as well.
@@ -339,6 +341,9 @@ color!: string;
 | `provideUnsavedChangesConfig({ title, paragraphs, discardLabel, keepEditingLabel })` | the question before changes are lost |
 
 The texts of the fields themselves, like the error messages, come from `provideInputConfig` of `@service-soft/ui/input`, and those of the tables from `provideTableConfig` of `@service-soft/ui/table`.
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-entity.table.deleteLabel`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideXConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from ngx-material-entity
 It is not finished: many-to-many relations and files (which wait for the next major version of zibri) are still to come. What changed so far:

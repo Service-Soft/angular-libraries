@@ -3,13 +3,20 @@ import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 
 import { LanguageSwitcherConfig } from './language-switcher-config.model';
 
-const DEFAULT_LANGUAGE_SWITCHER_CONFIG: LanguageSwitcherConfig = {
-    appearance: 'menu',
-    label: 'Language',
-    icon: faGlobe,
-    // a build for every language under its own path, like Angular's i18n makes them: /de/orders and /en/orders.
-    href: (url, code, subPath) => `/${subPath}${url}`
-};
+/**
+ * The values of a language switcher when nothing changes them. Its label is $localize, which an app translates like
+ * its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultLanguageSwitcherConfig(): LanguageSwitcherConfig {
+    return {
+        appearance: 'menu',
+        label: $localize`:@@ngx-navigation.language-switcher.label:Language`,
+        icon: faGlobe,
+        // a build for every language under its own path, like Angular's i18n makes them: /de/orders and /en/orders.
+        href: (url, code, subPath) => `/${subPath}${url}`
+    };
+}
 
 /**
  * The values every language switcher below this injector uses when its inputs are not set.
@@ -19,7 +26,7 @@ export const LANGUAGE_SWITCHER_CONFIG: InjectionToken<LanguageSwitcherConfig> = 
     'LANGUAGE_SWITCHER_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_LANGUAGE_SWITCHER_CONFIG
+        factory: () => getDefaultLanguageSwitcherConfig()
     }
 );
 
@@ -35,7 +42,7 @@ export function provideLanguageSwitcherConfig(config: Partial<LanguageSwitcherCo
     return {
         provide: LANGUAGE_SWITCHER_CONFIG,
         useFactory: (): LanguageSwitcherConfig => ({
-            ...inject(LANGUAGE_SWITCHER_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_LANGUAGE_SWITCHER_CONFIG,
+            ...inject(LANGUAGE_SWITCHER_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultLanguageSwitcherConfig(),
             ...config
         })
     };

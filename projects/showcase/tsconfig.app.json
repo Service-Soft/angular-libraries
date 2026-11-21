@@ -4,7 +4,7 @@
     "compilerOptions": {
         // the showcase consumes the built libraries from node_modules, exactly like an external project.
         "paths": {},
-        "types": []
+        "types": ["@angular/localize"]
     },
     "exclude": ["src/**/*.spec.ts"],
     "extends": "../../tsconfig.json",

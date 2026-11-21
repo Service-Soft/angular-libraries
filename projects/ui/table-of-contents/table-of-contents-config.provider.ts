@@ -2,12 +2,19 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { TableOfContentsConfig } from './table-of-contents-config.model';
 
-// the label of the anchors of @service-soft/ngx-navigation, which link to the sections of a page as well.
-const DEFAULT_TABLE_OF_CONTENTS_CONFIG: TableOfContentsConfig = {
-    label: 'On this page',
-    levels: [2, 3],
-    spy: true
-};
+/**
+ * The values of a table of contents when nothing changes them. Its label is $localize, which an app translates like its
+ * own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultTableOfContentsConfig(): TableOfContentsConfig {
+    return {
+        // the label of the anchors of @service-soft/ngx-navigation, which link to the sections of a page as well.
+        label: $localize`:@@ui.table-of-contents.label:On this page`,
+        levels: [2, 3],
+        spy: true
+    };
+}
 
 /**
  * The values every table of contents below this injector uses when its inputs are not set.
@@ -17,7 +24,7 @@ export const TABLE_OF_CONTENTS_CONFIG: InjectionToken<TableOfContentsConfig> = n
     'TABLE_OF_CONTENTS_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_TABLE_OF_CONTENTS_CONFIG
+        factory: () => getDefaultTableOfContentsConfig()
     }
 );
 
@@ -32,7 +39,7 @@ export function provideTableOfContentsConfig(config: Partial<TableOfContentsConf
     return {
         provide: TABLE_OF_CONTENTS_CONFIG,
         useFactory: (): TableOfContentsConfig => ({
-            ...inject(TABLE_OF_CONTENTS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_TABLE_OF_CONTENTS_CONFIG,
+            ...inject(TABLE_OF_CONTENTS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultTableOfContentsConfig(),
             ...config
         })
     };

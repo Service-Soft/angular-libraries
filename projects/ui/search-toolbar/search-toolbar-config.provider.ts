@@ -2,11 +2,22 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { SearchToolbarConfig } from './search-toolbar-config.model';
 
-const DEFAULT_SEARCH_TOOLBAR_CONFIG: SearchToolbarConfig = {
-    searchLabel: 'Search',
-    resultCountLabel: count => count === 1 ? '1 result' : `${count} results`,
-    activeFiltersLabel: count => `${count} active`
-};
+/**
+ * The values of a search toolbar and a filter button when nothing changes them. Their texts are $localize, which an app
+ * translates like its own, and resolved once the config is injected, so translations an app loads at runtime apply as
+ * well.
+ * @returns The default config.
+ */
+function getDefaultSearchToolbarConfig(): SearchToolbarConfig {
+    return {
+        searchLabel: $localize`:@@ui.search-toolbar.searchLabel:Search`,
+        // a text of its own for each form, as $localize has no plurals.
+        resultCountLabel: count => count === 1
+            ? $localize`:@@ui.search-toolbar.resultCountLabel.one:1 result`
+            : $localize`:@@ui.search-toolbar.resultCountLabel.other:${count}:count: results`,
+        activeFiltersLabel: count => $localize`:@@ui.search-toolbar.activeFiltersLabel:${count}:count: active`
+    };
+}
 
 /**
  * The values every search toolbar and filter button below this injector uses when their inputs are not set.
@@ -14,7 +25,7 @@ const DEFAULT_SEARCH_TOOLBAR_CONFIG: SearchToolbarConfig = {
  */
 export const SEARCH_TOOLBAR_CONFIG: InjectionToken<SearchToolbarConfig> = new InjectionToken<SearchToolbarConfig>('SEARCH_TOOLBAR_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_SEARCH_TOOLBAR_CONFIG
+    factory: () => getDefaultSearchToolbarConfig()
 });
 
 /**
@@ -29,7 +40,7 @@ export function provideSearchToolbarConfig(config: Partial<SearchToolbarConfig>)
     return {
         provide: SEARCH_TOOLBAR_CONFIG,
         useFactory: (): SearchToolbarConfig => ({
-            ...inject(SEARCH_TOOLBAR_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_SEARCH_TOOLBAR_CONFIG,
+            ...inject(SEARCH_TOOLBAR_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultSearchToolbarConfig(),
             ...config
         })
     };

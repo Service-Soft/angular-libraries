@@ -99,7 +99,7 @@ export class AcceptInvitationComponent {
      */
     protected readonly paragraphs: Signal<string[]> = computed(() => {
         const email: string | undefined = this.validity()?.email;
-        const invitedAs: string[] = email == undefined ? [] : [`${this.labels.invitedAs} ${email}`];
+        const invitedAs: string[] = email == undefined ? [] : [this.labels.invitedAs(email)];
         const message: string | undefined = this.resolveMessage(this.state());
         return message == undefined ? invitedAs : [...invitedAs, message];
     });

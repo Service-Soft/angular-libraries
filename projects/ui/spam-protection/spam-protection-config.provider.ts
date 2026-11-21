@@ -2,12 +2,19 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { SpamProtectionConfig } from './spam-protection-config.model';
 
-// no minimum by default: a person who comes back to a form whose draft was kept may send it within a second.
-const DEFAULT_SPAM_PROTECTION_CONFIG: SpamProtectionConfig = {
-    name: 'website',
-    label: 'Leave this field empty',
-    minimumFillTime: 0
-};
+/**
+ * The values of a spam protection when nothing changes them. Its label is $localize, which an app translates like its
+ * own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultSpamProtectionConfig(): SpamProtectionConfig {
+    return {
+        name: 'website',
+        label: $localize`:@@ui.spam-protection.label:Leave this field empty`,
+        // no minimum by default: a person who comes back to a form whose draft was kept may send it within a second.
+        minimumFillTime: 0
+    };
+}
 
 /**
  * The values every spam protection below this injector uses when its inputs are not set, and its texts.
@@ -17,7 +24,7 @@ export const SPAM_PROTECTION_CONFIG: InjectionToken<SpamProtectionConfig> = new 
     'SPAM_PROTECTION_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_SPAM_PROTECTION_CONFIG
+        factory: () => getDefaultSpamProtectionConfig()
     }
 );
 
@@ -32,7 +39,7 @@ export function provideSpamProtectionConfig(config: Partial<SpamProtectionConfig
     return {
         provide: SPAM_PROTECTION_CONFIG,
         useFactory: (): SpamProtectionConfig => ({
-            ...inject(SPAM_PROTECTION_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_SPAM_PROTECTION_CONFIG,
+            ...inject(SPAM_PROTECTION_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultSpamProtectionConfig(),
             ...config
         })
     };

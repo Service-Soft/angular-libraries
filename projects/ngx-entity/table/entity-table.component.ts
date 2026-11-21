@@ -262,7 +262,9 @@ export class EntityTableComponent<
      */
     protected resolveDeleteLabel(row: T): string {
         const first: TableColumn<T> | undefined = this.tableColumns()[0];
-        return first == undefined ? this.labels.deleteLabel : `${this.labels.deleteLabel} ${first.value(row)}`;
+        return first == undefined
+            ? this.labels.deleteLabel
+            : $localize`:@@ngx-entity.table.deleteRowLabel:${this.labels.deleteLabel}:deleteLabel: ${first.value(row)}:value:`;
     }
 
     /**
@@ -304,12 +306,12 @@ export class EntityTableComponent<
     /**
      * Imports the entities of the json file the user chose, and loads the page again. A refused file goes to the
      * ErrorHandler.
-     * @param input - The file input.
+     * @param inputElement - The file input.
      */
-    protected async import(input: HTMLInputElement): Promise<void> {
-        const file: File | undefined = input.files?.[0];
+    protected async import(inputElement: HTMLInputElement): Promise<void> {
+        const file: File | undefined = inputElement.files?.[0];
         // empty, so the same file can be chosen again
-        input.value = '';
+        inputElement.value = '';
         if (file == undefined) {
             return;
         }

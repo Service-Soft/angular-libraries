@@ -11,6 +11,7 @@ Every component lives in its own entry point, so a project only ships the code o
   - [Theming](#theming)
     - [Colored surfaces](#colored-surfaces)
   - [Dark mode](#dark-mode)
+  - [Translating](#translating)
 - [Components](#components)
   - [Button](#button)
   - [Input string](#input-string)
@@ -93,10 +94,11 @@ Every component lives in its own entry point, so a project only ships the code o
 - [License](#license)
 
 # Usage
-It requires Angular 22 and Tailwind CSS 4:
+It requires Angular 22 with `@angular/localize`, which [translates the texts](#translating), and Tailwind CSS 4:
 
 ```sh
 npm install @service-soft/ui
+ng add @angular/localize
 ```
 
 The icons it draws itself, like the one that shows a password, come from `@fortawesome/free-solid-svg-icons`, a peer dependency npm installs with it. Your app and every library share that one copy, and only the icons that are imported end up in the bundle.
@@ -192,6 +194,9 @@ Use the surface on your `body`, so the page background switches with the compone
 ```
 
 Tailwind's `dark:` variant follows the same rules. You rarely need it, since the tokens switch by themselves.
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ui.table.selectAllLabel`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideXConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Components
 Every input of a component has a default you can change for the whole app, or for only a part of it, with its `provideXConfig` function. Values you leave out keep the defaults of the parent.

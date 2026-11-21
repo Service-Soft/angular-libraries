@@ -2,20 +2,27 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { NavigationConfig, NavigationConfigChanges } from './navigation-config.model';
 
-const DEFAULT_NAVIGATION_CONFIG: NavigationConfig = {
-    labels: {
-        home: 'Home',
-        anchors: 'On this page'
-    },
-    routeCondition: () => true
-};
+/**
+ * What the navigation shares when nothing changes it. Its texts are $localize, which an app translates like its own,
+ * and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultNavigationConfig(): NavigationConfig {
+    return {
+        labels: {
+            home: $localize`:@@ngx-navigation.navigation.home:Home`,
+            anchors: $localize`:@@ngx-navigation.navigation.anchors:On this page`
+        },
+        routeCondition: () => true
+    };
+}
 
 /**
  * What every part of the navigation below this injector shares, like its texts. Change it with provideNavigationConfig.
  */
 export const NAVIGATION_CONFIG: InjectionToken<NavigationConfig> = new InjectionToken<NavigationConfig>('NAVIGATION_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_NAVIGATION_CONFIG
+    factory: () => getDefaultNavigationConfig()
 });
 
 /**
@@ -29,7 +36,7 @@ export function provideNavigationConfig(config: NavigationConfigChanges): Provid
     return {
         provide: NAVIGATION_CONFIG,
         useFactory: (): NavigationConfig => {
-            const parent: NavigationConfig = inject(NAVIGATION_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_NAVIGATION_CONFIG;
+            const parent: NavigationConfig = inject(NAVIGATION_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultNavigationConfig();
             return {
                 ...parent,
                 labels: { ...parent.labels, ...config.labels },

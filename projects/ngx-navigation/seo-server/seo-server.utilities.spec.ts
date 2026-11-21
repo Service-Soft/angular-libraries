@@ -123,7 +123,6 @@ describe('SeoServerUtilities', () => {
         const requests: string[] = [];
         const site: SeoSite = await SeoServerUtilities.resolvePages({
             origin: ORIGIN,
-            routes: ROUTES,
             serverRoutes: SERVER_ROUTES,
             prerenderedRoutes: PRERENDERED_ROUTES,
             appEngine: createAppEngine(requests),
@@ -140,8 +139,9 @@ describe('SeoServerUtilities', () => {
             ['/news/season', RenderMode.Server, undefined]
         ]);
         expect(site.unlistedRoutes).toEqual(['/members/:member']);
-        // data.sitemap ran in the app, rendered for the first page without parameters that renders on the server, as
-        // the route of unknown urls is prerendered here
+        expect(site.errorRoutes).toEqual([]);
+        // the app handed the routes over, rendered for the first server route without parameters that renders on the
+        // server, as the route of unknown urls is prerendered here
         expect(requests[0]).toBe('https://club.example/en/news');
 
         expect(site.pages[0]?.localized).toEqual([
@@ -164,12 +164,16 @@ describe('SeoServerUtilities', () => {
     });
 
     test('finds the pages of a site of one language at the urls without a prefix', async () => {
+        const routes: Routes = [{ path: '', component: PageComponent }, { path: 'teams/:team', component: PageComponent }];
         const site: SeoSite = await SeoServerUtilities.resolvePages({
             origin: ORIGIN,
-            routes: [{ path: '', component: PageComponent }, { path: 'teams/:team', component: PageComponent }],
-            serverRoutes: [{ path: '**', renderMode: RenderMode.Prerender }],
+            serverRoutes: [
+                { path: '', renderMode: RenderMode.Prerender },
+                { path: 'teams/:team', renderMode: RenderMode.Prerender },
+                { path: '**', renderMode: RenderMode.Server, status: 404 }
+            ],
             prerenderedRoutes: ['/', '/teams/juniors'],
-            appEngine: createAppEngine([]),
+            appEngine: createAppEngine([], routes),
             locales: [{ code: 'en-US', subPath: '' }]
         });
 
@@ -185,8 +189,7 @@ describe('SeoServerUtilities', () => {
         ];
         const site: SeoSite = await SeoServerUtilities.resolvePages({
             origin: ORIGIN,
-            routes,
-            serverRoutes: [{ path: '**', renderMode: RenderMode.Server, status: 404 }],
+            serverRoutes: [{ path: 'news/:article', renderMode: RenderMode.Server }, { path: '**', renderMode: RenderMode.Server, status: 404 }],
             prerenderedRoutes: [],
             appEngine: createAppEngine(requests, routes),
             locales: LOCALES
@@ -196,14 +199,29 @@ describe('SeoServerUtilities', () => {
         expect(site.pages.map(p => [p.path, p.lastModified])).toEqual([['/news/opening', new Date('2026-10-01')], ['/news/season', undefined]]);
     });
 
-    test('tells why data.sitemap cannot run when no page renders on the server', async () => {
+    test('leaves out a page that answers with an error, like one that falls under the 404 of the route of unknown urls', async () => {
         const routes: Routes = [
             { path: '', component: PageComponent },
-            { path: 'news/:article', component: PageComponent, data: { sitemap: () => Promise.resolve(inject(ARTICLES)) } }
+            // added to the routes, but not to the server routes
+            { path: 'contact', component: PageComponent },
+            { path: '**', component: PageComponent }
         ];
+        const site: SeoSite = await SeoServerUtilities.resolvePages({
+            origin: ORIGIN,
+            serverRoutes: [{ path: '', renderMode: RenderMode.Prerender }, { path: '**', renderMode: RenderMode.Server, status: 404 }],
+            prerenderedRoutes: ['/en', '/de'],
+            appEngine: createAppEngine([], routes),
+            locales: LOCALES
+        });
+
+        expect(site.pages.map(p => p.path)).toEqual(['/']);
+        expect(site.errorRoutes).toEqual(['/contact']);
+    });
+
+    test('tells why the pages cannot be read when no page renders on the server', async () => {
+        const routes: Routes = [{ path: '', component: PageComponent }];
         const pages: Promise<SeoSite> = SeoServerUtilities.resolvePages({
             origin: ORIGIN,
-            routes,
             serverRoutes: [{ path: '**', renderMode: RenderMode.Prerender }],
             prerenderedRoutes: [],
             appEngine: createAppEngine([], routes),

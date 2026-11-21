@@ -11,13 +11,15 @@ It is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui
 - [Input extras](#input-extras)
 - [Order summary](#order-summary)
   - [How it calculates](#how-it-calculates)
+- [Translating](#translating)
 - [License](#license)
 
 # Requirements
-Angular 22 and Tailwind CSS 4.
+Angular 22 with `@angular/localize`, which [translates the texts](#translating), and Tailwind CSS 4.
 
 ```sh
 npm install @service-soft/ngx-ecommerce @service-soft/ui
+ng add @angular/localize
 ```
 
 ```css
@@ -133,6 +135,9 @@ Change the defaults and the texts with `provideOrderSummaryConfig`, like `provid
 - Every step is rounded to a whole minor unit, half away from zero, like commercial rounding.
 
 A backend that calculates differently, like the tax per line, can end up a cent apart from the summary, so calculate it the same way there.
+
+# Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-ecommerce.order-summary.total`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideInputExtrasConfig` or `provideOrderSummaryConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # License
 MIT.

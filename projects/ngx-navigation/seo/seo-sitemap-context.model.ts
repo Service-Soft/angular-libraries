@@ -1,12 +1,12 @@
-import { NavSitemapEntry } from '@service-soft/ngx-navigation/navigation';
+import { SeoSitemapRoute } from './seo-sitemap-route.model';
 
 /**
- * The REQUEST_CONTEXT of the request SeoServerUtilities.resolvePages renders a page for, in which provideSeoConfig runs
- * the data.sitemap of every route in the app, before the page renders.
+ * The REQUEST_CONTEXT of the request SeoServerUtilities.resolvePages renders a page for, in which provideSeoConfig hands
+ * the server the routes of the pages of the app, with what their data.sitemap lists, before the page renders.
  */
 export type SeoSitemapContext = {
     /**
-     * The pages data.sitemap lists, by the path of their route, like 'news/:article'. Undefined until the app ran them.
+     * The routes of the pages. Undefined until the app handed them over.
      */
-    ngxSeoSitemap: Record<string, NavSitemapEntry[]> | undefined
+    ngxSeoSitemap: SeoSitemapRoute[] | undefined
 };

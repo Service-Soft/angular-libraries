@@ -2,10 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { LinkConfig } from './link-config.model';
 
-const DEFAULT_LINK_CONFIG: LinkConfig = {
-    appearance: 'inline',
-    newTabLabel: 'opens in a new tab'
-};
+/**
+ * The values of a link when nothing changes them. Its text for a link that opens in a new tab is $localize, which an
+ * app translates like its own texts, and resolved once the config is injected, so translations an app loads at runtime
+ * apply as well.
+ * @returns The default config.
+ */
+function getDefaultLinkConfig(): LinkConfig {
+    return {
+        appearance: 'inline',
+        newTabLabel: $localize`:@@ui.link.newTabLabel:opens in a new tab`
+    };
+}
 
 /**
  * The values every link below this injector uses when its inputs are not set.
@@ -13,7 +21,7 @@ const DEFAULT_LINK_CONFIG: LinkConfig = {
  */
 export const LINK_CONFIG: InjectionToken<LinkConfig> = new InjectionToken<LinkConfig>('LINK_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_LINK_CONFIG
+    factory: () => getDefaultLinkConfig()
 });
 
 /**
@@ -27,7 +35,7 @@ export function provideLinkConfig(config: Partial<LinkConfig>): Provider {
     return {
         provide: LINK_CONFIG,
         useFactory: (): LinkConfig => ({
-            ...inject(LINK_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_LINK_CONFIG,
+            ...inject(LINK_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultLinkConfig(),
             ...config
         })
     };

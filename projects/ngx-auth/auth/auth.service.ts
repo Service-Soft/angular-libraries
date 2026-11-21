@@ -514,19 +514,19 @@ export abstract class AuthService<
      * like the email of a login, once they pick one. Start it when the input shows, if
      * PasskeyUtilities.isAutofillAvailable, and abort it before anything else asks for a passkey, which the browser
      * refuses while it waits.
-     * @param signal - Aborts the waiting request.
+     * @param abortSignal - Aborts the waiting request.
      * @param authenticator - The name of the passkey authenticator of zibri.
      * @returns Whether the user is logged in, or what the login waits for.
      * @throws {DOMException} An AbortError once the signal aborted it, see PasskeyUtilities.isCancelled.
      */
-    async loginWithPasskeyAutofill(signal: AbortSignal, authenticator: string = 'passkey'): Promise<LoginResult> {
+    async loginWithPasskeyAutofill(abortSignal: AbortSignal, authenticator: string = 'passkey'): Promise<LoginResult> {
         const options: PublicKeyCredentialRequestOptionsJSON = await firstValueFrom(this.http.post<PublicKeyCredentialRequestOptionsJSON>(
             this.resolveUrl('loginOptions', { authenticator }),
             undefined,
             this.resolveOwnOptions()
         ));
-        signal.throwIfAborted();
-        return await this.login({ response: await PasskeyUtilities.resolveAssertion(options, 'conditional', signal) }, authenticator);
+        abortSignal.throwIfAborted();
+        return await this.login({ response: await PasskeyUtilities.resolveAssertion(options, 'conditional', abortSignal) }, authenticator);
     }
 
     /**

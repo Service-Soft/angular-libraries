@@ -2,11 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { BylineConfig } from './byline-config.model';
 
-const DEFAULT_BYLINE_CONFIG: BylineConfig = {
-    showAvatar: false,
-    dateFormat: { dateStyle: 'medium' },
-    readingTimeLabel: minutes => `${minutes} min read`
-};
+/**
+ * The values of a byline when nothing changes them. Its text of the reading time is $localize, which an app translates
+ * like its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultBylineConfig(): BylineConfig {
+    return {
+        showAvatar: false,
+        dateFormat: { dateStyle: 'medium' },
+        readingTimeLabel: minutes => $localize`:@@ui.byline.readingTimeLabel:${minutes}:minutes: min read`
+    };
+}
 
 /**
  * The values every byline below this injector uses when its inputs are not set.
@@ -14,7 +21,7 @@ const DEFAULT_BYLINE_CONFIG: BylineConfig = {
  */
 export const BYLINE_CONFIG: InjectionToken<BylineConfig> = new InjectionToken<BylineConfig>('BYLINE_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_BYLINE_CONFIG
+    factory: () => getDefaultBylineConfig()
 });
 
 /**
@@ -28,7 +35,7 @@ export function provideBylineConfig(config: Partial<BylineConfig>): Provider {
     return {
         provide: BYLINE_CONFIG,
         useFactory: (): BylineConfig => ({
-            ...inject(BYLINE_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_BYLINE_CONFIG,
+            ...inject(BYLINE_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultBylineConfig(),
             ...config
         })
     };

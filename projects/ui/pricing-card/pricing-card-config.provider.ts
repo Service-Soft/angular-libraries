@@ -2,12 +2,19 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { PricingCardConfig } from './pricing-card-config.model';
 
-// below the h2 of the section the plans are in.
-const DEFAULT_PRICING_CARD_CONFIG: PricingCardConfig = {
-    headingLevel: 3,
-    badge: 'Recommended',
-    highlightColor: 'primary'
-};
+/**
+ * The values of a pricing card when nothing changes them. Its text of the badge is $localize, which an app translates
+ * like its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultPricingCardConfig(): PricingCardConfig {
+    return {
+        // below the h2 of the section the plans are in.
+        headingLevel: 3,
+        badge: $localize`:@@ui.pricing-card.badge:Recommended`,
+        highlightColor: 'primary'
+    };
+}
 
 /**
  * The values every pricing card below this injector uses when its inputs are not set.
@@ -15,7 +22,7 @@ const DEFAULT_PRICING_CARD_CONFIG: PricingCardConfig = {
  */
 export const PRICING_CARD_CONFIG: InjectionToken<PricingCardConfig> = new InjectionToken<PricingCardConfig>('PRICING_CARD_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_PRICING_CARD_CONFIG
+    factory: () => getDefaultPricingCardConfig()
 });
 
 /**
@@ -29,7 +36,7 @@ export function providePricingCardConfig(config: Partial<PricingCardConfig>): Pr
     return {
         provide: PRICING_CARD_CONFIG,
         useFactory: (): PricingCardConfig => ({
-            ...inject(PRICING_CARD_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_PRICING_CARD_CONFIG,
+            ...inject(PRICING_CARD_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultPricingCardConfig(),
             ...config
         })
     };

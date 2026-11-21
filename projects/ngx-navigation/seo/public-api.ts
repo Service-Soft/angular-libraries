@@ -5,5 +5,6 @@ export * from './seo-locale.model';
 export * from './seo-page-route.model';
 export * from './seo-route.utilities';
 export * from './seo-sitemap-context.model';
+export * from './seo-sitemap-route.model';
 export * from './seo-url.utilities';
 export * from './seo.provider';

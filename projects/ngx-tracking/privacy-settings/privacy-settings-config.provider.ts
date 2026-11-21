@@ -2,10 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { PrivacySettingsConfig } from './privacy-settings-config.model';
 
-const DEFAULT_PRIVACY_SETTINGS_CONFIG: PrivacySettingsConfig = {
-    color: 'secondary',
-    label: 'Privacy settings'
-};
+/**
+ * The values of the button that opens the privacy settings when nothing changes them. Its label is $localize, which an
+ * app translates like its own texts, and resolved once the config is injected, so translations an app loads at runtime
+ * apply as well.
+ * @returns The default config.
+ */
+function getDefaultPrivacySettingsConfig(): PrivacySettingsConfig {
+    return {
+        color: 'secondary',
+        label: $localize`:@@ngx-tracking.privacy-settings.label:Privacy settings`
+    };
+}
 
 /**
  * The values every button below this injector that opens the privacy settings uses when its inputs are not set, and
@@ -15,7 +23,7 @@ export const PRIVACY_SETTINGS_CONFIG: InjectionToken<PrivacySettingsConfig> = ne
     'PRIVACY_SETTINGS_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_PRIVACY_SETTINGS_CONFIG
+        factory: () => getDefaultPrivacySettingsConfig()
     }
 );
 
@@ -30,7 +38,7 @@ export function providePrivacySettingsConfig(config: Partial<PrivacySettingsConf
     return {
         provide: PRIVACY_SETTINGS_CONFIG,
         useFactory: (): PrivacySettingsConfig => ({
-            ...inject(PRIVACY_SETTINGS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_PRIVACY_SETTINGS_CONFIG,
+            ...inject(PRIVACY_SETTINGS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultPrivacySettingsConfig(),
             ...config
         })
     };

@@ -95,10 +95,12 @@ export class InputAutocompleteComponent<T> extends BaseInputDirective<T | undefi
         effect(() => {
             const options: InputOption<T>[] = this.options();
             untracked(() => {
-                const input: HTMLInputElement = this.nativeInput().nativeElement;
+                const inputElement: HTMLInputElement = this.nativeInput().nativeElement;
                 const query: string = this.query().trim()
                     .toLowerCase();
-                const searching: boolean = input.ownerDocument.activeElement === input && query !== '' && !this.isChosenLabel(query);
+                const searching: boolean = inputElement.ownerDocument.activeElement === inputElement
+                    && query !== ''
+                    && !this.isChosenLabel(query);
                 if (options.length && searching && this.shownOptions().length) {
                     this.combobox().expanded.set(true);
                 }
@@ -116,9 +118,9 @@ export class InputAutocompleteComponent<T> extends BaseInputDirective<T | undefi
         afterRenderEffect({
             write: () => {
                 const query: string = this.query();
-                const input: HTMLInputElement = this.nativeInput().nativeElement;
-                if (input.value !== query) {
-                    input.value = query;
+                const inputElement: HTMLInputElement = this.nativeInput().nativeElement;
+                if (inputElement.value !== query) {
+                    inputElement.value = query;
                 }
             }
         });

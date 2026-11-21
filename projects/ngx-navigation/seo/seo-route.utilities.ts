@@ -1,47 +1,38 @@
 import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Route, Routes } from '@angular/router';
-import { NavRouteData, NavSitemapEntry } from '@service-soft/ngx-navigation/navigation';
+import { NavRouteData } from '@service-soft/ngx-navigation/navigation';
 
 import { SeoPageRoute } from './seo-page-route.model';
 import { SeoSitemapContext } from './seo-sitemap-context.model';
+import { SeoSitemapRoute } from './seo-sitemap-route.model';
 
 /**
- * Finds the pages of the routes of an app, the same way in the app and on its server, which lists them for the
- * sitemap.
+ * Finds the pages of the routes of an app, in the app, which hands them to its server for the sitemap. The server
+ * can't import the routes itself: in a site in several languages their texts are $localize, which only the build of
+ * each language fills in.
  */
 export abstract class SeoRouteUtilities {
     /**
-     * Finds the routes that render a page search engines may index, depth first: children and lazily loaded children
+     * Resolves the routes that render a page search engines may index, depth first: children and lazily loaded children
      * included, without redirects, without the route of unknown urls and matchers, and without routes whose data.robots
-     * holds noindex.
+     * holds noindex. Each with the pages its data.sitemap lists, which runs in an injection context of the app, so it
+     * can inject what it reads them with, like the HttpClient.
      * @param routes - The routes of the app, the same that provideRouter gets.
+     * @param injector - The injector of the app.
      * @returns The routes of the pages, by their whole path.
      */
-    static async findPageRoutes(routes: Routes): Promise<SeoPageRoute[]> {
-        return this.findChildPageRoutes(routes, '', {});
-    }
-
-    /**
-     * Resolves the pages that the data.sitemap of each route lists, in an injection context of the app, so they can
-     * inject what they read them with, like the HttpClient.
-     * @param routes - The routes of the app.
-     * @param injector - The injector of the app.
-     * @returns The pages, by the path of their route, like 'news/:article'.
-     */
-    static async resolveListedPages(routes: Routes, injector: EnvironmentInjector): Promise<Record<string, NavSitemapEntry[]>> {
-        const listed: Record<string, NavSitemapEntry[]> = {};
-        for (const route of await this.findPageRoutes(routes)) {
+    static async resolveSitemapRoutes(routes: Routes, injector: EnvironmentInjector): Promise<SeoSitemapRoute[]> {
+        const sitemapRoutes: SeoSitemapRoute[] = [];
+        for (const route of await this.findChildPageRoutes(routes, '', {})) {
             const sitemap: NavRouteData['sitemap'] = route.data.sitemap;
-            if (sitemap != undefined) {
-                listed[route.path] = await runInInjectionContext(injector, sitemap);
-            }
+            sitemapRoutes.push({ ...route, listed: sitemap == undefined ? undefined : await runInInjectionContext(injector, sitemap) });
         }
-        return listed;
+        return sitemapRoutes;
     }
 
     /**
-     * Whether the REQUEST_CONTEXT of a request is the one SeoServerUtilities.resolvePages renders a page with, to run
-     * the data.sitemap of the routes.
+     * Whether the REQUEST_CONTEXT of a request is the one SeoServerUtilities.resolvePages renders a page with, to get
+     * the routes of the pages.
      * @param context - The REQUEST_CONTEXT, null in the browser and for a page rendered for any other request.
      * @returns Whether it is.
      */

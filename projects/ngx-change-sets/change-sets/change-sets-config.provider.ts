@@ -4,47 +4,54 @@ import { ChangeSetType } from 'zibri-contract';
 import { ChangeSetsConfigChanges } from './change-sets-config-changes.model';
 import { ChangeSetsConfig } from './change-sets-config.model';
 
-const DEFAULT_CHANGE_SETS_CONFIG: ChangeSetsConfig = {
-    dateFormat: 'dd.MM.yyyy HH:mm',
-    valueDateFormat: 'dd.MM.yyyy HH:mm',
-    pageSize: 10,
-    canResetAndRollback: true,
-    canOpenCreatedBy: true,
-    showEmptyCreatedBy: false,
-    labels: {
-        types: {
-            [ChangeSetType.CREATE]: 'Created',
-            [ChangeSetType.REPLACE]: 'Replaced',
-            [ChangeSetType.RESET]: 'Reset',
-            [ChangeSetType.UPDATE]: 'Updated',
-            [ChangeSetType.DELETE]: 'Deleted',
-            [ChangeSetType.RESTORE]: 'Restored'
+/**
+ * The values of the change sets when nothing changes them. Their texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultChangeSetsConfig(): ChangeSetsConfig {
+    return {
+        dateFormat: 'dd.MM.yyyy HH:mm',
+        valueDateFormat: 'dd.MM.yyyy HH:mm',
+        pageSize: 10,
+        canResetAndRollback: true,
+        canOpenCreatedBy: true,
+        showEmptyCreatedBy: false,
+        labels: {
+            types: {
+                [ChangeSetType.CREATE]: $localize`:@@ngx-change-sets.change-sets.types.created:Created`,
+                [ChangeSetType.REPLACE]: $localize`:@@ngx-change-sets.change-sets.types.replaced:Replaced`,
+                [ChangeSetType.RESET]: $localize`:@@ngx-change-sets.change-sets.types.reset:Reset`,
+                [ChangeSetType.UPDATE]: $localize`:@@ngx-change-sets.change-sets.types.updated:Updated`,
+                [ChangeSetType.DELETE]: $localize`:@@ngx-change-sets.change-sets.types.deleted:Deleted`,
+                [ChangeSetType.RESTORE]: $localize`:@@ngx-change-sets.change-sets.types.restored:Restored`
+            },
+            reset: $localize`:@@ngx-change-sets.change-sets.reset:Reset`,
+            resetChangeSet: $localize`:@@ngx-change-sets.change-sets.resetChangeSet:This change set`,
+            rollbackToChangeSet: $localize`:@@ngx-change-sets.change-sets.rollbackToChangeSet:Rollback all to this state`,
+            key: $localize`:@@ngx-change-sets.change-sets.key:Property`,
+            previousValue: $localize`:@@ngx-change-sets.change-sets.previousValue:Previous value`,
+            newValue: $localize`:@@ngx-change-sets.change-sets.newValue:New value`,
+            showMore: $localize`:@@ngx-change-sets.change-sets.showMore:Show more`,
+            createdAt: $localize`:@@ngx-change-sets.change-sets.createdAt:Created at`,
+            createdBy: $localize`:@@ngx-change-sets.change-sets.createdBy:Created by`
         },
-        reset: 'Reset',
-        resetChangeSet: 'This change set',
-        rollbackToChangeSet: 'Rollback all to this state',
-        key: 'Property',
-        previousValue: 'Previous value',
-        newValue: 'New value',
-        showMore: 'Show more',
-        createdAt: 'Created at',
-        createdBy: 'Created by'
-    },
-    resetConfirmDialogData: {
-        title: 'Reset this change set?',
-        paragraphs: ['This deletes the change set and can\'t be undone. The change sets after it are kept.'],
-        confirmButtonLabel: 'Reset',
-        cancelButtonLabel: 'Cancel',
-        confirmButtonColor: 'error'
-    },
-    rollbackConfirmDialogData: {
-        title: 'Rollback to the state after this change set?',
-        paragraphs: ['This undoes and deletes every newer change set and can\'t be undone.'],
-        confirmButtonLabel: 'Rollback',
-        cancelButtonLabel: 'Cancel',
-        confirmButtonColor: 'error'
-    }
-};
+        resetConfirmDialogData: {
+            title: $localize`:@@ngx-change-sets.change-sets.resetConfirmDialogData.title:Reset this change set?`,
+            paragraphs: [$localize`:@@ngx-change-sets.change-sets.resetConfirmDialogData.paragraphs:This deletes the change set and can't be undone. The change sets after it are kept.`],
+            confirmButtonLabel: $localize`:@@ngx-change-sets.change-sets.resetConfirmDialogData.confirmButtonLabel:Reset`,
+            cancelButtonLabel: $localize`:@@ngx-change-sets.change-sets.resetConfirmDialogData.cancelButtonLabel:Cancel`,
+            confirmButtonColor: 'error'
+        },
+        rollbackConfirmDialogData: {
+            title: $localize`:@@ngx-change-sets.change-sets.rollbackConfirmDialogData.title:Rollback to the state after this change set?`,
+            paragraphs: [$localize`:@@ngx-change-sets.change-sets.rollbackConfirmDialogData.paragraphs:This undoes and deletes every newer change set and can't be undone.`],
+            confirmButtonLabel: $localize`:@@ngx-change-sets.change-sets.rollbackConfirmDialogData.confirmButtonLabel:Rollback`,
+            cancelButtonLabel: $localize`:@@ngx-change-sets.change-sets.rollbackConfirmDialogData.cancelButtonLabel:Cancel`,
+            confirmButtonColor: 'error'
+        }
+    };
+}
 
 /**
  * The values every change sets component below this injector uses when its inputs are not set.
@@ -52,7 +59,7 @@ const DEFAULT_CHANGE_SETS_CONFIG: ChangeSetsConfig = {
  */
 export const CHANGE_SETS_CONFIG: InjectionToken<ChangeSetsConfig> = new InjectionToken<ChangeSetsConfig>('CHANGE_SETS_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_CHANGE_SETS_CONFIG
+    factory: () => getDefaultChangeSetsConfig()
 });
 
 /**
@@ -66,7 +73,7 @@ export function provideChangeSetsConfig(config: ChangeSetsConfigChanges): Provid
     return {
         provide: CHANGE_SETS_CONFIG,
         useFactory: (): ChangeSetsConfig => {
-            const parent: ChangeSetsConfig = inject(CHANGE_SETS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_CHANGE_SETS_CONFIG;
+            const parent: ChangeSetsConfig = inject(CHANGE_SETS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultChangeSetsConfig();
             return {
                 ...parent,
                 ...config,
