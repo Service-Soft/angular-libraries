@@ -1,5 +1,6 @@
-import { Component, ErrorHandler, signal, WritableSignal } from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ErrorHandlerTestingUtilities } from 'testing/error-handler';
 import { describe, expect, test } from 'vitest';
 
 import { IframeComponent } from './iframe.component';
@@ -39,7 +40,7 @@ describe('IframeComponent', () => {
 
     test('refuses a url that would run script in the page', async () => {
         const errors: unknown[] = [];
-        TestBed.configureTestingModule({ providers: [{ provide: ErrorHandler, useValue: { handleError: (error: unknown) => errors.push(error) } }] });
+        TestBed.configureTestingModule({ providers: [ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         const [fixture, iframe] = await render();
         fixture.componentInstance.src.set('javascript:alert(1)');
         await fixture.whenStable().catch((error: unknown) => errors.push(error));

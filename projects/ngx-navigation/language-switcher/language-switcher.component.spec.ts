@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -24,6 +24,19 @@ const LANGUAGES: LanguageSwitcherLanguage[] = [
 })
 class PageComponent {
     readonly languages: LanguageSwitcherLanguage[] = LANGUAGES;
+}
+
+@Component({
+    selector: 'ngx-regional-page',
+    template: '<ngx-language-switcher appearance="list" [languages]="languages" />',
+    imports: [LanguageSwitcherComponent]
+})
+class RegionalPageComponent {
+    // languages of a region, whose builds Angular i18n serves below a shorter path
+    readonly languages: LanguageSwitcherLanguage[] = [
+        { code: 'de-CH', label: 'Deutsch', subPath: 'de' },
+        { code: 'fr-CH', label: 'Français', subPath: 'fr' }
+    ];
 }
 
 // the text, the href, the hreflang, the lang and the aria-current of a link.
@@ -75,5 +88,32 @@ describe('LanguageSwitcherComponent', () => {
         ]);
         expect(menu?.querySelector('button')).toBeNull();
         expect(menu?.querySelectorAll('a[ui-menu-link]').length).toBe(4);
+    });
+
+    test('links to the path a language is served below, and names it by its code', async () => {
+        TestBed.configureTestingModule({
+            providers: [provideRouter([{ path: '**', component: RegionalPageComponent }]), { provide: LOCALE_ID, useValue: 'fr-CH' }]
+        });
+        const [list] = await render();
+
+        expect(findLinks(list)).toEqual([
+            ['Deutsch', '/de/orders?page=2', 'de-CH', 'de-CH', undefined],
+            ['Français', '/fr/orders?page=2', 'fr-CH', 'fr-CH', 'page']
+        ]);
+    });
+
+    test('gives the href of the config the code and the path of a language', async () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter([{ path: '**', component: RegionalPageComponent }]),
+                provideLanguageSwitcherConfig({ href: (url, code, subPath) => `https://${subPath}.example.ch${url}#${code}` })
+            ]
+        });
+        const [list] = await render();
+
+        expect(findLinks(list).map(([, href]) => href)).toEqual([
+            'https://de.example.ch/orders?page=2#de-CH',
+            'https://fr.example.ch/orders?page=2#fr-CH'
+        ]);
     });
 });

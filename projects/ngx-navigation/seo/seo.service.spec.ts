@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NavRoute } from '@service-soft/ngx-navigation/navigation';
@@ -47,6 +47,11 @@ function setup(): Router {
 
 function findContent(selector: string): string | undefined {
     return document.head.querySelector(selector)?.getAttribute('content') ?? undefined;
+}
+
+function findAlternates(): [string | null, string | null][] {
+    return [...document.head.querySelectorAll('link[rel="alternate"][hreflang]')]
+        .map(link => [link.getAttribute('hreflang'), link.getAttribute('href')]);
 }
 
 function findStructuredData(): unknown[] {
@@ -102,5 +107,48 @@ describe('provideSeoConfig', () => {
         expect(findContent('meta[name="description"]')).toBe('Every team of the club.');
         expect(findStructuredData()).toEqual([{ '@type': 'SportsTeam', name: 'juniors' }]);
         expect(findContent('meta[property="og:title"]')).toBe('Team');
+    });
+
+    test('links a page in a site of several languages to itself in each, and to its url without a language', async () => {
+        // the build of the German language, which Angular i18n gives its own LOCALE_ID and serves below /de
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter(ROUTES),
+                provideSeoConfig({ origin: 'https://club.example', locales: [{ code: 'en', subPath: 'en' }, { code: 'de-CH', subPath: 'de' }] }),
+                { provide: LOCALE_ID, useValue: 'de-ch' }
+            ]
+        });
+        const router: Router = TestBed.inject(Router);
+        await router.navigateByUrl('/teams/juniors?season=2026');
+
+        expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://club.example/de/teams/juniors');
+        expect(findAlternates()).toEqual([
+            ['en', 'https://club.example/en/teams/juniors'],
+            ['de-CH', 'https://club.example/de/teams/juniors'],
+            ['x-default', 'https://club.example/teams/juniors']
+        ]);
+        expect(findContent('meta[property="og:url"]')).toBe('https://club.example/de/teams/juniors');
+        expect(findContent('meta[property="og:locale"]')).toBe('de_CH');
+        expect([...document.head.querySelectorAll('meta[property="og:locale:alternate"]')].map(meta => meta.getAttribute('content')))
+            .toEqual(['en']);
+
+        // the start page of a language has no slash at its end, the one of the whole site is /
+        await router.navigateByUrl('/');
+        expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://club.example/de');
+        expect(findAlternates()).toEqual([
+            ['en', 'https://club.example/en'],
+            ['de-CH', 'https://club.example/de'],
+            ['x-default', 'https://club.example/']
+        ]);
+        expect(document.head.querySelectorAll('meta[property="og:locale:alternate"]')).toHaveLength(1);
+    });
+
+    test('writes no alternates for a site of one language', async () => {
+        const router: Router = setup();
+        await router.navigateByUrl('/imprint');
+
+        expect(findAlternates()).toEqual([]);
+        expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe('https://club.example/imprint');
+        expect(findContent('meta[property="og:locale"]')).toBeUndefined();
     });
 });

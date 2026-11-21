@@ -21,12 +21,14 @@ It is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui
 - [Switching the language](#switching-the-language)
 - [The page for unknown urls](#the-page-for-unknown-urls)
 - [SEO](#seo)
+  - [Several languages](#several-languages)
+  - [The server: sitemap, robots.txt and llms.txt](#the-server-sitemap-robotstxt-and-llmstxt)
 - [Configuration](#configuration)
 - [Moving from ngx-material-navigation](#moving-from-ngx-material-navigation)
 - [License](#license)
 
 # Requirements
-Angular 22 with its router, and Tailwind CSS 4.
+Angular 22 with its router, and Tailwind CSS 4. `@angular/ssr` for the [server part of the SEO](#the-server-sitemap-robotstxt-and-llmstxt).
 
 ```sh
 npm install @service-soft/ngx-navigation @service-soft/ui
@@ -248,12 +250,12 @@ protected readonly languages: LanguageSwitcherLanguage[] = [
 
 | Input | Values | Default |
 |---|---|---|
-| `languages` | `LanguageSwitcherLanguage[]` | required — `code`, `label` and `href`, a fixed address or a function of the url of the current page; the `href` of the config when it has none |
+| `languages` | `LanguageSwitcherLanguage[]` | required — `code`, `label`, `subPath`, the path its build is served below, its code when it has none, and `href`, a fixed address or a function of the url of the current page; the `href` of the config when it has none |
 | `current` | `string` | the `LOCALE_ID` of the app — the code of the language of the page; `en` counts for `en-US` when no code is the same |
 | `appearance` | `'menu'` \| `'list'` | `'menu'` — a button with a globe and the current language that opens a [menu](https://www.npmjs.com/package/@service-soft/ui#menu) of all of them, or a row of links |
 | `label` | `string` | `'Language'` — what screen readers call it; the button is named "Language: English" |
 
-The link to the current page in a language has its code as `hreflang` and `lang`, so search engines know the page in that language, and screen readers read its name in it. The one of the current language is marked with a check in the menu, underlined in the row, and tells screen readers that it is the current page. The links are plain hrefs, which load the page in the other language. By default they go to `/<code><url>`, like `/de/orders?page=2`, where Angular's i18n puts the build of every language; change that for all languages with `provideLanguageSwitcherConfig({ href: (url, code) => … })`, and the `label`, the `icon` and the `appearance` there as well. Inside of a `ui-menu`, like a menu of the navbar as a `custom` element, its links are items of that menu.
+The link to the current page in a language has its code as `hreflang` and `lang`, so search engines know the page in that language, and screen readers read its name in it. The one of the current language is marked with a check in the menu, underlined in the row, and tells screen readers that it is the current page. The links are plain hrefs, which load the page in the other language. By default they go to `/<subPath><url>`, like `/de/orders?page=2`, where Angular's i18n puts the build of every language. Give a language whose path isn't its code its `subPath`, like `{ code: 'de-CH', label: 'Deutsch', subPath: 'de' }`, the same as the `subPath` of its [SEO locale](#several-languages). Change the links for all languages with `provideLanguageSwitcherConfig({ href: (url, code, subPath) => … })`, and the `label`, the `icon` and the `appearance` there as well. Inside of a `ui-menu`, like a menu of the navbar as a `custom` element, its links are items of that menu.
 
 # The page for unknown urls
 `NotFoundComponent` is the page of the route for every other path, a centered [result](https://www.npmjs.com/package/@service-soft/ui#result) of `@service-soft/ui` with an icon, a heading, a text and a link back:
@@ -296,6 +298,63 @@ const routes: NavRoute[] = [{
 
 Each value comes from the deepest route that has it, and `NavRouteData` types them. A tag the page has no value for is removed, so none of the page before survives a navigation; leave them out of your `index.html`. The JSON-LD of the site itself, like its `Organization`, can stay there: only the one of the pages is replaced.
 
+## Several languages
+For a site that Angular i18n builds in several languages, give `locales` the languages, the source language first, each with its code and the `subPath` its build is served below:
+
+```ts
+provideSeoConfig({ origin: 'https://club.example', locales: [{ code: 'en', subPath: 'en' }, { code: 'de', subPath: 'de' }] })
+```
+
+Each build knows its language by its `LOCALE_ID`. Then the canonical url of a page has its language, like `https://club.example/de/teams`. Every page also links to itself in each language with `<link rel="alternate" hreflang>`, and to its url without a language as `x-default`, which the server redirects by the language of the visitor. `og:locale` is the language, like `de_CH`, and `og:locale:alternate` names the others. With one language, or none given, pages have no alternates and no prefix.
+
+## The server: sitemap, robots.txt and llms.txt
+`SeoServerUtilities` of `@service-soft/ngx-navigation/seo-server` gives the server of the site what it tells about all of its pages. That entry point needs `@angular/ssr`, an optional peer dependency. `resolvePages` finds them in the routes of the app, so the sitemap has every page, however it renders:
+
+- the routes of the router config, children and lazily loaded children included;
+- without redirects, the route of unknown urls, matchers, and routes whose `robots` holds `noindex`;
+- the render mode of each page by the first of the server routes that matches it, `RenderMode.Server` when none does;
+- for a route with parameters, the pages Angular prerendered for it, and the ones `sitemap` in its data lists, like the articles of a database. A route with parameters that has neither is returned in `unlistedRoutes`, so the server can log it.
+
+  `sitemap` runs in the app, in an injection context of its root, so it reads them like the pages do. For that, `resolvePages` has the app engine render one page on the server, which hands the app a `REQUEST_CONTEXT` that only the server can give. `provideSeoConfig` runs every `sitemap` before that page renders. The page is an unknown url, so it needs the route of unknown urls to render on the server, which a 404 needs anyway: `{ path: '**', renderMode: RenderMode.Server, status: 404 }`. Without it, the first page without parameters that renders on the server is used, and `resolvePages` throws when there is none;
+- the title and description of each page in each language, read from its html as the app engine answers it, prerendered or rendered once. A page only a browser renders, `RenderMode.Client`, has neither, as search engines see little more of it.
+
+```ts
+{ path: 'news/:article', title: 'Article', component: ArticlePage, data: {
+    sitemap: async () => {
+        // inject before the first await, as in every injection context
+        const articles: Article[] = await firstValueFrom(inject(ArticleService).findAll());
+        return articles.map(article => ({ path: `/news/${article.slug}`, lastModified: new Date(article.updatedAt) }));
+    }
+} }
+```
+
+`lastModified` of the data, or of an entry of `sitemap`, is a `Date`, which the sitemap writes as the `<lastmod>` of the page in the format search engines read, like `2026-11-01T00:00:00.000Z`. It is left out when it isn't known: search engines ignore one that is always today. An invalid date throws, naming the page.
+
+```ts
+const appEngine: AngularNodeAppEngine = new AngularNodeAppEngine();
+const locales: SeoLocale[] = [{ code: 'en', subPath: 'en' }, { code: 'de', subPath: 'de' }];
+const site: Promise<SeoSite> = SeoServerUtilities.resolvePages({
+    origin: 'https://club.example',
+    routes,
+    serverRoutes,
+    // written next to the browser and server folders by the build
+    prerenderedRoutes: Object.keys(JSON.parse(readFileSync(join(import.meta.dirname, '../prerendered-routes.json'), 'utf8')).routes),
+    appEngine,
+    locales
+});
+```
+
+The app engine renders each page of the site once for that, at the url of `origin`, so its host has to be one the app engine accepts.
+
+| Method | Gives |
+|---|---|
+| `resolveSitemapFiles(pages, origin)` | the files of the sitemap by their path: every page in every language, with `xhtml:link` alternates and `x-default` when there are several. Over 50,000 urls or 50 MB, `/sitemap.xml` is an index of `/sitemap-1.xml`, `/sitemap-2.xml` and so on |
+| `resolveRobotsTxt({ allowed, disallowedCrawlers, sitemapUrl })` | the robots.txt: everything allowed or, like on a stage, disallowed, the crawlers that may not read the site, and the sitemap |
+| `resolveLlmsTxt(pages, locale, locales, origin)` | the [llms.txt](https://llmstxt.org) of a language: the name and description of the start page and every page that renders on the server, and where the other languages have theirs. `/llms.txt` is the one of the source language, `/<subPath>/llms.txt` the one of another |
+| `findTrailingSlashRedirect(url)` | the url without a slash at the end of its path, for a 301, so each page has one url |
+| `findLocaleRedirect(url, acceptLanguage, locales)` | for a url without a language, the same page in the language the visitor prefers, for a 302 with `Vary: Accept-Language`; none for the robots.txt, the llms.txt and the sitemap |
+| `resolvePreferredLocale(acceptLanguage, locales)` | the language of the site the visitor prefers, by its code or its primary language, like `de` for `de-AT`, the source language when they accept none |
+
 # Configuration
 Every part reads its defaults and texts from a config, which `provideXConfig` changes, in the application config for the whole app or in a component or route for only that part of it:
 
@@ -306,9 +365,9 @@ Every part reads its defaults and texts from a config, which `provideXConfig` ch
 | | `labels` | `navigation: 'Navigation'`, `openNavigation: 'Open the navigation'` |
 | `provideNavigationConfig` | `labels` | `home: 'Home'` — the first step of the breadcrumbs, `anchors: 'On this page'` — what screen readers call the links to the sections |
 | | `routeCondition` | every link shows — see [conditions and actions](#conditions-and-actions) |
-| `provideSeoConfig` | `origin`, `defaultImage` | required, none — see [SEO](#seo) |
+| `provideSeoConfig` | `origin`, `defaultImage`, `locales` | required, none, `[]` — see [SEO](#seo) |
 | `provideNotFoundConfig` | `title`, `message`, `homeLabel`, `homeRoute`, `icon` | `'Page not found'`, a sentence, `'Back to the start page'`, `'/'`, `faSignsPost` |
-| `provideLanguageSwitcherConfig` | `appearance`, `label`, `icon`, `href` | `'menu'`, `'Language'`, `faGlobe`, `(url, code) => '/' + code + url` |
+| `provideLanguageSwitcherConfig` | `appearance`, `label`, `icon`, `href` | `'menu'`, `'Language'`, `faGlobe`, `(url, code, subPath) => '/' + subPath + url` |
 | `provideBreadcrumbsConfig` of `@service-soft/ui/breadcrumbs` | `label` | `'Breadcrumbs'` — what screen readers call the breadcrumbs |
 | `provideDrawerConfig` of `@service-soft/ui/drawer` | `side` | `'start'` — the edge the drawer slides in from |
 

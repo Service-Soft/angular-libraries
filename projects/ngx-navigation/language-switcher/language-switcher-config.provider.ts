@@ -8,7 +8,7 @@ const DEFAULT_LANGUAGE_SWITCHER_CONFIG: LanguageSwitcherConfig = {
     label: 'Language',
     icon: faGlobe,
     // a build for every language under its own path, like Angular's i18n makes them: /de/orders and /en/orders.
-    href: (url, code) => `/${code}${url}`
+    href: (url, code, subPath) => `/${subPath}${url}`
 };
 
 /**

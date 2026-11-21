@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { NavLinkComponent } from '@service-soft/ngx-navigation/nav-link';
 import { NavTextComponent } from '@service-soft/ngx-navigation/nav-text';
 import { FooterRow } from '@service-soft/ngx-navigation/navigation';
+import { ErrorHandlerTestingUtilities } from 'testing/error-handler';
 import { describe, expect, test } from 'vitest';
 
 import { FooterComponent } from './footer.component';
@@ -35,11 +36,14 @@ describe('FooterComponent', () => {
     });
 
     test('throws in development builds for a type without a component', async () => {
-        TestBed.configureTestingModule({ providers: [provideRouter([])] });
+        // the error handler of the app gets it first, whose default would log it
+        const errors: unknown[] = [];
+        TestBed.configureTestingModule({ providers: [provideRouter([]), ErrorHandlerTestingUtilities.provideErrorList(errors)] });
         const fixture: ComponentFixture<FooterComponent> = TestBed.createComponent(FooterComponent);
         fixture.componentRef.setInput('rows', ROWS);
         fixture.componentRef.setInput('components', { link: NavLinkComponent });
 
         await expect(fixture.whenStable()).rejects.toThrow('The footer needs a component for "text"');
+        expect(errors).toHaveLength(1);
     });
 });

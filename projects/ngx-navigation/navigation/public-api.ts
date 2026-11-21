@@ -19,6 +19,7 @@ export * from './nav-route-data.model';
 export * from './nav-route-target.model';
 export * from './nav-route.model';
 export * from './nav-routes-source.model';
+export * from './nav-sitemap-entry.model';
 export * from './nav-structured-data.type';
 export * from './nav-target.type';
 export * from './nav-text.model';
