@@ -2,10 +2,17 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { ShowcaseCardConfig } from './showcase-card-config.model';
 
-const DEFAULT_SHOWCASE_CARD_CONFIG: ShowcaseCardConfig = {
-    headingLevel: 2,
-    tagsLabel: 'Tags'
-};
+/**
+ * The values of a showcase card when nothing changes them. Its label of the tags is $localize, which an app translates
+ * like its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultShowcaseCardConfig(): ShowcaseCardConfig {
+    return {
+        headingLevel: 2,
+        tagsLabel: $localize`:@@ui.showcase-card.tagsLabel:Tags`
+    };
+}
 
 /**
  * The values every showcase card below this injector uses when its inputs are not set.
@@ -13,7 +20,7 @@ const DEFAULT_SHOWCASE_CARD_CONFIG: ShowcaseCardConfig = {
  */
 export const SHOWCASE_CARD_CONFIG: InjectionToken<ShowcaseCardConfig> = new InjectionToken<ShowcaseCardConfig>('SHOWCASE_CARD_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_SHOWCASE_CARD_CONFIG
+    factory: () => getDefaultShowcaseCardConfig()
 });
 
 /**
@@ -27,7 +34,7 @@ export function provideShowcaseCardConfig(config: Partial<ShowcaseCardConfig>): 
     return {
         provide: SHOWCASE_CARD_CONFIG,
         useFactory: (): ShowcaseCardConfig => ({
-            ...inject(SHOWCASE_CARD_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_SHOWCASE_CARD_CONFIG,
+            ...inject(SHOWCASE_CARD_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultShowcaseCardConfig(),
             ...config
         })
     };

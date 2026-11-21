@@ -8,7 +8,7 @@
         // the paths of the workspace point to the sources of the other libraries, which the build would then compile
         // into this one. Without them, they resolve from node_modules like for a consumer, so ui has to be built first.
         "paths": {},
-        "types": []
+        "types": ["@angular/localize"]
     },
     "exclude": ["**/*.spec.ts", "**/*.stories.ts", "test-setup.ts"],
     "extends": "../../tsconfig.json",

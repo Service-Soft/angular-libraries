@@ -142,7 +142,8 @@ export class EntityDateArrayFieldComponent<T extends object> extends BaseEntityF
      * @returns The name.
      */
     protected resolveRemoveLabel(item: EntityDateArrayItem): string {
-        return `${this.labels.removeLabel} ${EntityTextUtilities.resolveItemText(this.items(), item, this.labels, this.locale)}`;
+        const value: string = EntityTextUtilities.resolveItemText(this.items(), item, this.labels, this.locale);
+        return $localize`:@@ngx-entity.field-date-array.removeItemLabel:${this.labels.removeLabel}:removeLabel: ${value}:value:`;
     }
 
     private resolveDateText(date: Date | undefined): string {

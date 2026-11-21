@@ -17,14 +17,16 @@ Everything works with server-side rendering: on the server nothing is kept, sent
 - [Sync dialog](#sync-dialog)
 - [Push notifications](#push-notifications)
 - [Updates](#updates)
+- [Translating](#translating)
 - [Moving from ngx-pwa](#moving-from-ngx-pwa)
 - [License](#license)
 
 # Requirements
-Angular 22 with `@angular/service-worker` set up by `ng add @angular/pwa`. The offline status bar, the sync dialog and the update dialog also need [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui) and Tailwind CSS 4.
+Angular 22 with `@angular/service-worker` set up by `ng add @angular/pwa`. The offline status bar, the sync dialog and the update dialog also need [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui), `@angular/localize`, which [translates their texts](#translating), and Tailwind CSS 4.
 
 ```sh
 npm install @service-soft/ngx-pwa @service-soft/ui
+ng add @angular/localize
 ```
 
 ```css
@@ -205,6 +207,9 @@ providers: [
 | `reload`, `notNow` | `'Reload'`, `'Not now'` |
 
 To check for a new version yourself, call `checkForUpdate()` of `SwUpdate`.
+
+# Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-pwa.sync-dialog.title`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The offline status bar, the sync dialog and the update dialog need `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideOfflineStatusBarConfig`, `provideSyncDialogConfig` or `provideUpdates` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from ngx-pwa
 - The package is `@service-soft/ngx-pwa`, with an entry point each for `/offline`, `/offline-status-bar`, `/sync-dialog`, `/push-notifications` and `/updates`. It needs `@service-soft/ui` and Tailwind instead of Angular Material, and no longer lodash, uuid and dompurify.

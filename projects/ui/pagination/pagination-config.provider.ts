@@ -2,15 +2,22 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { PaginationConfig } from './pagination-config.model';
 
-const DEFAULT_PAGINATION_CONFIG: PaginationConfig = {
-    color: 'primary',
-    label: 'Pages',
-    firstLabel: 'First page',
-    previousLabel: 'Previous page',
-    nextLabel: 'Next page',
-    lastLabel: 'Last page',
-    pageLabel: page => `Page ${page}`
-};
+/**
+ * The values of a pagination when nothing changes them. Its texts are $localize, which an app translates like its own,
+ * and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultPaginationConfig(): PaginationConfig {
+    return {
+        color: 'primary',
+        label: $localize`:@@ui.pagination.label:Pages`,
+        firstLabel: $localize`:@@ui.pagination.firstLabel:First page`,
+        previousLabel: $localize`:@@ui.pagination.previousLabel:Previous page`,
+        nextLabel: $localize`:@@ui.pagination.nextLabel:Next page`,
+        lastLabel: $localize`:@@ui.pagination.lastLabel:Last page`,
+        pageLabel: page => $localize`:@@ui.pagination.pageLabel:Page ${page}:page:`
+    };
+}
 
 /**
  * The values every pagination below this injector uses when its inputs are not set, and its texts.
@@ -18,7 +25,7 @@ const DEFAULT_PAGINATION_CONFIG: PaginationConfig = {
  */
 export const PAGINATION_CONFIG: InjectionToken<PaginationConfig> = new InjectionToken<PaginationConfig>('PAGINATION_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_PAGINATION_CONFIG
+    factory: () => getDefaultPaginationConfig()
 });
 
 /**
@@ -32,7 +39,7 @@ export function providePaginationConfig(config: Partial<PaginationConfig>): Prov
     return {
         provide: PAGINATION_CONFIG,
         useFactory: (): PaginationConfig => ({
-            ...inject(PAGINATION_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_PAGINATION_CONFIG,
+            ...inject(PAGINATION_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultPaginationConfig(),
             ...config
         })
     };

@@ -12,21 +12,28 @@ const NO_CONNECTION: number = 0;
 // the first status of the errors of the server, after the refusals of the request.
 const FIRST_SERVER_ERROR: number = 500;
 
-const DEFAULT_ERROR_DIALOG_CONFIG: ErrorDialogConfig = {
-    labels: {
-        refusedTitle: 'That didn\'t work',
-        failedTitle: 'Something went wrong',
-        offlineTitle: 'No connection',
-        failedParagraphs: ['Something went wrong. Please try again later.'],
-        offlineParagraphs: ['Check your connection and try again.'],
-        problem: (key, message) => `${key}: ${message}`,
-        reference: traceId => `Reference: ${traceId}`,
-        close: 'OK'
-    },
-    // the auth ends a login zibri refuses, and sends the user to the login
-    ignoredStatuses: [HttpStatusCode.Unauthorized],
-    isIgnored: () => false
-};
+/**
+ * Which errors the dialog shows, and how, when nothing changes it. Its texts are $localize, which an app translates
+ * like its own, and resolved once an error is handled, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultErrorDialogConfig(): ErrorDialogConfig {
+    return {
+        labels: {
+            refusedTitle: $localize`:@@ngx-error-handling.error-dialog.refusedTitle:That didn't work`,
+            failedTitle: $localize`:@@ngx-error-handling.error-dialog.failedTitle:Something went wrong`,
+            offlineTitle: $localize`:@@ngx-error-handling.error-dialog.offlineTitle:No connection`,
+            failedParagraphs: [$localize`:@@ngx-error-handling.error-dialog.failedParagraphs:Something went wrong. Please try again later.`],
+            offlineParagraphs: [$localize`:@@ngx-error-handling.error-dialog.offlineParagraphs:Check your connection and try again.`],
+            problem: (key, message) => $localize`:@@ngx-error-handling.error-dialog.problem:${key}:key:: ${message}:message:`,
+            reference: traceId => $localize`:@@ngx-error-handling.error-dialog.reference:Reference: ${traceId}:traceId:`,
+            close: $localize`:@@ngx-error-handling.error-dialog.close:OK`
+        },
+        // the auth ends a login zibri refuses, and sends the user to the login
+        ignoredStatuses: [HttpStatusCode.Unauthorized],
+        isIgnored: () => false
+    };
+}
 
 /**
  * Utilities for the dialog that shows an error.
@@ -38,10 +45,11 @@ export abstract class ErrorDialogUtilities {
      * @returns The config.
      */
     static resolveConfig(changes: ErrorDialogConfigChanges): ErrorDialogConfig {
+        const defaults: ErrorDialogConfig = getDefaultErrorDialogConfig();
         return {
-            ...DEFAULT_ERROR_DIALOG_CONFIG,
+            ...defaults,
             ...changes,
-            labels: { ...DEFAULT_ERROR_DIALOG_CONFIG.labels, ...changes.labels }
+            labels: { ...defaults.labels, ...changes.labels }
         };
     }
 

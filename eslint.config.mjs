@@ -28,6 +28,13 @@ export default [
         }
     },
     {
+        files: ['**/*.ts'],
+        rules: {
+            // a polyfill is imported for what it defines, like the $localize of the default texts in the stories.
+            'eslintImport/no-unassigned-import': ['warn', { allow: ['@angular/localize/init'] }]
+        }
+    },
+    {
         // the controls pass their autofocus input on to their native element, like every other native attribute. Only a
         // consumer that asks for it gets it, like a control in a popover, which the browser focuses as the popover opens.
         files: ['projects/ui/input-*/*.component.html', 'projects/ngx-ecommerce/input-*/*.component.html'],

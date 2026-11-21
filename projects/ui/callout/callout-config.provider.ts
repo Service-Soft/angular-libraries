@@ -3,25 +3,32 @@ import { faCircleCheck, faCircleExclamation, faCircleInfo, faLightbulb, faStar, 
 
 import { CalloutConfig } from './callout-config.model';
 
-const DEFAULT_CALLOUT_CONFIG: CalloutConfig = {
-    tone: 'info',
-    icons: {
-        neutral: faLightbulb,
-        info: faCircleInfo,
-        success: faCircleCheck,
-        warning: faTriangleExclamation,
-        error: faCircleExclamation,
-        promo: faStar
-    },
-    toneLabels: {
-        neutral: undefined,
-        info: 'Information',
-        success: 'Success',
-        warning: 'Warning',
-        error: 'Error',
-        promo: undefined
-    }
-};
+/**
+ * The values of a callout when nothing changes them. Its texts are $localize, which an app translates like its own, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultCalloutConfig(): CalloutConfig {
+    return {
+        tone: 'info',
+        icons: {
+            neutral: faLightbulb,
+            info: faCircleInfo,
+            success: faCircleCheck,
+            warning: faTriangleExclamation,
+            error: faCircleExclamation,
+            promo: faStar
+        },
+        toneLabels: {
+            neutral: undefined,
+            info: $localize`:@@ui.callout.toneLabels.info:Information`,
+            success: $localize`:@@ui.callout.toneLabels.success:Success`,
+            warning: $localize`:@@ui.callout.toneLabels.warning:Warning`,
+            error: $localize`:@@ui.callout.toneLabels.error:Error`,
+            promo: undefined
+        }
+    };
+}
 
 /**
  * The values every callout below this injector uses when its inputs are not set.
@@ -29,7 +36,7 @@ const DEFAULT_CALLOUT_CONFIG: CalloutConfig = {
  */
 export const CALLOUT_CONFIG: InjectionToken<CalloutConfig> = new InjectionToken<CalloutConfig>('CALLOUT_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_CALLOUT_CONFIG
+    factory: () => getDefaultCalloutConfig()
 });
 
 /**
@@ -44,7 +51,7 @@ export function provideCalloutConfig(config: Partial<CalloutConfig>): Provider {
     return {
         provide: CALLOUT_CONFIG,
         useFactory: (): CalloutConfig => ({
-            ...inject(CALLOUT_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_CALLOUT_CONFIG,
+            ...inject(CALLOUT_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultCalloutConfig(),
             ...config
         })
     };

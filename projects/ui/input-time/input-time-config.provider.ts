@@ -2,12 +2,19 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { InputTimeConfig } from './input-time-config.model';
 
-const DEFAULT_INPUT_TIME_CONFIG: InputTimeConfig = {
-    step: 30,
-    // like the calendar of a date input
-    color: 'primary',
-    timePickerLabel: 'Choose a time'
-};
+/**
+ * The values of a time input when nothing changes them. Its label of the picker is $localize, which an app translates
+ * like its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultInputTimeConfig(): InputTimeConfig {
+    return {
+        step: 30,
+        // like the calendar of a date input
+        color: 'primary',
+        timePickerLabel: $localize`:@@ui.input-time.timePickerLabel:Choose a time`
+    };
+}
 
 /**
  * The values every time input below this injector uses when its inputs are not set, and its texts.
@@ -15,7 +22,7 @@ const DEFAULT_INPUT_TIME_CONFIG: InputTimeConfig = {
  */
 export const INPUT_TIME_CONFIG: InjectionToken<InputTimeConfig> = new InjectionToken<InputTimeConfig>('INPUT_TIME_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_INPUT_TIME_CONFIG
+    factory: () => getDefaultInputTimeConfig()
 });
 
 /**
@@ -29,7 +36,7 @@ export function provideInputTimeConfig(config: Partial<InputTimeConfig>): Provid
     return {
         provide: INPUT_TIME_CONFIG,
         useFactory: (): InputTimeConfig => ({
-            ...inject(INPUT_TIME_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_INPUT_TIME_CONFIG,
+            ...inject(INPUT_TIME_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultInputTimeConfig(),
             ...config
         })
     };

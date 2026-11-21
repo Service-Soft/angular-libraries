@@ -2,6 +2,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { Service } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { clearTranslations, loadTranslations } from '@angular/localize';
 import { provideRouter } from '@angular/router';
 import { authInterceptor, AuthService, provideAuth } from '@service-soft/ngx-auth/auth';
 import { FormTestingUtilities } from 'testing/form';
@@ -47,6 +48,7 @@ async function setup(): Promise<[HTMLElement, ComponentFixture<EmailSettingsComp
 describe('EmailSettingsComponent', () => {
     afterEach(() => {
         localStorage.clear();
+        clearTranslations();
         TestBed.inject(HttpTestingController).verify();
     });
 
@@ -72,5 +74,20 @@ describe('EmailSettingsComponent', () => {
 
         await vi.waitFor(() => expect(FormTestingUtilities.getText(root, '[role="status"]')).toContain('We sent a link to ada@example.org.'));
         expect(FormTestingUtilities.findInput(root, 'new-email')?.value).toBe('');
+    });
+
+    test('shows the translations an app loaded at runtime, with the new email in its place', async () => {
+        loadTranslations({
+            'ngx-auth.email.change': 'E-Mail-Adresse ändern',
+            'ngx-auth.email.changeRequested': 'Wir haben einen Link an {$newEmail} geschickt.'
+        });
+        const [root, fixture, backend] = await setup();
+
+        FormTestingUtilities.type(root, 'new-email', 'ada@example.org');
+        await fixture.whenStable();
+        FormTestingUtilities.click(root, 'E-Mail-Adresse ändern');
+        HttpTestingUtilities.flushNoContent(await vi.waitFor(() => backend.expectOne({ method: 'POST', url: `${API}/request-email-change` })));
+
+        await vi.waitFor(() => expect(FormTestingUtilities.getText(root, '[role="status"]')).toBe('Wir haben einen Link an ada@example.org geschickt.'));
     });
 });

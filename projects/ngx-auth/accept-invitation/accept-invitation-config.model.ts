@@ -7,9 +7,9 @@ export type AcceptInvitationLabels = {
      */
     title: string,
     /**
-     * Shown before the invited email.
+     * Says who is invited, from the invited email.
      */
-    invitedAs: string,
+    invitedAs: (email: string) => string,
     /**
      * Shown when the link doesn't work, like when it was used, revoked or ran out.
      */

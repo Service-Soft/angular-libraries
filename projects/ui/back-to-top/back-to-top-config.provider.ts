@@ -2,10 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { BackToTopConfig } from './back-to-top-config.model';
 
-const DEFAULT_BACK_TO_TOP_CONFIG: BackToTopConfig = {
-    color: 'secondary',
-    label: 'Back to top'
-};
+/**
+ * The values of the button that goes back to the top of the page when nothing changes them. Its label is $localize,
+ * which an app translates like its own texts, and resolved once the config is injected, so translations an app loads at
+ * runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultBackToTopConfig(): BackToTopConfig {
+    return {
+        color: 'secondary',
+        label: $localize`:@@ui.back-to-top.label:Back to top`
+    };
+}
 
 /**
  * The values every button below this injector that goes back to the top of the page uses when its inputs are not set,
@@ -13,7 +21,7 @@ const DEFAULT_BACK_TO_TOP_CONFIG: BackToTopConfig = {
  */
 export const BACK_TO_TOP_CONFIG: InjectionToken<BackToTopConfig> = new InjectionToken<BackToTopConfig>('BACK_TO_TOP_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_BACK_TO_TOP_CONFIG
+    factory: () => getDefaultBackToTopConfig()
 });
 
 /**
@@ -28,7 +36,7 @@ export function provideBackToTopConfig(config: Partial<BackToTopConfig>): Provid
     return {
         provide: BACK_TO_TOP_CONFIG,
         useFactory: (): BackToTopConfig => ({
-            ...inject(BACK_TO_TOP_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_BACK_TO_TOP_CONFIG,
+            ...inject(BACK_TO_TOP_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultBackToTopConfig(),
             ...config
         })
     };

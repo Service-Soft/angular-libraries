@@ -58,7 +58,8 @@ export class ApplicationsFilterComponent {
      * The text of the button, like 'Applications: Api, Website', which is its name for screen readers as well.
      */
     protected readonly summary: Signal<string> = computed(() => {
-        return `${this.label()}: ${this.selected().length ? this.selected().join(', ') : this.allLabel()}`;
+        const applications: string = this.selected().length ? this.selected().join(', ') : this.allLabel();
+        return $localize`:@@ngx-persistence-logger.log-history.applicationsSummary:${this.label()}:label:: ${applications}:applications:`;
     });
 
     /**

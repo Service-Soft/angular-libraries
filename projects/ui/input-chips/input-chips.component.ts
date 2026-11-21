@@ -195,9 +195,9 @@ export class InputChipsComponent<T> extends BaseInputDirective<T[]> {
         afterRenderEffect({
             write: () => {
                 const query: string = this.query();
-                const input: HTMLInputElement = this.nativeInput().nativeElement;
-                if (input.value !== query) {
-                    input.value = query;
+                const inputElement: HTMLInputElement = this.nativeInput().nativeElement;
+                if (inputElement.value !== query) {
+                    inputElement.value = query;
                 }
             }
         });

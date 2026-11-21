@@ -1,13 +1,11 @@
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
-import { ConsentService, GdprCategory, Tracking } from '@service-soft/ngx-tracking/consent';
+import { CONSENT_DIALOG_CONFIG, ConsentDialogConfig, ConsentDialogLabels, ConsentService, GdprCategory, Tracking } from '@service-soft/ngx-tracking/consent';
 import { ButtonComponent } from '@service-soft/ui/button';
 import { DialogRef } from '@service-soft/ui/dialog';
 import { FormComponent } from '@service-soft/ui/form';
 
 import { ConsentCategoryView } from './consent-category-view.model';
 import { ConsentCategoryComponent } from './consent-category.component';
-import { ConsentDialogConfig, ConsentDialogLabels } from './consent-dialog-config.model';
-import { CONSENT_DIALOG_CONFIG } from './consent-dialog-config.provider';
 
 // the order the categories show in: what can't be changed first, then what is checked at first.
 const CATEGORIES: GdprCategory[] = [GdprCategory.TECHNICAL_NECESSARY, GdprCategory.ENABLED_BY_DEFAULT, GdprCategory.DISABLED_BY_DEFAULT];

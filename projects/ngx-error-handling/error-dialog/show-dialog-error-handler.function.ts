@@ -16,7 +16,6 @@ import { ErrorDialogUtilities } from './error-dialog.utilities';
  * @returns The handler, for provideErrorHandler.
  */
 export function showDialogErrorHandler(changes: ErrorDialogConfigChanges = {}): ErrorHandlerFn {
-    const config: ErrorDialogConfig = ErrorDialogUtilities.resolveConfig(changes);
     // an error that follows another, like every request of a page without a connection, would stack dialogs. The
     // handler belongs to the app config it is provided in, so this is one flag per app.
     let showing: boolean = false;
@@ -25,8 +24,9 @@ export function showDialogErrorHandler(changes: ErrorDialogConfigChanges = {}): 
      * Shows the dialog of an error until the user closes it.
      * @param dialogService - Opens the dialog.
      * @param error - The error to show.
+     * @param config - How the dialog shows it.
      */
-    async function showDialog(dialogService: DialogService, error: unknown): Promise<void> {
+    async function showDialog(dialogService: DialogService, error: unknown, config: ErrorDialogConfig): Promise<void> {
         // set before the first await, so an error right after this one finds it showing
         showing = true;
         try {
@@ -43,10 +43,16 @@ export function showDialogErrorHandler(changes: ErrorDialogConfigChanges = {}): 
     }
 
     return error => {
-        if (!isPlatformBrowser(inject(PLATFORM_ID)) || showing || ErrorDialogUtilities.isIgnored(error, config)) {
+        if (!isPlatformBrowser(inject(PLATFORM_ID)) || showing) {
+            return;
+        }
+        // resolved for each error rather than once above: showDialogErrorHandler runs when the app config is created,
+        // which can be before the translations an app loads at runtime, and its default texts are $localize.
+        const config: ErrorDialogConfig = ErrorDialogUtilities.resolveConfig(changes);
+        if (ErrorDialogUtilities.isIgnored(error, config)) {
             return;
         }
         // injected here, as inject() only works until the first await
-        void showDialog(inject(DialogService), error);
+        void showDialog(inject(DialogService), error, config);
     };
 }

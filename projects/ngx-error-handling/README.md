@@ -7,15 +7,17 @@ Handles the errors of Angular apps that nothing caught: hands each of them to se
 - [Requirements](#requirements)
 - [Several handlers for one error](#several-handlers-for-one-error)
 - [The error dialog](#the-error-dialog)
+  - [Translating](#translating)
 - [The error body of zibri](#the-error-body-of-zibri)
 - [Moving from ngx-material-auth](#moving-from-ngx-material-auth)
 - [License](#license)
 
 # Requirements
-Angular 22. The dialog is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui), which `@service-soft/ngx-error-handling/error-handler` doesn't need. The error body, `ErrorResponseBody` with its `ValidationProblem`s, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
+Angular 22. The dialog is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui) and needs `@angular/localize`, which [translates its texts](#translating); `@service-soft/ngx-error-handling/error-handler` needs neither. The error body, `ErrorResponseBody` with its `ValidationProblem`s, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
 
 ```sh
 npm install @service-soft/ngx-error-handling @service-soft/ui zibri-contract
+ng add @angular/localize
 ```
 
 # Several handlers for one error
@@ -62,6 +64,9 @@ Errors your code catches show none, like the ones the forms of [@service-soft/ng
 | `labels` | English texts, each of which can be changed on its own |
 | `ignoredStatuses` | `[401]`: zibri refused the login, and the auth sends the user to the login |
 | `isIgnored` | — a function that says an error shows no dialog, like one your app tells the user of itself |
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-error-handling.error-dialog.failedTitle`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The dialog needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once an error is handled, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `showDialogErrorHandler` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # The error body of zibri
 `@service-soft/ngx-error-handling/error-response` reads what zibri answers a refused or failed request with, without any ui:

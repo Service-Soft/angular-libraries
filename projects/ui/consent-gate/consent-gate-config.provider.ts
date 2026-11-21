@@ -2,18 +2,24 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { ConsentGateConfig } from './consent-gate-config.model';
 
-const DEFAULT_CONSENT_GATE_CONFIG: ConsentGateConfig = {
-    privacyPolicyUrl: undefined,
-    alwaysAllow: false,
-    aspectRatio: undefined,
-    title: provider => `Content from ${provider}`,
-    description: provider => `To show it, your browser loads it from ${provider}, which receives data like your IP address `
-        + 'and may set cookies.',
-    privacyPolicyLabel: 'Privacy policy',
-    providerPrivacyPolicyLabel: provider => `Privacy policy of ${provider}`,
-    loadLabel: provider => `Load ${provider}`,
-    alwaysAllowLabel: provider => `Always allow ${provider}`
-};
+/**
+ * The values of a consent gate when nothing changes them. Its texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultConsentGateConfig(): ConsentGateConfig {
+    return {
+        privacyPolicyUrl: undefined,
+        alwaysAllow: false,
+        aspectRatio: undefined,
+        title: provider => $localize`:@@ui.consent-gate.title:Content from ${provider}:provider:`,
+        description: provider => $localize`:@@ui.consent-gate.description:To show it, your browser loads it from ${provider}:provider:, which receives data like your IP address and may set cookies.`,
+        privacyPolicyLabel: $localize`:@@ui.consent-gate.privacyPolicyLabel:Privacy policy`,
+        providerPrivacyPolicyLabel: provider => $localize`:@@ui.consent-gate.providerPrivacyPolicyLabel:Privacy policy of ${provider}:provider:`,
+        loadLabel: provider => $localize`:@@ui.consent-gate.loadLabel:Load ${provider}:provider:`,
+        alwaysAllowLabel: provider => $localize`:@@ui.consent-gate.alwaysAllowLabel:Always allow ${provider}:provider:`
+    };
+}
 
 /**
  * The values every consent gate below this injector uses when its inputs are not set, and its texts.
@@ -21,7 +27,7 @@ const DEFAULT_CONSENT_GATE_CONFIG: ConsentGateConfig = {
  */
 export const CONSENT_GATE_CONFIG: InjectionToken<ConsentGateConfig> = new InjectionToken<ConsentGateConfig>('CONSENT_GATE_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_CONSENT_GATE_CONFIG
+    factory: () => getDefaultConsentGateConfig()
 });
 
 /**
@@ -35,7 +41,7 @@ export function provideConsentGateConfig(config: Partial<ConsentGateConfig>): Pr
     return {
         provide: CONSENT_GATE_CONFIG,
         useFactory: (): ConsentGateConfig => ({
-            ...inject(CONSENT_GATE_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_CONSENT_GATE_CONFIG,
+            ...inject(CONSENT_GATE_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultConsentGateConfig(),
             ...config
         })
     };

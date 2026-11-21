@@ -14,11 +14,13 @@ Logs to the console of the browser and sends the logs to your backend, like the 
 - [Log history](#log-history)
   - [The endpoint of the logs](#the-endpoint-of-the-logs)
   - [Configuration](#configuration)
+    - [Translating](#translating)
 - [Moving from the old ngx-persistence-logger](#moving-from-the-old-ngx-persistence-logger)
 - [License](#license)
 
 # Requirements
-Angular 22. The log history also needs `@service-soft/ui` and Tailwind CSS 4. The models a log is sent and read as,
+Angular 22. The log history also needs `@service-soft/ui`, `@angular/localize`, which [translates its texts](#translating),
+and Tailwind CSS 4. The models a log is sent and read as,
 like `LogLevel`, `LogContext` and `PaginationResult`, come from [zibri-contract](https://www.npmjs.com/package/zibri-contract),
 the package zibri declares them in.
 
@@ -26,6 +28,7 @@ the package zibri declares them in.
 npm install @service-soft/ngx-persistence-logger zibri-contract
 # only for the log history
 npm install @service-soft/ui
+ng add @angular/localize
 ```
 
 # Logger
@@ -218,6 +221,9 @@ provideLogHistoryConfig({ pageSize: 25, labels: { levels: { [LogLevel.WARN]: 'Wa
 | `labels` | the English texts of the component, to translate them |
 
 The buttons of the pages are the pagination of `@service-soft/ui`, whose names `providePaginationConfig` translates.
+
+### Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-persistence-logger.log-history.search`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The log history needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideLogHistoryConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from the old ngx-persistence-logger
 - The package is `@service-soft/ngx-persistence-logger`. Import the logger from `/logger` and the log history from `/log-history`.

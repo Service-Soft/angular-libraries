@@ -22,6 +22,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-auth/tsconfig.spec.json"
                     }
                 }
@@ -48,6 +49,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-change-sets/tsconfig.spec.json"
                     }
                 }
@@ -74,6 +76,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-ecommerce/tsconfig.spec.json"
                     }
                 }
@@ -100,6 +103,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "setupFiles": ["projects/ngx-entity/test-setup.ts"],
                         "tsConfig": "projects/ngx-entity/tsconfig.spec.json"
                     }
@@ -127,6 +131,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-error-handling/tsconfig.spec.json"
                     }
                 }
@@ -153,6 +158,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-navigation/tsconfig.spec.json"
                     }
                 }
@@ -179,6 +185,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-persistence-logger/tsconfig.spec.json"
                     }
                 }
@@ -205,6 +212,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-pwa/tsconfig.spec.json"
                     }
                 }
@@ -231,6 +239,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "tsConfig": "projects/ngx-tracking/tsconfig.spec.json"
                     }
                 }
@@ -276,6 +285,7 @@
                         ],
                         "browser": "projects/showcase/src/main.ts",
                         "outputMode": "static",
+                        "polyfills": ["@angular/localize/init"],
                         "server": "projects/showcase/src/main.server.ts",
                         "styles": ["projects/showcase/src/styles.css"],
                         "tsConfig": "projects/showcase/tsconfig.app.json"
@@ -338,6 +348,14 @@
                         }
                     },
                     "defaultConfiguration": "production"
+                },
+                "test-polyfills": {
+                    "builder": "@angular/build:application",
+                    "options": {
+                        "browser": "projects/testing/src/public-api.ts",
+                        "polyfills": ["@angular/localize/init"],
+                        "tsConfig": "projects/testing/tsconfig.lib.json"
+                    }
                 }
             },
             "prefix": "lib",
@@ -386,6 +404,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
+                        "buildTarget": "testing:test-polyfills",
                         "setupFiles": ["projects/ui/test-setup.ts"],
                         "tsConfig": "projects/ui/tsconfig.spec.json"
                     }

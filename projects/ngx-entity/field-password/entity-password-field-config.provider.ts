@@ -2,17 +2,24 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { EntityPasswordFieldConfig } from './entity-password-field-config.model';
 
-const DEFAULT_ENTITY_PASSWORD_FIELD_CONFIG: EntityPasswordFieldConfig = {
-    confirmationLabel: displayName => `Repeat ${displayName}`,
-    mismatchMessage: 'The passwords differ.'
-};
+/**
+ * The texts of the fields of passwords when nothing changes them. They are $localize, which an app translates like its
+ * own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultEntityPasswordFieldConfig(): EntityPasswordFieldConfig {
+    return {
+        confirmationLabel: displayName => $localize`:@@ngx-entity.field-password.confirmationLabel:Repeat ${displayName}:displayName:`,
+        mismatchMessage: $localize`:@@ngx-entity.field-password.mismatchMessage:The passwords differ.`
+    };
+}
 
 /**
  * The texts of every field of a password below this injector. Change them with provideEntityPasswordFieldConfig.
  */
 export const ENTITY_PASSWORD_FIELD_CONFIG: InjectionToken<EntityPasswordFieldConfig> = new InjectionToken<EntityPasswordFieldConfig>(
     'ENTITY_PASSWORD_FIELD_CONFIG',
-    { providedIn: 'root', factory: () => DEFAULT_ENTITY_PASSWORD_FIELD_CONFIG }
+    { providedIn: 'root', factory: () => getDefaultEntityPasswordFieldConfig() }
 );
 
 /**
@@ -26,7 +33,7 @@ export function provideEntityPasswordFieldConfig(config: Partial<EntityPasswordF
     return {
         provide: ENTITY_PASSWORD_FIELD_CONFIG,
         useFactory: (): EntityPasswordFieldConfig => ({
-            ...inject(ENTITY_PASSWORD_FIELD_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_ENTITY_PASSWORD_FIELD_CONFIG,
+            ...inject(ENTITY_PASSWORD_FIELD_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultEntityPasswordFieldConfig(),
             ...config
         })
     };

@@ -2,17 +2,29 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { EntityTableConfig } from './entity-table-config.model';
 
-const DEFAULT_ENTITY_TABLE_CONFIG: EntityTableConfig = {
-    yesLabel: 'Yes',
-    noLabel: 'No',
-    createLabel: 'Create',
-    deleteLabel: 'Delete',
-    createFirstLabel: 'These can be added once this is saved.',
-    importLabel: 'Import',
-    exportLabels: { json: 'Export as JSON', csv: 'Export as CSV', xml: 'Export as XML' },
-    exportFileName: 'export',
-    csvSeparator: ','
-};
+/**
+ * The texts of entity tables when nothing changes them. They are $localize, which an app translates like its own
+ * texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultEntityTableConfig(): EntityTableConfig {
+    return {
+        yesLabel: $localize`:@@ngx-entity.table.yesLabel:Yes`,
+        noLabel: $localize`:@@ngx-entity.table.noLabel:No`,
+        createLabel: $localize`:@@ngx-entity.table.createLabel:Create`,
+        deleteLabel: $localize`:@@ngx-entity.table.deleteLabel:Delete`,
+        createFirstLabel: $localize`:@@ngx-entity.table.createFirstLabel:These can be added once this is saved.`,
+        importLabel: $localize`:@@ngx-entity.table.importLabel:Import`,
+        exportLabels: {
+            json: $localize`:@@ngx-entity.table.exportLabels.json:Export as JSON`,
+            csv: $localize`:@@ngx-entity.table.exportLabels.csv:Export as CSV`,
+            xml: $localize`:@@ngx-entity.table.exportLabels.xml:Export as XML`
+        },
+        // the name of the file the user downloads, which they see.
+        exportFileName: $localize`:@@ngx-entity.table.exportFileName:export`,
+        csvSeparator: ','
+    };
+}
 
 /**
  * The texts of every entity table below this injector. Change them with provideEntityTableConfig. The texts of the
@@ -20,7 +32,7 @@ const DEFAULT_ENTITY_TABLE_CONFIG: EntityTableConfig = {
  */
 export const ENTITY_TABLE_CONFIG: InjectionToken<EntityTableConfig> = new InjectionToken<EntityTableConfig>('ENTITY_TABLE_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_ENTITY_TABLE_CONFIG
+    factory: () => getDefaultEntityTableConfig()
 });
 
 /**
@@ -34,7 +46,7 @@ export function provideEntityTableConfig(config: Partial<EntityTableConfig>): Pr
     return {
         provide: ENTITY_TABLE_CONFIG,
         useFactory: (): EntityTableConfig => ({
-            ...inject(ENTITY_TABLE_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_ENTITY_TABLE_CONFIG,
+            ...inject(ENTITY_TABLE_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultEntityTableConfig(),
             ...config
         })
     };

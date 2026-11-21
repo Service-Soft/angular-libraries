@@ -1,4 +1,4 @@
-import { GdprCategory } from '@service-soft/ngx-tracking/consent';
+import { GdprCategory } from './gdpr-category.enum';
 
 /**
  * The texts of the consent dialog, to translate them.

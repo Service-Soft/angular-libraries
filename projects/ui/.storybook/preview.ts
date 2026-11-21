@@ -1,3 +1,5 @@
+// the default texts of the libraries are $localize, which an app defines with this polyfill
+import '@angular/localize/init';
 import { Preview } from '@storybook/angular';
 
 import { PAGE_LEVEL_RULES } from './page-level-rules';

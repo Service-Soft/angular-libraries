@@ -2,11 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { ExpandableTextConfig } from './expandable-text-config.model';
 
-const DEFAULT_EXPANDABLE_TEXT_CONFIG: ExpandableTextConfig = {
-    lines: 3,
-    moreLabel: 'Read more',
-    lessLabel: 'Show less'
-};
+/**
+ * The values of an expandable text when nothing changes them. Its texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultExpandableTextConfig(): ExpandableTextConfig {
+    return {
+        lines: 3,
+        moreLabel: $localize`:@@ui.expandable-text.moreLabel:Read more`,
+        lessLabel: $localize`:@@ui.expandable-text.lessLabel:Show less`
+    };
+}
 
 /**
  * The values every expandable text below this injector uses when its inputs are not set.
@@ -16,7 +23,7 @@ export const EXPANDABLE_TEXT_CONFIG: InjectionToken<ExpandableTextConfig> = new 
     'EXPANDABLE_TEXT_CONFIG',
     {
         providedIn: 'root',
-        factory: () => DEFAULT_EXPANDABLE_TEXT_CONFIG
+        factory: () => getDefaultExpandableTextConfig()
     }
 );
 
@@ -32,7 +39,7 @@ export function provideExpandableTextConfig(config: Partial<ExpandableTextConfig
     return {
         provide: EXPANDABLE_TEXT_CONFIG,
         useFactory: (): ExpandableTextConfig => ({
-            ...inject(EXPANDABLE_TEXT_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_EXPANDABLE_TEXT_CONFIG,
+            ...inject(EXPANDABLE_TEXT_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultExpandableTextConfig(),
             ...config
         })
     };

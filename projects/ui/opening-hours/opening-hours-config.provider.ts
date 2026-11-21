@@ -2,20 +2,27 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { OpeningHoursConfig } from './opening-hours-config.model';
 
-const DEFAULT_OPENING_HOURS_CONFIG: OpeningHoursConfig = {
-    firstDayOfWeek: 1,
-    group: false,
-    status: true,
-    microdata: true,
-    timeZone: undefined,
-    dayFormat: 'long',
-    label: 'Opening hours',
-    closedLabel: 'Closed',
-    todayLabel: 'Today',
-    openNowLabel: 'Open now',
-    closedNowLabel: 'Closed now',
-    toLabel: 'to'
-};
+/**
+ * The values of opening hours when nothing changes them. Their texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultOpeningHoursConfig(): OpeningHoursConfig {
+    return {
+        firstDayOfWeek: 1,
+        group: false,
+        status: true,
+        microdata: true,
+        timeZone: undefined,
+        dayFormat: 'long',
+        label: $localize`:@@ui.opening-hours.label:Opening hours`,
+        closedLabel: $localize`:@@ui.opening-hours.closedLabel:Closed`,
+        todayLabel: $localize`:@@ui.opening-hours.todayLabel:Today`,
+        openNowLabel: $localize`:@@ui.opening-hours.openNowLabel:Open now`,
+        closedNowLabel: $localize`:@@ui.opening-hours.closedNowLabel:Closed now`,
+        toLabel: $localize`:@@ui.opening-hours.toLabel:to`
+    };
+}
 
 /**
  * The values all opening hours below this injector use when their inputs are not set, and their texts.
@@ -23,7 +30,7 @@ const DEFAULT_OPENING_HOURS_CONFIG: OpeningHoursConfig = {
  */
 export const OPENING_HOURS_CONFIG: InjectionToken<OpeningHoursConfig> = new InjectionToken<OpeningHoursConfig>('OPENING_HOURS_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_OPENING_HOURS_CONFIG
+    factory: () => getDefaultOpeningHoursConfig()
 });
 
 /**
@@ -37,7 +44,7 @@ export function provideOpeningHoursConfig(config: Partial<OpeningHoursConfig>): 
     return {
         provide: OPENING_HOURS_CONFIG,
         useFactory: (): OpeningHoursConfig => ({
-            ...inject(OPENING_HOURS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_OPENING_HOURS_CONFIG,
+            ...inject(OPENING_HOURS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultOpeningHoursConfig(),
             ...config
         })
     };

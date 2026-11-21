@@ -28,10 +28,11 @@ It is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui
 - [License](#license)
 
 # Requirements
-Angular 22 with its router, and Tailwind CSS 4. `@angular/ssr` for the [server part of the SEO](#the-server-sitemap-robotstxt-and-llmstxt).
+Angular 22 with its router and `@angular/localize`, which [translates the texts](#translating), and Tailwind CSS 4. `@angular/ssr` for the [server part of the SEO](#the-server-sitemap-robotstxt-and-llmstxt).
 
 ```sh
 npm install @service-soft/ngx-navigation @service-soft/ui
+ng add @angular/localize
 ```
 
 # Setup
@@ -313,10 +314,11 @@ Each build knows its language by its `LOCALE_ID`. Then the canonical url of a pa
 - the routes of the router config, children and lazily loaded children included;
 - without redirects, the route of unknown urls, matchers, and routes whose `robots` holds `noindex`;
 - the render mode of each page by the first of the server routes that matches it, `RenderMode.Server` when none does;
-- for a route with parameters, the pages Angular prerendered for it, and the ones `sitemap` in its data lists, like the articles of a database. A route with parameters that has neither is returned in `unlistedRoutes`, so the server can log it.
-
-  `sitemap` runs in the app, in an injection context of its root, so it reads them like the pages do. For that, `resolvePages` has the app engine render one page on the server, which hands the app a `REQUEST_CONTEXT` that only the server can give. `provideSeoConfig` runs every `sitemap` before that page renders. The page is an unknown url, so it needs the route of unknown urls to render on the server, which a 404 needs anyway: `{ path: '**', renderMode: RenderMode.Server, status: 404 }`. Without it, the first page without parameters that renders on the server is used, and `resolvePages` throws when there is none;
+- without a route whose server route answers with an error, like one with no server route of its own that falls under the 404 of the route of unknown urls. It is returned in `errorRoutes`, so the server can log it;
+- for a route with parameters, the pages Angular prerendered for it, and the ones `sitemap` in its data lists, like the articles of a database. `sitemap` runs in the app, in an injection context of its root, so it reads them like the pages do. A route with parameters that has neither is returned in `unlistedRoutes`;
 - the title and description of each page in each language, read from its html as the app engine answers it, prerendered or rendered once. A page only a browser renders, `RenderMode.Client`, has neither, as search engines see little more of it.
+
+The app hands the server its routes, as the server can't import them: in a site in several languages their texts are `$localize`, which only the build of each language fills in. For that, `resolvePages` has the app engine render one page on the server, which hands the app a `REQUEST_CONTEXT` that only the server can give. `provideSeoConfig` puts the routes into it, after running every `sitemap`, before that page renders. The page is an unknown url, so the route of unknown urls has to render on the server, which a 404 needs anyway: `{ path: '**', renderMode: RenderMode.Server, status: 404 }`. Without it, the first server route without parameters that renders on the server is used, and `resolvePages` throws when there is none.
 
 ```ts
 { path: 'news/:article', title: 'Article', component: ArticlePage, data: {
@@ -335,7 +337,6 @@ const appEngine: AngularNodeAppEngine = new AngularNodeAppEngine();
 const locales: SeoLocale[] = [{ code: 'en', subPath: 'en' }, { code: 'de', subPath: 'de' }];
 const site: Promise<SeoSite> = SeoServerUtilities.resolvePages({
     origin: 'https://club.example',
-    routes,
     serverRoutes,
     // written next to the browser and server folders by the build
     prerenderedRoutes: Object.keys(JSON.parse(readFileSync(join(import.meta.dirname, '../prerendered-routes.json'), 'utf8')).routes),
@@ -372,6 +373,9 @@ Every part reads its defaults and texts from a config, which `provideXConfig` ch
 | `provideDrawerConfig` of `@service-soft/ui/drawer` | `side` | `'start'` — the edge the drawer slides in from |
 
 The navbar and the anchors also take their label as an input: `<ngx-navbar [rows]="rows" [components]="components" label="Main" />`.
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-navigation.not-found.title`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideXConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from ngx-material-navigation
 The package was ngx-material-navigation, built on Angular Material. It is built on `@service-soft/ui` now, without Material and the cdk:

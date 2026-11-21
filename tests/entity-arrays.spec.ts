@@ -3,8 +3,8 @@ import { AxeResults } from 'axe-core';
 import { Browser, BrowserContext, chromium, Locator, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { StorybookUtilities } from './storybook.utilities';
 import { PAGE_LEVEL_RULES } from '../projects/ui/.storybook/page-level-rules';
+import { StorybookUtilities } from './storybook.utilities';
 
 // a real browser, because the dialog of an item is a modal one, and where the focus goes is the point.
 describe('entity arrays in the browser', () => {
