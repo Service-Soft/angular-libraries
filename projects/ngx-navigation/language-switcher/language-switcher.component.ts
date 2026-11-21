@@ -83,7 +83,9 @@ export class LanguageSwitcherComponent {
     protected readonly currentItem: Signal<LanguageSwitcherItem | undefined> = computed(() => this.items().find(item => item.isCurrent));
 
     private resolveHref(language: LanguageSwitcherLanguage, url: string): string {
-        return typeof language.href === 'string' ? language.href : (language.href ?? this.config.href)(url, language.code);
+        return typeof language.href === 'string'
+            ? language.href
+            : (language.href ?? this.config.href)(url, language.code, language.subPath ?? language.code);
     }
 
     // codes are compared without case, as 'en-gb' and 'en-GB' are the same language.
