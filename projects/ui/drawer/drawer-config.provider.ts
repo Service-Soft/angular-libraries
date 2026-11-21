@@ -2,12 +2,19 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { DrawerConfig } from './drawer-config.model';
 
-const DEFAULT_DRAWER_CONFIG: DrawerConfig = {
-    side: 'start',
-    color: 'surface',
-    header: false,
-    closeLabel: 'Close'
-};
+/**
+ * The values of a drawer when nothing changes them. Its label of the close button is $localize, which an app translates
+ * like its own texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultDrawerConfig(): DrawerConfig {
+    return {
+        side: 'start',
+        color: 'surface',
+        header: false,
+        closeLabel: $localize`:@@ui.drawer.closeLabel:Close`
+    };
+}
 
 /**
  * The values every drawer below this injector uses when its inputs are not set.
@@ -15,7 +22,7 @@ const DEFAULT_DRAWER_CONFIG: DrawerConfig = {
  */
 export const DRAWER_CONFIG: InjectionToken<DrawerConfig> = new InjectionToken<DrawerConfig>('DRAWER_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_DRAWER_CONFIG
+    factory: () => getDefaultDrawerConfig()
 });
 
 /**
@@ -29,7 +36,7 @@ export function provideDrawerConfig(config: Partial<DrawerConfig>): Provider {
     return {
         provide: DRAWER_CONFIG,
         useFactory: (): DrawerConfig => ({
-            ...inject(DRAWER_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_DRAWER_CONFIG,
+            ...inject(DRAWER_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultDrawerConfig(),
             ...config
         })
     };

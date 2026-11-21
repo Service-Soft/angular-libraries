@@ -142,7 +142,9 @@ export class EntityObjectArrayFieldComponent<T extends object> extends BaseEntit
      */
     protected resolveActionLabel(action: string, item: object): string {
         const first: LocalTableColumn<object> | undefined = this.columns()[0];
-        return first == undefined ? action : `${action} ${first.value(item)}`;
+        return first == undefined
+            ? action
+            : $localize`:@@ngx-entity.field-object-array.actionLabel:${action}:action: ${first.value(item)}:value:`;
     }
 
     private async openDialog(

@@ -10,14 +10,16 @@ It is built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui
 - [Setup](#setup)
 - [Usage](#usage)
 - [Configuration](#configuration)
+  - [Translating](#translating)
 - [Moving from ngx-material-change-sets](#moving-from-ngx-material-change-sets)
 - [License](#license)
 
 # Requirements
-Angular 22 and Tailwind CSS 4. The change sets, like `ChangeSetEntity` and `ChangeSetType`, come from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares them in.
+Angular 22 with `@angular/localize`, which [translates the texts](#translating), and Tailwind CSS 4. The change sets, like `ChangeSetEntity` and `ChangeSetType`, come from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares them in.
 
 ```sh
 npm install @service-soft/ngx-change-sets @service-soft/ui zibri-contract
+ng add @angular/localize
 ```
 
 # Setup
@@ -94,6 +96,9 @@ provideChangeSetsConfig({
 | `showEmptyCreatedBy` | `false` — whether change sets without `createdBy` show the name `resolveCreatedByName` returns, like `'System'` |
 | `labels` | the English texts of the component, to translate them |
 | `resetConfirmDialogData`, `rollbackConfirmDialogData` | the title, text and buttons of the questions before undoing |
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-change-sets.change-sets.showMore`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideChangeSetsConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from ngx-material-change-sets
 - It needs `@service-soft/ui` and Tailwind instead of Angular Material and the Font Awesome packages. Import from `@service-soft/ngx-change-sets/change-sets`.

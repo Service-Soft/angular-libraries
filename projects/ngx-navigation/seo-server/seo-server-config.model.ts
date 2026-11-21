@@ -1,21 +1,16 @@
-import { Routes } from '@angular/router';
 import { ServerRoute } from '@angular/ssr';
 import { SeoLocale } from '@service-soft/ngx-navigation/seo';
 
 import { SeoAppEngine } from './seo-app-engine.model';
 
 /**
- * Where resolvePages finds the pages of a site: its routes, how Angular renders them, and what its build wrote.
+ * Where resolvePages finds the pages of a site: the app, how Angular renders them, and what its build wrote.
  */
 export type SeoServerConfig = {
     /**
      * The origin of the site, like 'https://example.com', without a slash at its end.
      */
     origin: string,
-    /**
-     * The routes of the app, the same that provideRouter gets.
-     */
-    routes: Routes,
     /**
      * The server routes of the app, the same that withRoutes of provideServerRendering gets, which say how each page
      * renders.

@@ -2,12 +2,20 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { UnsavedChangesConfig } from './unsaved-changes-config.model';
 
-const DEFAULT_UNSAVED_CHANGES_CONFIG: UnsavedChangesConfig = {
-    title: 'Discard your changes?',
-    paragraphs: ['What you changed hasn\'t been saved and will be lost.'],
-    discardLabel: 'Discard',
-    keepEditingLabel: 'Keep editing'
-};
+/**
+ * The texts of the question before changes are lost when nothing changes them. They are $localize, which an app
+ * translates like its own texts, and resolved once the config is injected, so translations an app loads at runtime
+ * apply as well.
+ * @returns The default config.
+ */
+function getDefaultUnsavedChangesConfig(): UnsavedChangesConfig {
+    return {
+        title: $localize`:@@ngx-entity.unsaved-changes.title:Discard your changes?`,
+        paragraphs: [$localize`:@@ngx-entity.unsaved-changes.paragraphs:What you changed hasn't been saved and will be lost.`],
+        discardLabel: $localize`:@@ngx-entity.unsaved-changes.discardLabel:Discard`,
+        keepEditingLabel: $localize`:@@ngx-entity.unsaved-changes.keepEditingLabel:Keep editing`
+    };
+}
 
 /**
  * The texts of the question before changes are lost, below this injector. Change them with
@@ -15,7 +23,7 @@ const DEFAULT_UNSAVED_CHANGES_CONFIG: UnsavedChangesConfig = {
  */
 export const UNSAVED_CHANGES_CONFIG: InjectionToken<UnsavedChangesConfig> = new InjectionToken<UnsavedChangesConfig>(
     'UNSAVED_CHANGES_CONFIG',
-    { providedIn: 'root', factory: () => DEFAULT_UNSAVED_CHANGES_CONFIG }
+    { providedIn: 'root', factory: () => getDefaultUnsavedChangesConfig() }
 );
 
 /**
@@ -29,7 +37,7 @@ export function provideUnsavedChangesConfig(config: Partial<UnsavedChangesConfig
     return {
         provide: UNSAVED_CHANGES_CONFIG,
         useFactory: (): UnsavedChangesConfig => ({
-            ...inject(UNSAVED_CHANGES_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_UNSAVED_CHANGES_CONFIG,
+            ...inject(UNSAVED_CHANGES_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultUnsavedChangesConfig(),
             ...config
         })
     };

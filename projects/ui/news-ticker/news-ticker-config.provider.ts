@@ -3,14 +3,21 @@ import { faBullhorn } from '@fortawesome/free-solid-svg-icons';
 
 import { NewsTickerConfig } from './news-ticker-config.model';
 
-const DEFAULT_NEWS_TICKER_CONFIG: NewsTickerConfig = {
-    color: 'neutral',
-    icon: faBullhorn,
-    speed: 50,
-    label: 'News',
-    pauseLabel: 'Pause news',
-    playLabel: 'Play news'
-};
+/**
+ * The values of a news ticker when nothing changes them. Its texts are $localize, which an app translates like its own,
+ * and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultNewsTickerConfig(): NewsTickerConfig {
+    return {
+        color: 'neutral',
+        icon: faBullhorn,
+        speed: 50,
+        label: $localize`:@@ui.news-ticker.label:News`,
+        pauseLabel: $localize`:@@ui.news-ticker.pauseLabel:Pause news`,
+        playLabel: $localize`:@@ui.news-ticker.playLabel:Play news`
+    };
+}
 
 /**
  * The values every news ticker below this injector uses when its inputs are not set, and its texts.
@@ -18,7 +25,7 @@ const DEFAULT_NEWS_TICKER_CONFIG: NewsTickerConfig = {
  */
 export const NEWS_TICKER_CONFIG: InjectionToken<NewsTickerConfig> = new InjectionToken<NewsTickerConfig>('NEWS_TICKER_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_NEWS_TICKER_CONFIG
+    factory: () => getDefaultNewsTickerConfig()
 });
 
 /**
@@ -32,7 +39,7 @@ export function provideNewsTickerConfig(config: Partial<NewsTickerConfig>): Prov
     return {
         provide: NEWS_TICKER_CONFIG,
         useFactory: (): NewsTickerConfig => ({
-            ...inject(NEWS_TICKER_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_NEWS_TICKER_CONFIG,
+            ...inject(NEWS_TICKER_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultNewsTickerConfig(),
             ...config
         })
     };

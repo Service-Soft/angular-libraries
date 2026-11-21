@@ -13,14 +13,16 @@ Everything works with server-side rendering: on the server nothing is tracked, s
 - [Consent dialog](#consent-dialog)
 - [Embedded content](#embedded-content)
 - [Funnel](#funnel)
+- [Translating](#translating)
 - [Moving from ngx-material-tracking](#moving-from-ngx-material-tracking)
 - [License](#license)
 
 # Requirements
-Angular 22 with the router. The consent dialog, the button of the privacy settings and the funnel also need [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui) and Tailwind CSS 4.
+Angular 22 with the router and `@angular/localize`, which [translates the texts](#translating). The consent dialog, the button of the privacy settings and the funnel also need [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui) and Tailwind CSS 4.
 
 ```sh
 npm install @service-soft/ngx-tracking @service-soft/ui
+ng add @angular/localize
 ```
 
 ```css
@@ -142,7 +144,7 @@ Nothing that needs consent is allowed before the user pressed a button in the di
 # Consent dialog
 `ConsentDialogUi` from `@service-soft/ngx-tracking/consent-dialog` shows a modal dialog with a checkbox for every tracking, grouped by category. Escape doesn't close it: the user chooses with "Save choices", "Only required" or "Allow all", and refusing looks as prominent as allowing. Nothing changes before they press one of them. Links to your privacy policy and imprint open in a new tab, so the dialog stays.
 
-Change its texts and links with `provideConsentDialogConfig`. Values you leave out keep their defaults, labels included:
+Change its texts and links with `provideConsentDialogConfig` of `@service-soft/ngx-tracking/consent`, like to translate them. It is part of `/consent` rather than of `/consent-dialog`, so the app configures the dialog without loading it: an import of `/consent-dialog` in the application config puts the whole dialog into the first load. Values you leave out keep their defaults, labels included:
 
 ```ts
 provideConsentDialogConfig({
@@ -205,6 +207,9 @@ import { FunnelComponent } from '@service-soft/ngx-tracking/funnel';
 ```
 
 The steps are a list screen readers read, and the shapes only repeat them. They are drawn in `--color-primary`. Without a heading before it, give it a `label`.
+
+# Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-tracking.consent.title`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideConsentDialogConfig` or `providePrivacySettingsConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it.
 
 # Moving from ngx-material-tracking
 - The package is `@service-soft/ngx-tracking`, with an entry point each for `/consent`, `/consent-dialog`, `/custom-tracking`, `/google-analytics`, `/google-tag-manager`, `/meta-pixel` and `/funnel`. It needs `@service-soft/ui` and Tailwind instead of the Angular CDK and the Font Awesome packages.

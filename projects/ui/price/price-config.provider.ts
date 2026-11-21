@@ -2,13 +2,20 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { PriceConfig } from './price-config.model';
 
-const DEFAULT_PRICE_CONFIG: PriceConfig = {
-    currency: 'EUR',
-    format: {},
-    size: 'md',
-    perLabel: 'per',
-    oldPriceLabel: 'previously'
-};
+/**
+ * The values of a price when nothing changes them. Its texts are $localize, which an app translates like its own, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultPriceConfig(): PriceConfig {
+    return {
+        currency: 'EUR',
+        format: {},
+        size: 'md',
+        perLabel: $localize`:@@ui.price.perLabel:per`,
+        oldPriceLabel: $localize`:@@ui.price.oldPriceLabel:previously`
+    };
+}
 
 /**
  * The values every price below this injector uses when its inputs are not set.
@@ -16,7 +23,7 @@ const DEFAULT_PRICE_CONFIG: PriceConfig = {
  */
 export const PRICE_CONFIG: InjectionToken<PriceConfig> = new InjectionToken<PriceConfig>('PRICE_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_PRICE_CONFIG
+    factory: () => getDefaultPriceConfig()
 });
 
 /**
@@ -30,7 +37,7 @@ export function providePriceConfig(config: Partial<PriceConfig>): Provider {
     return {
         provide: PRICE_CONFIG,
         useFactory: (): PriceConfig => ({
-            ...inject(PRICE_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_PRICE_CONFIG,
+            ...inject(PRICE_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultPriceConfig(),
             ...config
         })
     };

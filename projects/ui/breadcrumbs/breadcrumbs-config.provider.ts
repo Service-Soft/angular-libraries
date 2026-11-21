@@ -2,9 +2,16 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { BreadcrumbsConfig } from './breadcrumbs-config.model';
 
-const DEFAULT_BREADCRUMBS_CONFIG: BreadcrumbsConfig = {
-    label: 'Breadcrumbs'
-};
+/**
+ * The values of breadcrumbs when nothing changes them. Its label is $localize, which an app translates like its own
+ * texts, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultBreadcrumbsConfig(): BreadcrumbsConfig {
+    return {
+        label: $localize`:@@ui.breadcrumbs.label:Breadcrumbs`
+    };
+}
 
 /**
  * The values all breadcrumbs below this injector use when their inputs are not set.
@@ -12,7 +19,7 @@ const DEFAULT_BREADCRUMBS_CONFIG: BreadcrumbsConfig = {
  */
 export const BREADCRUMBS_CONFIG: InjectionToken<BreadcrumbsConfig> = new InjectionToken<BreadcrumbsConfig>('BREADCRUMBS_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_BREADCRUMBS_CONFIG
+    factory: () => getDefaultBreadcrumbsConfig()
 });
 
 /**
@@ -26,7 +33,7 @@ export function provideBreadcrumbsConfig(config: Partial<BreadcrumbsConfig>): Pr
     return {
         provide: BREADCRUMBS_CONFIG,
         useFactory: (): BreadcrumbsConfig => ({
-            ...inject(BREADCRUMBS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_BREADCRUMBS_CONFIG,
+            ...inject(BREADCRUMBS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultBreadcrumbsConfig(),
             ...config
         })
     };

@@ -21,14 +21,16 @@ Everything works with server-side rendering: on the server nobody is logged in, 
 - [Passwords](#passwords)
 - [Invitations](#invitations)
 - [The pages](#the-pages)
+  - [Translating](#translating)
 - [Moving from ngx-material-auth](#moving-from-ngx-material-auth)
 - [License](#license)
 
 # Requirements
-Angular 22 with the router, and a backend with the `AuthController` of zibri 3.1 or later, 3.2 with `invitationRoutes: true` for [invitations](#invitations). What the routes answer and take, like `CurrentUserProfile`, `UserLogin` and `OtpRegistration`, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
+Angular 22 with the router and `@angular/localize`, which [translates the texts](#translating), and a backend with the `AuthController` of zibri 3.1 or later, 3.2 with `invitationRoutes: true` for [invitations](#invitations). What the routes answer and take, like `CurrentUserProfile`, `UserLogin` and `OtpRegistration`, comes from [zibri-contract](https://www.npmjs.com/package/zibri-contract), the package zibri declares it in.
 
 ```sh
 npm install @service-soft/ngx-auth zibri-contract
+ng add @angular/localize
 ```
 
 [The pages](#the-pages) and [second factors](#second-factors) are built on [@service-soft/ui](https://www.npmjs.com/package/@service-soft/ui). The login and `@service-soft/ngx-auth/two-factor` draw the qr code of an authenticator app with [uqr](https://www.npmjs.com/package/uqr):
@@ -285,9 +287,12 @@ A refused attempt shows the message of zibri, in the language of the request, an
 
 | Option | Default |
 |---|---|
-| `labels` | English texts. The texts of the second factor are those of `provideSecondFactorConfig`, see [second factors](#second-factors) |
+| `labels` | English texts, see [translating](#translating). The texts of the second factor are those of `provideSecondFactorConfig`, see [second factors](#second-factors) |
 | `requestPasswordResetRoute` of the login and the confirm page | `'/request-password-reset'`. Undefined hides the link of the login, for an app without passwords to reset |
 | `newPasswordMinLength` | — the `minLength` of zibri's password policy, so the browser checks it before sending |
+
+## Translating
+The default texts are `$localize` with an id of their own, like `@@ngx-auth.login.title`, so `ng extract-i18n` puts them into the messages of your app, and you translate them like its own texts. The library needs `@angular/localize` for that, `ng add @angular/localize`, also in an app of one language. A build with `localize` fills the texts in, so no part of `@angular/localize` reaches the browser. The defaults are made once a config is injected, so translations an app loads at runtime with `loadTranslations` apply as well. A text of `provideXConfig` replaces the default in every language. So translate a default in your messages, and change it in the config only to say something else: a default the config replaces stays in your messages, though nothing shows it. The messages zibri refuses a request with come in the language of the request, from zibri.
 
 # Moving from ngx-material-auth
 - The package is `@service-soft/ngx-auth`, and it works with zibri instead of lbx-jwt: the routes, bodies and errors are zibri's.

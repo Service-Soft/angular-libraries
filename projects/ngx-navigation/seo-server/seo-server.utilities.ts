@@ -1,6 +1,6 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 import { NavSitemapEntry } from '@service-soft/ngx-navigation/navigation';
-import { SeoLocale, SeoPageRoute, SeoRouteUtilities, SeoSitemapContext, SeoUrlUtilities } from '@service-soft/ngx-navigation/seo';
+import { SeoLocale, SeoSitemapContext, SeoSitemapRoute, SeoUrlUtilities } from '@service-soft/ngx-navigation/seo';
 
 import { SeoLocalizedPage } from './seo-localized-page.model';
 import { SeoPage } from './seo-page.model';
@@ -19,8 +19,8 @@ const MAX_SITEMAP_BYTES: number = 50 * 1024 * 1024;
 
 const SITEMAP_PATH: string = '/sitemap.xml';
 
-// the page resolvePages has the app render to run the data.sitemap of its routes: an unknown one, which the route of
-// unknown urls renders on the server, to answer 404
+// the page resolvePages has the app render to get the routes of its pages: an unknown one, which the route of unknown
+// urls renders on the server, to answer 404
 const SITEMAP_REQUEST_PATH: string = '/__ngx-seo-sitemap';
 
 // the files a server answers itself, which are the same in every language and redirect to none
@@ -39,23 +39,30 @@ export abstract class SeoServerUtilities {
     /**
      * Finds every page of a site that search engines may index, in every language: the routes of the router config,
      * children and lazily loaded children included, without redirects, without the route of unknown urls and without
-     * routes whose data.robots holds noindex. A route with parameters gets the pages Angular prerendered for it, and the
-     * ones its data.sitemap lists, which the app runs as the app engine renders a page on the server. Its title and
-     * description in each language are read from the page as that language renders it, as the app engine answers it:
-     * prerendered, or rendered once now. A page only a browser renders has neither.
+     * routes whose data.robots holds noindex. The app hands them over as the app engine renders a page on the server,
+     * as only the app has them with its texts. A route with parameters gets the pages Angular prerendered for it, and
+     * the ones its data.sitemap lists, which the app runs then. A route whose server route answers with an error, like
+     * the 404 of the route of unknown urls, is left out. The title and description of a page in each language are read
+     * from the page as that language renders it, as the app engine answers it: prerendered, or rendered once now. A
+     * page only a browser renders has neither.
      * @param config - Where the pages are found.
-     * @returns The pages, and the routes with parameters whose pages could not be listed.
-     * @throws {Error} When a route has a data.sitemap, but no page renders on the server to run it.
+     * @returns The pages, the routes with parameters whose pages could not be listed, and the routes that answer with
+     * an error.
+     * @throws {Error} When no page renders on the server for the app to hand the routes over.
      */
     static async resolvePages(config: SeoServerConfig): Promise<SeoSite> {
         const prerenderedPaths: string[] = this.findPrerenderedPaths(config);
-        const routes: SeoPageRoute[] = await SeoRouteUtilities.findPageRoutes(config.routes);
-        const listed: Record<string, NavSitemapEntry[]> = await this.resolveListedPages(config, routes);
         const pages: SeoPage[] = [];
         const unlistedRoutes: string[] = [];
-        for (const route of routes) {
-            const renderMode: RenderMode = this.findRenderMode(config.serverRoutes, route.path);
-            const entries: NavSitemapEntry[] = this.resolveEntries(route, listed[route.path] ?? [], prerenderedPaths);
+        const errorRoutes: string[] = [];
+        for (const route of await this.resolveSitemapRoutes(config)) {
+            const serverRoute: ServerRoute | undefined = this.findServerRoute(config.serverRoutes, route.path);
+            if (this.hasErrorStatus(serverRoute)) {
+                errorRoutes.push(`/${route.path}`);
+                continue;
+            }
+            const renderMode: RenderMode = serverRoute?.renderMode ?? RenderMode.Server;
+            const entries: NavSitemapEntry[] = this.resolveEntries(route, prerenderedPaths);
             if (!entries.length) {
                 unlistedRoutes.push(`/${route.path}`);
             }
@@ -70,7 +77,7 @@ export abstract class SeoServerUtilities {
                 });
             }
         }
-        return { pages, unlistedRoutes };
+        return { pages, unlistedRoutes, errorRoutes };
     }
 
     /**
@@ -218,37 +225,37 @@ export abstract class SeoServerUtilities {
         return `${SeoUrlUtilities.normalizePath(urlPath)}${queryStart === -1 ? '' : url.slice(queryStart)}`;
     }
 
-    // the data.sitemap of the routes, which the app runs as it renders a page on the server for a request with the
-    // context. Only a page rendered for each request gets it: the route of unknown urls, or else a page without
-    // parameters that renders on the server
-    private static async resolveListedPages(config: SeoServerConfig, routes: SeoPageRoute[]): Promise<Record<string, NavSitemapEntry[]>> {
-        if (!routes.some(route => route.data.sitemap != undefined)) {
-            return {};
-        }
-        const candidates: string[] = [
-            SITEMAP_REQUEST_PATH,
-            ...routes.filter(route => !this.hasParameters(route.path)).map(route => `/${route.path}`)
-        ].filter(candidate => this.findRenderMode(config.serverRoutes, candidate) === RenderMode.Server);
+    // the routes of the pages, which the app hands over as it renders a page on the server for a request with the
+    // context, once it ran their data.sitemap. Only a page rendered for each request gets it: the route of unknown
+    // urls, or else a server route without parameters that renders on the server
+    private static async resolveSitemapRoutes(config: SeoServerConfig): Promise<SeoSitemapRoute[]> {
+        const staticPaths: string[] = config.serverRoutes
+            .map(serverRoute => `/${serverRoute.path}`)
+            .filter(path => !this.hasParameters(path) && !path.includes('*'));
+        const candidates: string[] = [SITEMAP_REQUEST_PATH, ...staticPaths].filter(candidate => {
+            return (this.findServerRoute(config.serverRoutes, candidate)?.renderMode ?? RenderMode.Server) === RenderMode.Server;
+        });
         for (const candidate of candidates) {
             const context: SeoSitemapContext = { ngxSeoSitemap: undefined };
             const url: string = SeoUrlUtilities.resolveUrl(config.origin, candidate, config.locales[0]);
             const response: Response | null = await config.appEngine.handle(new Request(url), context);
-            // the app has run them once the page is rendered
+            // the app has handed them over once the page is rendered
             await response?.text();
             if (context.ngxSeoSitemap != undefined) {
                 return context.ngxSeoSitemap;
             }
         }
-        throw new Error('The data.sitemap of a route runs in the app as the server renders a page, which needs one with '
+        throw new Error('The app hands the server the routes of its pages as the server renders a page, which needs one with '
             + 'RenderMode.Server, like the route of unknown urls: { path: \'**\', renderMode: RenderMode.Server, status: 404 }. '
             + 'And the app needs provideSeoConfig.');
     }
 
     // the pages of a route: the one of its path, or the ones of its parameters, listed or prerendered
-    private static resolveEntries(route: SeoPageRoute, listed: NavSitemapEntry[], prerenderedPaths: string[]): NavSitemapEntry[] {
+    private static resolveEntries(route: SeoSitemapRoute, prerenderedPaths: string[]): NavSitemapEntry[] {
         if (!this.hasParameters(route.path)) {
             return [{ path: `/${route.path}` }];
         }
+        const listed: NavSitemapEntry[] = route.listed ?? [];
         const prerendered: NavSitemapEntry[] = prerenderedPaths
             .filter(prerenderedPath => this.matchesPattern(route.path, prerenderedPath))
             .filter(prerenderedPath => !listed.some(entry => SeoUrlUtilities.normalizePath(entry.path) === prerenderedPath))
@@ -299,9 +306,15 @@ export abstract class SeoServerUtilities {
         return [...new Set(paths)];
     }
 
-    // by the first server route that matches, like the router of @angular/ssr finds it, and on the server when none does
-    private static findRenderMode(serverRoutes: ServerRoute[], routePath: string): RenderMode {
-        return serverRoutes.find(serverRoute => this.matchesPattern(serverRoute.path, routePath))?.renderMode ?? RenderMode.Server;
+    // the first server route that matches, like the router of @angular/ssr finds it. A page renders on the server when
+    // none does
+    private static findServerRoute(serverRoutes: ServerRoute[], routePath: string): ServerRoute | undefined {
+        return serverRoutes.find(serverRoute => this.matchesPattern(serverRoute.path, routePath));
+    }
+
+    // like a route without a server route of its own, which falls under the 404 of the route of unknown urls
+    private static hasErrorStatus(serverRoute: ServerRoute | undefined): boolean {
+        return serverRoute != undefined && 'status' in serverRoute && serverRoute.status != undefined && serverRoute.status >= 400;
     }
 
     // whether a path matches a pattern of routes, like 'teams/:team', '*' or '**'. A parameter of the path matches a

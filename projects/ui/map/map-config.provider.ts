@@ -3,13 +3,20 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 import { GOOGLE_MAPS_PROVIDER } from './google-maps-provider';
 import { MapConfig } from './map-config.model';
 
-const DEFAULT_MAP_CONFIG: MapConfig = {
-    provider: GOOGLE_MAPS_PROVIDER,
-    zoom: 15,
-    aspectRatio: '16 / 9',
-    label: 'Map',
-    routeLabel: 'Plan route'
-};
+/**
+ * The values of a map when nothing changes them. Its texts are $localize, which an app translates like its own, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultMapConfig(): MapConfig {
+    return {
+        provider: GOOGLE_MAPS_PROVIDER,
+        zoom: 15,
+        aspectRatio: '16 / 9',
+        label: $localize`:@@ui.map.label:Map`,
+        routeLabel: $localize`:@@ui.map.routeLabel:Plan route`
+    };
+}
 
 /**
  * The values every map below this injector uses when its inputs are not set, and its texts.
@@ -17,7 +24,7 @@ const DEFAULT_MAP_CONFIG: MapConfig = {
  */
 export const MAP_CONFIG: InjectionToken<MapConfig> = new InjectionToken<MapConfig>('MAP_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_MAP_CONFIG
+    factory: () => getDefaultMapConfig()
 });
 
 /**
@@ -32,7 +39,7 @@ export function provideMapConfig(config: Partial<MapConfig>): Provider {
     return {
         provide: MAP_CONFIG,
         useFactory: (): MapConfig => ({
-            ...inject(MAP_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_MAP_CONFIG,
+            ...inject(MAP_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultMapConfig(),
             ...config
         })
     };

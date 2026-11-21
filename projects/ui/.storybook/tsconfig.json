@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "types": ["node"]
+        "types": ["node", "@angular/localize"]
     },
     "exclude": ["../**/*.spec.ts", "../../ngx-change-sets/**/*.spec.ts", "../../ngx-persistence-logger/**/*.spec.ts", "../../ngx-tracking/**/*.spec.ts", "../../ngx-pwa/**/*.spec.ts", "../../ngx-auth/**/*.spec.ts", "../../ngx-error-handling/**/*.spec.ts", "../../ngx-navigation/**/*.spec.ts", "../../ngx-entity/**/*.spec.ts", "../../ngx-ecommerce/**/*.spec.ts", "../../testing/**/*.spec.ts"],
     "extends": "../tsconfig.lib.json",

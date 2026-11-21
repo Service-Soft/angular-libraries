@@ -5,7 +5,7 @@
         "declaration": true,
         "declarationMap": true,
         "outDir": "../../out-tsc/lib",
-        "types": []
+        "types": ["@angular/localize"]
     },
     "exclude": ["**/*.spec.ts", "**/*.stories.ts", ".storybook", "test-setup.ts"],
     "extends": "../../tsconfig.json",

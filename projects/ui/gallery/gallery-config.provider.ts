@@ -2,13 +2,20 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { GalleryConfig } from './gallery-config.model';
 
-const DEFAULT_GALLERY_CONFIG: GalleryConfig = {
-    label: 'Pictures',
-    previousLabel: 'Previous picture',
-    nextLabel: 'Next picture',
-    closeLabel: 'Close',
-    positionLabel: (position, count) => `Picture ${position} of ${count}`
-};
+/**
+ * The texts of a gallery when nothing changes them. They are $localize, which an app translates like its own texts, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultGalleryConfig(): GalleryConfig {
+    return {
+        label: $localize`:@@ui.gallery.label:Pictures`,
+        previousLabel: $localize`:@@ui.gallery.previousLabel:Previous picture`,
+        nextLabel: $localize`:@@ui.gallery.nextLabel:Next picture`,
+        closeLabel: $localize`:@@ui.gallery.closeLabel:Close`,
+        positionLabel: (position, count) => $localize`:@@ui.gallery.positionLabel:Picture ${position}:position: of ${count}:count:`
+    };
+}
 
 /**
  * The texts every gallery below this injector uses.
@@ -16,7 +23,7 @@ const DEFAULT_GALLERY_CONFIG: GalleryConfig = {
  */
 export const GALLERY_CONFIG: InjectionToken<GalleryConfig> = new InjectionToken<GalleryConfig>('GALLERY_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_GALLERY_CONFIG
+    factory: () => getDefaultGalleryConfig()
 });
 
 /**
@@ -30,7 +37,7 @@ export function provideGalleryConfig(config: Partial<GalleryConfig>): Provider {
     return {
         provide: GALLERY_CONFIG,
         useFactory: (): GalleryConfig => ({
-            ...inject(GALLERY_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_GALLERY_CONFIG,
+            ...inject(GALLERY_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultGalleryConfig(),
             ...config
         })
     };

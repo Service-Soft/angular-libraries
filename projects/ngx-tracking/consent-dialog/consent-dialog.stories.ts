@@ -1,10 +1,9 @@
 import { afterNextRender, Component, inject, Service } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { ConsentService, GdprCategory, provideTrackingConsent, Tracking, TrackingService } from '@service-soft/ngx-tracking/consent';
+import { ConsentService, GdprCategory, provideConsentDialogConfig, provideTrackingConsent, Tracking, TrackingService } from '@service-soft/ngx-tracking/consent';
 import { PrivacySettingsComponent } from '@service-soft/ngx-tracking/privacy-settings';
 import { applicationConfig, Meta, StoryObj } from '@storybook/angular';
 
-import { provideConsentDialogConfig } from './consent-dialog-config.provider';
 import { ConsentDialogUi } from './consent-dialog-ui.service';
 import { ConsentDialogComponent } from './consent-dialog.component';
 

@@ -2,11 +2,18 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { FootnotesConfig } from './footnotes-config.model';
 
-const DEFAULT_FOOTNOTES_CONFIG: FootnotesConfig = {
-    label: 'Footnotes',
-    referenceLabel: number => `Footnote ${number}`,
-    backLabel: number => `Back to reference ${number}`
-};
+/**
+ * The texts of footnotes when nothing changes them. They are $localize, which an app translates like its own texts, and
+ * resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultFootnotesConfig(): FootnotesConfig {
+    return {
+        label: $localize`:@@ui.footnotes.label:Footnotes`,
+        referenceLabel: number => $localize`:@@ui.footnotes.referenceLabel:Footnote ${number}:number:`,
+        backLabel: number => $localize`:@@ui.footnotes.backLabel:Back to reference ${number}:number:`
+    };
+}
 
 /**
  * The texts every list of footnotes and every footnote below this injector uses.
@@ -14,7 +21,7 @@ const DEFAULT_FOOTNOTES_CONFIG: FootnotesConfig = {
  */
 export const FOOTNOTES_CONFIG: InjectionToken<FootnotesConfig> = new InjectionToken<FootnotesConfig>('FOOTNOTES_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_FOOTNOTES_CONFIG
+    factory: () => getDefaultFootnotesConfig()
 });
 
 /**
@@ -28,7 +35,7 @@ export function provideFootnotesConfig(config: Partial<FootnotesConfig>): Provid
     return {
         provide: FOOTNOTES_CONFIG,
         useFactory: (): FootnotesConfig => ({
-            ...inject(FOOTNOTES_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_FOOTNOTES_CONFIG,
+            ...inject(FOOTNOTES_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultFootnotesConfig(),
             ...config
         })
     };

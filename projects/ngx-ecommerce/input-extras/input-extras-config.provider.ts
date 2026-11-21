@@ -3,20 +3,27 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 import { InputExtrasConfigChanges } from './input-extras-config-changes.model';
 import { InputExtrasConfig } from './input-extras-config.model';
 
-const DEFAULT_INPUT_EXTRAS_CONFIG: InputExtrasConfig = {
-    appearance: 'checkbox',
-    showTotal: false,
-    labels: {
-        units: {
-            once: 'once',
-            perItem: 'each',
-            perDay: 'per day'
-        },
-        decrease: 'Remove one',
-        increase: 'Add one',
-        total: 'Extras'
-    }
-};
+/**
+ * The values of an extras input when nothing changes them. Its texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultInputExtrasConfig(): InputExtrasConfig {
+    return {
+        appearance: 'checkbox',
+        showTotal: false,
+        labels: {
+            units: {
+                once: $localize`:@@ngx-ecommerce.input-extras.units.once:once`,
+                perItem: $localize`:@@ngx-ecommerce.input-extras.units.perItem:each`,
+                perDay: $localize`:@@ngx-ecommerce.input-extras.units.perDay:per day`
+            },
+            decrease: $localize`:@@ngx-ecommerce.input-extras.decrease:Remove one`,
+            increase: $localize`:@@ngx-ecommerce.input-extras.increase:Add one`,
+            total: $localize`:@@ngx-ecommerce.input-extras.total:Extras`
+        }
+    };
+}
 
 /**
  * The values every extras input below this injector uses when its inputs are not set.
@@ -24,7 +31,7 @@ const DEFAULT_INPUT_EXTRAS_CONFIG: InputExtrasConfig = {
  */
 export const INPUT_EXTRAS_CONFIG: InjectionToken<InputExtrasConfig> = new InjectionToken<InputExtrasConfig>('INPUT_EXTRAS_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_INPUT_EXTRAS_CONFIG
+    factory: () => getDefaultInputExtrasConfig()
 });
 
 /**
@@ -39,7 +46,7 @@ export function provideInputExtrasConfig(config: InputExtrasConfigChanges): Prov
         provide: INPUT_EXTRAS_CONFIG,
         useFactory: (): InputExtrasConfig => {
             const parent: InputExtrasConfig = inject(INPUT_EXTRAS_CONFIG, { skipSelf: true, optional: true })
-                ?? DEFAULT_INPUT_EXTRAS_CONFIG;
+                ?? getDefaultInputExtrasConfig();
             return {
                 ...parent,
                 ...config,

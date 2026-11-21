@@ -1,10 +1,8 @@
 import { inject, Service } from '@angular/core';
-import { ConsentUi } from '@service-soft/ngx-tracking/consent';
+import { CONSENT_DIALOG_CONFIG, ConsentDialogConfig, ConsentUi } from '@service-soft/ngx-tracking/consent';
 import { DialogService } from '@service-soft/ui/dialog';
 import { SnackbarService } from '@service-soft/ui/snackbar';
 
-import { ConsentDialogConfig } from './consent-dialog-config.model';
-import { CONSENT_DIALOG_CONFIG } from './consent-dialog-config.provider';
 import { ConsentDialogComponent } from './consent-dialog.component';
 
 /**

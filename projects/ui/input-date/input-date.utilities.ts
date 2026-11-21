@@ -126,6 +126,7 @@ export abstract class InputDateUtilities {
     static resolveCalendarWeeks(month: Date, firstDayOfWeek: InputWeekday): Date[][] {
         const start: Date = this.resolveMonthStart(month);
         const daysBefore: number = (start.getDay() - firstDayOfWeek + DAYS_PER_WEEK) % DAYS_PER_WEEK;
+        // eslint-disable-next-line typescript/no-shadow
         return Array.from({ length: CALENDAR_WEEKS }, (_, week) => Array.from({ length: DAYS_PER_WEEK }, (_, weekday) => {
             return new Date(start.getFullYear(), start.getMonth(), 1 - daysBefore + (week * DAYS_PER_WEEK) + weekday);
         }));

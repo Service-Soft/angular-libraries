@@ -2,7 +2,7 @@
 import { ApplicationRef, Service } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { ConsentService, GdprCategory, provideTrackingConsent, Tracking, TrackingService } from '@service-soft/ngx-tracking/consent';
+import { ConsentService, GdprCategory, provideConsentDialogConfig, provideTrackingConsent, Tracking, TrackingService } from '@service-soft/ngx-tracking/consent';
 import { DialogTestingUtilities } from 'testing/dialog';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
@@ -191,6 +191,20 @@ describe('ConsentDialogComponent', () => {
         await dialog.closed;
         expect([VisitsTracking, AdsTracking, AbuseProtectionTracking].map(service => TestBed.inject<TrackingService>(service).enabled()))
             .toEqual([false, false, true]);
+    });
+
+    test('shows the texts and links of the config, which the app gives it without loading the dialog', async () => {
+        // from /consent, which an app imports anyway, unlike the dialog, which loads once it shows
+        TestBed.configureTestingModule({
+            providers: [provideConsentDialogConfig({ paragraphs: ['Wir nutzen Cookies.'], privacyUrl: 'datenschutz', labels: { title: 'Datenschutz' } })]
+        });
+        await openDialog();
+
+        expect(document.querySelector('dialog h2')?.textContent.trim()).toBe('Datenschutz');
+        expect([...document.querySelectorAll('dialog p')].map(p => p.textContent.trim())[0]).toBe('Wir nutzen Cookies.');
+        expect(document.querySelector('dialog a')?.getAttribute('href')).toBe('datenschutz');
+        // what it doesn't change keeps its default
+        expect(findButton('Allow all')).toBeDefined();
     });
 
     test('tells the user in a snackbar when their browser asked not to be tracked', async () => {

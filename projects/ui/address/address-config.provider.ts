@@ -2,14 +2,21 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { AddressConfig } from './address-config.model';
 
-const DEFAULT_ADDRESS_CONFIG: AddressConfig = {
-    icons: true,
-    microdata: true,
-    businessType: 'LocalBusiness',
-    phoneLabel: 'Phone',
-    faxLabel: 'Fax',
-    emailLabel: 'Email'
-};
+/**
+ * The values of an address block when nothing changes them. Its texts are $localize, which an app translates like its
+ * own, and resolved once the config is injected, so translations an app loads at runtime apply as well.
+ * @returns The default config.
+ */
+function getDefaultAddressConfig(): AddressConfig {
+    return {
+        icons: true,
+        microdata: true,
+        businessType: 'LocalBusiness',
+        phoneLabel: $localize`:@@ui.address.phoneLabel:Phone`,
+        faxLabel: $localize`:@@ui.address.faxLabel:Fax`,
+        emailLabel: $localize`:@@ui.address.emailLabel:Email`
+    };
+}
 
 /**
  * The values every address block below this injector uses when its inputs are not set, and its texts.
@@ -17,7 +24,7 @@ const DEFAULT_ADDRESS_CONFIG: AddressConfig = {
  */
 export const ADDRESS_CONFIG: InjectionToken<AddressConfig> = new InjectionToken<AddressConfig>('ADDRESS_CONFIG', {
     providedIn: 'root',
-    factory: () => DEFAULT_ADDRESS_CONFIG
+    factory: () => getDefaultAddressConfig()
 });
 
 /**
@@ -31,7 +38,7 @@ export function provideAddressConfig(config: Partial<AddressConfig>): Provider {
     return {
         provide: ADDRESS_CONFIG,
         useFactory: (): AddressConfig => ({
-            ...inject(ADDRESS_CONFIG, { skipSelf: true, optional: true }) ?? DEFAULT_ADDRESS_CONFIG,
+            ...inject(ADDRESS_CONFIG, { skipSelf: true, optional: true }) ?? getDefaultAddressConfig(),
             ...config
         })
     };
