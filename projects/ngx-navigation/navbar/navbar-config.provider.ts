@@ -14,6 +14,7 @@ function getDefaultNavbarConfig(): NavbarConfig {
             navigation: $localize`:@@ngx-navigation.navbar.navigation:Navigation`,
             openNavigation: $localize`:@@ngx-navigation.navbar.openNavigation:Open the navigation`
         },
+        color: 'surface',
         collapse: 'sm',
         menuIcon: faBars
     };

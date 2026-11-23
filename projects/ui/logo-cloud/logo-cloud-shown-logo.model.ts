@@ -19,6 +19,10 @@ export type LogoCloudShownLogo = {
      */
     height: number,
     /**
+     * The height it shows in, a part of the token --spacing-logo-cloud, like 'calc(var(--spacing-logo-cloud) * 0.5)'.
+     */
+    shownHeight: string,
+    /**
      * Where the logo links to, undefined for no link.
      */
     href: string | undefined,

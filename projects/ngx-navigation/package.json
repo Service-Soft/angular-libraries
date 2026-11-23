@@ -1,6 +1,6 @@
 {
     "name": "@service-soft/ngx-navigation",
-    "version": "22.3.1",
+    "version": "22.3.2",
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -26,7 +26,7 @@
         "@angular/router": "^22.2.0",
         "@angular/ssr": "^22.2.0",
         "@fortawesome/free-solid-svg-icons": "^7.3.1",
-        "@service-soft/ui": "^22.3.1",
+        "@service-soft/ui": "^22.3.2",
         "tailwindcss": "^4.3.3"
     },
     "peerDependenciesMeta": {

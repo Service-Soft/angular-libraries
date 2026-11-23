@@ -66,6 +66,7 @@ Every component lives in its own entry point, so a project only ships the code o
   - [Drawer](#drawer)
   - [Breadcrumbs](#breadcrumbs)
   - [Menu](#menu)
+  - [Theme switcher](#theme-switcher)
   - [Pagination](#pagination)
   - [Popover](#popover)
   - [Snackbar](#snackbar)
@@ -164,6 +165,8 @@ A color too light to be text on a surface has a `-text` token for that: `--color
 
 The content takes them from the direct children of the element, so wrap it in one. They are the tokens `--color-on-primary-variant` (hints), `--color-on-primary-outline` (borders of controls), `--color-on-primary-outline-variant`, `--color-primary-surface-container` (areas like input fields), `--color-on-primary-tint` and `-tint-pressed` (behind colored text, like a text button) and `--color-on-primary-hover` and `-pressed` (a filled button, which is the on- color with the color as its text), and the same for secondary. They are calculated from the color and its on- color, and the contrast tests check them like the others. Status colors as text, like an error message, keep the colors they have on the surface, so a form with validation belongs on the surface.
 
+A colored surface looks the same in light and dark mode: it is always light, so every `light-dark()` inside of it, and the `dark:` variant, take their light value. Primary is a color for text in dark mode, light on the dark surface, while a navbar, a hero or a call to action wants the deep brand color with its white text in both modes.
+
 Text uses the roles of the type scale: `text-display`, `text-headline`, `text-title`, `text-body`, `text-body-sm`, `text-label-sm` (for dense content like a badge or a count), `text-label` and `text-label-lg`. Each sets the size, line height and weight together, so you can change the whole scale through the `--text-*` tokens. The page uses `--font-body`, and headings use `font-heading`, which follows the body font until you set it:
 
 ```css
@@ -173,6 +176,8 @@ Text uses the roles of the type scale: `text-display`, `text-headline`, `text-ti
 }
 ```
 
+The titles in the navbar and the footer of [ngx-navigation](https://www.npmjs.com/package/@service-soft/ngx-navigation) use `--font-nav-title`, which follows the heading font until you set it, like to the font of your wordmark.
+
 The default is the font of the operating system, which costs nothing to load. When you add your own, host it yourself with `font-display: swap` and preload the files the first screen needs. That keeps text visible while the font loads, and keeps the layout from jumping when it arrives, which search engines measure.
 
 Shadows come in five elevation levels, from `shadow-1` to `shadow-5`: cards and elevated buttons sit on 1, menus and popovers on 2, dialogs on 3, and hovering raises an elevated element by one level. They are darker in dark mode, where a light shadow would not show.
@@ -180,7 +185,9 @@ Shadows come in five elevation levels, from `shadow-1` to `shadow-5`: cards and 
 ## Dark mode
 Every color token has a value for light and one for dark mode, written as `light-dark(<light>, <dark>)`. Give your overrides both as well: a single color is used in both modes, and a brand color that works on white rarely works on a dark surface.
 
-By default the page follows the operating system. To let users choose, set the class `light` or `dark` on `<html>`. They work on any element, so a part of the page can have the other mode too:
+The default dark surface is a gray with a touch of blue, `#2a2a35`, and `surface-container` is darker than it, `#1a1a26`, like the header and the code of the documentation of zibri. [Colored surfaces](#colored-surfaces) keep their light look.
+
+By default the page follows the operating system. To let users choose, use the [theme switcher](#theme-switcher), which sets the class `light` or `dark` on `<html>` and remembers the choice. The classes work on any element, so a part of the page can have the other mode too:
 
 ```html
 <html class="dark">
@@ -1290,7 +1297,7 @@ A number that stands out, with what it counts below it, like '1,200 members'. Pl
 In the browser, the number counts up from 0 once it scrolls into view, keeping the fraction digits of its value on the way, unless the user prefers reduced motion. The page rendered on the server, search engines and screen readers always get the final value, and the number keeps the width of the final value while it counts, so nothing around it moves. Change the defaults with `provideStatConfig({ color, format, duration })`.
 
 ## Logo cloud
-The logos of sponsors, partners or certificates, next to each other and wrapping into rows, each as high as the token `--spacing-logo-cloud` whatever the size of its image:
+The logos of sponsors, partners or certificates, next to each other and wrapping into rows, each with the area of a square of the token `--spacing-logo-cloud` whatever the size of its image. With one height for all, a wide wordmark would look far bigger than a square logo. A wide logo is at most two and a half squares wide, a tall one at most a quarter higher than a square:
 
 ```html
 <ui-logo-cloud [logos]="[{ src: '/sponsors/acme.svg', alt: 'Acme', width: 160, height: 48, href: 'https://acme.example' }]" />
@@ -1303,6 +1310,10 @@ The logos of sponsors, partners or certificates, next to each other and wrapping
 | `width`, `height` | `number` | — the size of the image in pixels, which keeps the page from moving while it loads |
 | `href` | `string` | — where the logo links to; without one, it is no link |
 | `openInNewTab` | `boolean` | `true` — the default comes from `provideLogoCloudConfig({ openInNewTab })` |
+
+| Input | Values | Default |
+|---|---|---|
+| `grayscale` | `boolean` | `false` — gray until the pointer is on a logo or its link has the focus, so colorful logos don't compete with the page. The color fades in and out over half a second; the default comes from `provideLogoCloudConfig({ grayscale })` |
 
 Images load with `NgOptimizedImage`, lazily, data urls as they are. A link that opens in a new tab tells screen readers so after the logo, with the `newTabLabel` of `provideLinkConfig`. It gets the focus ring of a plain [link](#link), without the icon of a link to another site.
 
@@ -1420,6 +1431,8 @@ A panel that slides in from the side of the screen, like the navigation on a sma
 
 On a phone, give its links and buttons the full width, so a tap anywhere in their row hits them, not only on their text: `ui-link` with `appearance="nav"` and `block` looks like a navigation item and spans the drawer, on an `<a>` as well as on a `<button>`.
 
+Its content can tell that it is in a drawer: `inject(IS_IN_DRAWER)` is true there, and false anywhere else. A button that is only an icon elsewhere uses it to be such a row with its text, like the [theme switcher](#theme-switcher).
+
 | Input | Values | Default |
 |---|---|---|
 | `open` | `boolean` | `false` — bind it with `[(open)]`, it follows when the user closes the drawer |
@@ -1456,6 +1469,8 @@ A menu of actions and links, on a native popover. The browser opens and closes i
 
 The trigger stays a directive on your own `button`, because it only adds behaviour to it. The items follow the trigger in the tab order. Choosing one closes the menu and returns focus to the trigger before your click handler runs, so a dialog it opens returns focus there as well. The corner radius is the token `--radius-menu`.
 
+Items that are a choice of several, like the modes of the [theme switcher](#theme-switcher), mark the chosen one with `[pressed]`, which screen readers announce. Give it a visible mark as well, like a check: color is never the only cue.
+
 Links are your own `<a>` with `ui-menu-link`, so `routerLink`, middle clicks and new tabs work like with any link. A menu inside of a menu is a submenu, which an item opens beside it:
 
 ```html
@@ -1470,6 +1485,25 @@ Links are your own `<a>` with `ui-menu-link`, so `routerLink`, middle clicks and
 ```
 
 The links of a submenu follow its item in the tab order, and escape closes only the submenu. Following a link or choosing an item anywhere closes every menu, with the focus back at the first trigger. The submenu opens on the other side when there is no space, and below its item on a screen too narrow for either.
+
+## Theme switcher
+Lets users choose the color mode of the page: the one of their operating system, light or dark. A button with the icon of the current mode opens a [menu](#menu) of the three, the current one marked with a check and announced as pressed:
+
+```html
+<ui-theme-switcher />
+```
+
+The choice is remembered in the browser and applied to `<html>` as the class `light` or `dark` (see [Dark mode](#dark-mode)). Choosing "System" forgets it again. Inside of a `<ui-menu>`, like a menu of a navbar, the modes are items of that menu instead. Inside of a [drawer](#drawer), like the one of a navbar on a phone, the button is a row of the drawer that names the current mode beside its icon, as the drawer has the room for it and lists text below each other.
+
+Prerendered pages and pages rendered on the server don't know the choice of a browser. So the page doesn't show in the wrong mode until the app has started, add the script of `ThemeModeUtilities.INIT_SCRIPT` to the `<head>` of your `index.html`. It is this, for `localStorage` key `ui-theme-mode`:
+
+```html
+<script>try{var m=localStorage.getItem('ui-theme-mode');if(m==='light'||m==='dark')document.documentElement.classList.add(m)}catch(e){}</script>
+```
+
+If your site sends a Content-Security-Policy, allow the script by its hash.
+
+`ThemeService` is the same choice in code: `mode()` is the current one, `setMode('dark')` changes it. On the server, the mode is always `'system'`. The texts and icons are set with `provideThemeSwitcherConfig({ label, modeLabels, modeIcons })`.
 
 ## Pagination
 Goes through pages, like the ones of a list zibri answers in pages: a navigation with buttons for up to five pages around the current one, between buttons for the page before and after and for the first and the last page:

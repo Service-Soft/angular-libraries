@@ -111,7 +111,8 @@ export default [
             }
         },
         rules: {
-            'better-tailwindcss/no-unknown-classes': 'warn',
+            // .light and .dark of ui fix the mode of an element, plain css in its base layer, which the plugin doesn't see
+            'better-tailwindcss/no-unknown-classes': ['warn', { ignore: ['^light$', '^dark$'] }],
             'better-tailwindcss/no-concatenated-classes': 'warn',
             'better-tailwindcss/enforce-consistent-line-wrapping': ['warn', { printWidth: 140, indent: 4, preferSingleLine: true }],
             'better-tailwindcss/no-restricted-classes': [

@@ -2,9 +2,11 @@ import { inject, InjectionToken, Provider } from '@angular/core';
 
 import { LogoCloudConfig } from './logo-cloud-config.model';
 
-// logos link to other sites, like the ones of sponsors, which keep the page open behind them.
+// logos link to other sites, like the ones of sponsors, which keep the page open behind them. They keep their colors,
+// which is what a sponsor expects to see.
 const DEFAULT_LOGO_CLOUD_CONFIG: LogoCloudConfig = {
-    openInNewTab: true
+    openInNewTab: true,
+    grayscale: false
 };
 
 /**
