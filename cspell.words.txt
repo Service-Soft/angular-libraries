@@ -48,3 +48,4 @@ uppercased
 llms
 sitemapindex
 prerenders
+wordmark

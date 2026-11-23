@@ -176,6 +176,8 @@ Text uses the roles of the type scale: `text-display`, `text-headline`, `text-ti
 }
 ```
 
+The titles in the navbar and the footer of [ngx-navigation](https://www.npmjs.com/package/@service-soft/ngx-navigation) use `--font-nav-title`, which follows the heading font until you set it, like to the font of your wordmark.
+
 The default is the font of the operating system, which costs nothing to load. When you add your own, host it yourself with `font-display: swap` and preload the files the first screen needs. That keeps text visible while the font loads, and keeps the layout from jumping when it arrives, which search engines measure.
 
 Shadows come in five elevation levels, from `shadow-1` to `shadow-5`: cards and elevated buttons sit on 1, menus and popovers on 2, dialogs on 3, and hovering raises an elevated element by one level. They are darker in dark mode, where a light shadow would not show.

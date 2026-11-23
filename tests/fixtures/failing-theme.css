@@ -9,7 +9,8 @@
     --color-success: light-dark(#1a8641, #1a8641);
 }
 
-/* ui sets color-scheme: dark on .dark, so it is only checked in dark mode */
+/* ui sets color-scheme: dark on .dark, so it is only checked in dark mode. Text in the color of the surface itself,
+   whatever the dark surface of ui is */
 .dark {
-    --color-on-surface: #11171b;
+    --color-on-surface: var(--color-surface);
 }

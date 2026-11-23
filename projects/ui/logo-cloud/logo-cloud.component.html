@@ -25,8 +25,7 @@
 <ng-template #image let-logo>
     @if (logo.optimized) {
         <img
-            class="w-auto max-w-full object-contain"
-            [class]="grayscaleClasses()"
+            [class]="imageClasses()"
             [style.height]="logo.shownHeight"
             [ngSrc]="logo.src"
             [alt]="logo.alt"
@@ -34,15 +33,16 @@
             [height]="logo.height"
         />
     } @else {
-        <!-- eslint-disable-next-line angular/prefer-ngsrc -->
+        <!-- a data url, which NgOptimizedImage doesn't take. The pair covers the whole element, wherever the rule reports -->
+        <!-- eslint-disable angular/prefer-ngsrc -->
         <img
-            class="w-auto max-w-full object-contain"
-            [class]="grayscaleClasses()"
+            [class]="imageClasses()"
             [style.height]="logo.shownHeight"
             [src]="logo.src"
             [alt]="logo.alt"
             [width]="logo.width"
             [height]="logo.height"
         />
+        <!-- eslint-enable angular/prefer-ngsrc -->
     }
 </ng-template>

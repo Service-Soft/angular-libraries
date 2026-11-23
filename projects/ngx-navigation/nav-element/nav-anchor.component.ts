@@ -1,15 +1,4 @@
-import {
-    booleanAttribute,
-    Component,
-    computed,
-    inject,
-    input,
-    InputSignal,
-    InputSignalWithTransform,
-    output,
-    OutputEmitterRef,
-    Signal
-} from '@angular/core';
+import { booleanAttribute, Component, computed, inject, input, InputSignal, InputSignalWithTransform, output, OutputEmitterRef, Signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NavLinkView } from '@service-soft/ngx-navigation/navigation';
 import { BUTTON_CONFIG, ButtonColor, ButtonComponent, ButtonConfig, ButtonVariant } from '@service-soft/ui/button';

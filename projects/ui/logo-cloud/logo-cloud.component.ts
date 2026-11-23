@@ -11,6 +11,18 @@ import { LogoCloudShownLogo } from './logo-cloud-shown-logo.model';
 const MAX_WIDTH: number = 2.5;
 const MAX_HEIGHT: number = 1.25;
 
+// an image as wide as its aspect ratio makes it at the height of its area, and never wider than the page
+const IMAGE_CLASSES: string = 'w-auto max-w-full object-contain';
+
+// gray until the pointer is on its logo or its link has the focus. The color fades in and out slowly enough to be seen
+// as a fade, not as a jump.
+const GRAYSCALE_CLASSES: string = `
+    grayscale
+    group-hover:grayscale-0
+    group-focus-within:grayscale-0
+    motion-safe:transition-[filter] motion-safe:duration-500 motion-safe:ease-in-out
+`;
+
 /**
  * The logos of sponsors, partners or certificates, next to each other and wrapping into rows, each with the area of a
  * square of the token --spacing-logo-cloud whatever the size of its image, so a wide wordmark looks as big as a square
@@ -42,12 +54,11 @@ export class LogoCloudComponent {
     readonly grayscale: InputSignalWithTransform<boolean, unknown> = input(this.config.grayscale, { transform: booleanAttribute });
 
     /**
-     * The tailwind classes that make an image gray until the pointer is on its logo, empty without grayscale. The color
-     * fades in and out slowly enough to be seen as a fade, not as a jump.
+     * The tailwind classes of an image, gray until the pointer is on its logo with grayscale.
      */
-    protected readonly grayscaleClasses: Signal<string> = computed(() => this.grayscale()
-        ? 'grayscale motion-safe:transition-[filter] motion-safe:duration-500 motion-safe:ease-in-out group-hover:grayscale-0 group-focus-within:grayscale-0'
-        : '');
+    protected readonly imageClasses: Signal<string> = computed(() => {
+        return this.grayscale() ? `${IMAGE_CLASSES} ${GRAYSCALE_CLASSES}` : IMAGE_CLASSES;
+    });
 
     // a link of its own rather than ui-link, which would mark a link to another site with an icon after the logo. It
     // only gets the focus ring of a plain link around the logo.

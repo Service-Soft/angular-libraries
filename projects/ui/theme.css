@@ -145,6 +145,8 @@
      */
     --font-body: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-heading: var(--font-body);
+    /* a title in the navbar and the footer of ngx-navigation, like the one of your wordmark. The heading font by default */
+    --font-nav-title: var(--font-heading);
     --default-font-family: var(--font-body);
     /* code and data whose characters have to line up, eg. json */
     --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
