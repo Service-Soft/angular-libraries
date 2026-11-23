@@ -5,5 +5,9 @@ export type LogoCloudConfig = {
     /**
      * Whether the links of the logos open in a new tab.
      */
-    openInNewTab: boolean
+    openInNewTab: boolean,
+    /**
+     * Whether the logos are gray until the pointer is on them or their link has the focus.
+     */
+    grayscale: boolean
 };

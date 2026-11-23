@@ -8,6 +8,7 @@ import { DrawerComponent } from '@service-soft/ui/drawer';
 import { IconComponent, IconDefinition } from '@service-soft/ui/icon';
 import { filter } from 'rxjs';
 
+import { NavbarColor } from './navbar-color.type';
 import { NavbarConfig, NavbarLabels } from './navbar-config.model';
 import { NAVBAR_CONFIG } from './navbar-config.provider';
 
@@ -37,6 +38,22 @@ const MENU_BUTTON_CLASSES: Record<Exclude<NavCollapse, 'never'>, string> = {
     md: 'flex lg:hidden',
     lg: 'flex xl:hidden',
     always: 'flex'
+};
+
+// a theme color is a colored surface, which gives the content the on- colors of it, so its links and buttons keep
+// their contrast. Only the navigation gets it: the drawer has a color of its own.
+const COLOR_CLASSES: Record<NavbarColor, string> = {
+    surface: 'bg-surface text-on-surface',
+    primary: 'surface-primary',
+    secondary: 'surface-secondary'
+};
+
+// a navbar in a theme color usually sits above a section of its color, like a hero, where the light shadow of the theme
+// doesn't show: it takes the shadow of dark mode in both modes. Its content stays light, as a colored surface always is.
+const HEADER_CLASSES: Record<NavbarColor, string> = {
+    surface: 'relative shadow-1 z-10',
+    primary: 'dark relative shadow-1 z-10',
+    secondary: 'dark relative shadow-1 z-10'
 };
 
 // from the widest screen an element is in the drawer at to the narrowest.
@@ -78,6 +95,22 @@ export class NavbarComponent {
      * What screen readers call the navigation of the navbar and the drawer. The default comes from provideNavbarConfig.
      */
     readonly label: InputSignal<string> = input(this.config.labels.navigation);
+
+    /**
+     * The background of the navbar: the surface, or a theme color, like the brand color behind a wordmark in white.
+     * The default comes from provideNavbarConfig.
+     */
+    readonly color: InputSignal<NavbarColor> = input(this.config.color);
+
+    /**
+     * The classes of the color.
+     */
+    protected readonly colorClasses: Signal<string> = computed(() => COLOR_CLASSES[this.color()]);
+
+    /**
+     * The classes of the header: its elevation, in the mode its color needs.
+     */
+    protected readonly headerClasses: Signal<string> = computed(() => HEADER_CLASSES[this.color()]);
 
     /**
      * The texts to show.

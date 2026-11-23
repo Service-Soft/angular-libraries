@@ -7,6 +7,7 @@ import { DrawerColor } from './drawer-color.type';
 import { DrawerConfig } from './drawer-config.model';
 import { DRAWER_CONFIG } from './drawer-config.provider';
 import { DrawerSide } from './drawer-side.type';
+import { IS_IN_DRAWER } from './is-in-drawer.provider';
 
 // a modal dialog is centered by its margins and kept smaller than the viewport. The margins put it at its side instead,
 // and it takes the full height. It leaves a strip of the page visible, so the user sees there is something behind it.
@@ -54,6 +55,8 @@ const SIDE_CLASSES: Record<DrawerSide, string> = {
     selector: 'ui-drawer',
     templateUrl: './drawer.component.html',
     imports: [ButtonComponent, IconComponent],
+    // its content learns that it is in a drawer, see IS_IN_DRAWER
+    providers: [{ provide: IS_IN_DRAWER, useValue: true }],
     host: {
         // the dialog is in the top layer while it is open and hidden otherwise, so the wrapper needs no box.
         class: 'contents'

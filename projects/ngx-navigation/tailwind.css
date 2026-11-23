@@ -1,1 +1,6 @@
 @source "./fesm2022";
+
+@theme {
+    /* the font of a title in the navbar and the footer, like the one of your wordmark. The font of headings by default */
+    --font-nav-title: var(--font-heading);
+}

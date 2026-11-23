@@ -1,20 +1,6 @@
 @if (isInMenu) {
     <ngx-language-menu-items [items]="items()" />
-} @else if (appearance() === 'menu') {
-    <!-- named by the label and the current language, which it shows, so a voice command with what it shows hits it -->
-    <button ui-button type="button" variant="text" [uiMenuTrigger]="menu">
-        <ui-icon [icon]="icon" />
-        @if (currentItem(); as current) {
-            <!-- the space inside, Angular drops the ones between elements -->
-            <span class="sr-only">{{ label() }}: </span><span [lang]="current.code">{{ current.label }}</span>
-        } @else {
-            {{ label() }}
-        }
-    </button>
-    <ui-menu #menu>
-        <ngx-language-menu-items [items]="items()" />
-    </ui-menu>
-} @else {
+} @else if (appearance() === 'list') {
     <nav [attr.aria-label]="label()">
         <ul class="flex flex-wrap gap-1">
             @for (item of items(); track item.code) {
@@ -33,4 +19,35 @@
             }
         </ul>
     </nav>
+} @else {
+    @if (isInDrawer) {
+        <!-- a row of the drawer, like its links, which has the room for the current language as an icon does too -->
+        <button ui-link appearance="nav" block type="button" [uiMenuTrigger]="menu">
+            <ui-icon [icon]="icon" />
+            <span><ng-container [ngTemplateOutlet]="name" /></span>
+        </button>
+    } @else if (appearance() === 'icon') {
+        <!-- like the theme switcher beside it: the label and the current language only for screen readers -->
+        <button ui-button type="button" variant="text" iconOnly [attr.aria-label]="buttonLabel()" [uiMenuTrigger]="menu">
+            <ui-icon [icon]="icon" />
+        </button>
+    } @else {
+        <!-- named by the label and the current language, which it shows, so a voice command with what it shows hits it -->
+        <button ui-button type="button" variant="text" [uiMenuTrigger]="menu">
+            <ui-icon [icon]="icon" />
+            <ng-container [ngTemplateOutlet]="name" />
+        </button>
+    }
+    <ui-menu #menu>
+        <ngx-language-menu-items [items]="items()" />
+    </ui-menu>
 }
+
+<ng-template #name>
+    @if (currentItem(); as current) {
+        <!-- the space inside, Angular drops the ones between elements -->
+        <span class="sr-only">{{ label() }}: </span><span [lang]="current.code">{{ current.label }}</span>
+    } @else {
+        {{ label() }}
+    }
+</ng-template>

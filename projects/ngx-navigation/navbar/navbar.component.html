@@ -1,6 +1,7 @@
-<!-- a navbar sits on elevation 1 above the page. -->
-<header class="bg-surface text-on-surface shadow-1">
-    <nav [attr.aria-label]="label()">
+<!-- a navbar sits on elevation 1 above the page. Stacked above what follows it, as the background of the next section
+     would otherwise be painted over its shadow. -->
+<header [class]="headerClasses()">
+    <nav [class]="colorClasses()" [attr.aria-label]="label()">
         @for (row of rowViews(); track $index; let first = $first) {
             <ngx-nav-row [groups]="row" [components]="components()">
                 @if (first && menuButtonClasses(); as classes) {
@@ -20,12 +21,13 @@
             </ngx-nav-row>
         }
     </nav>
-    <!-- the drawer is labelled like the navigation, so it is a list without a navigation of its own. -->
-    <ui-drawer [label]="label()" [(open)]="drawerOpen">
-        <ul class="grid gap-1">
-            @for (item of drawerItems(); track $index) {
-                <li [class]="item.classes"><ngx-nav-element layout="drawer" [element]="item.element" [components]="components()" /></li>
-            }
-        </ul>
-    </ui-drawer>
 </header>
+<!-- the drawer is labelled like the navigation, so it is a list without a navigation of its own. Outside of the header,
+     so it keeps the mode of the page when the header has the one of its shadow. -->
+<ui-drawer [label]="label()" [(open)]="drawerOpen">
+    <ul class="grid gap-1">
+        @for (item of drawerItems(); track $index) {
+            <li [class]="item.classes"><ngx-nav-element layout="drawer" [element]="item.element" [components]="components()" /></li>
+        }
+    </ul>
+</ui-drawer>

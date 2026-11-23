@@ -52,7 +52,7 @@
     --color-primary-faint: color-mix(in oklab, var(--color-surface), var(--color-primary) 5%);
     --color-secondary-tint: light-dark(
         color-mix(in oklab, var(--color-surface), var(--color-secondary) 19%),
-        color-mix(in oklab, var(--color-surface), var(--color-secondary) 11%)
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 9%)
     );
     --color-error-tint: color-mix(in oklab, var(--color-surface), var(--color-error) 12%);
     --color-success-tint: color-mix(in oklab, var(--color-surface), var(--color-success) 12%);
@@ -74,7 +74,7 @@
     --color-primary-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-primary) 15%);
     --color-secondary-tint-pressed: light-dark(
         color-mix(in oklab, var(--color-surface), var(--color-secondary) 28%),
-        color-mix(in oklab, var(--color-surface), var(--color-secondary) 17%)
+        color-mix(in oklab, var(--color-surface), var(--color-secondary) 14%)
     );
     --color-error-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-error) 18%);
     --color-success-tint-pressed: color-mix(in oklab, var(--color-surface), var(--color-success) 18%);
@@ -106,18 +106,21 @@
     --color-on-secondary-hover: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 8%);
     --color-on-secondary-pressed: color-mix(in oklab, var(--color-on-secondary), var(--color-secondary) 13%);
 
-    /* the background of pages and components, and its text */
-    --color-surface: light-dark(#ffffff, #11171b);
-    --color-on-surface: light-dark(#131c23, #e3e9ec);
+    /*
+     * the background of pages and components, and its text. Dark mode is a gray with a touch of blue, and the container
+     * is darker than the surface, like the header and the code of the documentation of zibri
+     */
+    --color-surface: light-dark(#ffffff, #2a2a35);
+    --color-on-surface: light-dark(#131c23, #f5f5f5);
     /* areas set apart from the surface, eg. input fields or table headers */
-    --color-surface-container: light-dark(#f0f4f7, #1b2327);
+    --color-surface-container: light-dark(#f0f4f7, #1a1a26);
     /* secondary text like hints, placeholders and captions, on surface and surface-container */
-    --color-on-surface-variant: light-dark(#646f78, #a8b3b9);
+    --color-on-surface-variant: light-dark(#646f78, #ababbd);
 
     /* borders that identify a control, eg. of an input */
-    --color-outline: light-dark(#808b96, #76828a);
+    --color-outline: light-dark(#808b96, #7d7d91);
     /* decorative borders and dividers */
-    --color-outline-variant: light-dark(#d9dfe4, #31393f);
+    --color-outline-variant: light-dark(#d9dfe4, #43435a);
 
     /*
      * tables: the row of the headers and the bar below the rows with the pagination. Their content is on-surface,
@@ -270,8 +273,12 @@
  * knowing. Status colors as text, like an error message, keep the colors they have on the surface.
  * The element takes the color and its on- color before its children change them: a token that names itself, like
  * --color-primary: var(--color-on-primary) next to --color-on-primary: var(--color-primary), would be invalid.
+ * A colored surface looks the same in light and dark mode: it is always light, so light-dark() inside of it picks the
+ * light value. Primary is a color for text in dark mode, light on the dark surface, while a navbar, a hero or a call to
+ * action wants the deep brand color with its white text in both modes.
  */
 @utility surface-primary {
+    color-scheme: light;
     --surface-color: var(--color-primary);
     --surface-on-color: var(--color-on-primary);
     background-color: var(--color-primary);
@@ -297,6 +304,7 @@
 }
 
 @utility surface-secondary {
+    color-scheme: light;
     --surface-color: var(--color-secondary);
     --surface-on-color: var(--color-on-secondary);
     background-color: var(--color-secondary);
@@ -324,6 +332,7 @@
 /*
  * light-dark() picks its value by the color-scheme of the element it is used on. The page follows the operating
  * system, .light and .dark fix the mode of an element and everything inside of it, eg. on <html> for a toggle.
+ * A colored surface is always light, see surface-primary.
  */
 @layer base {
     :root {
@@ -339,14 +348,14 @@
     }
 }
 
-/* the dark: variant follows the same rules, for anything that tokens can't express */
+/* the dark: variant follows the same rules, for anything that tokens can't express, a colored surface included */
 @custom-variant dark {
-    &:where(.dark, .dark *) {
+    &:where(.dark, .dark *):where(:not(.surface-primary, .surface-primary *, .surface-secondary, .surface-secondary *)) {
         @slot;
     }
 
     @media (prefers-color-scheme: dark) {
-        &:where(:not(.light, .light *)) {
+        &:where(:not(.light, .light *, .surface-primary, .surface-primary *, .surface-secondary, .surface-secondary *)) {
             @slot;
         }
     }

@@ -1,6 +1,8 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, InputSignal, LOCALE_ID, Signal } from '@angular/core';
 import { NavigationService } from '@service-soft/ngx-navigation/navigation';
 import { ButtonComponent } from '@service-soft/ui/button';
+import { IS_IN_DRAWER } from '@service-soft/ui/drawer';
 import { IconComponent, IconDefinition } from '@service-soft/ui/icon';
 import { LinkComponent } from '@service-soft/ui/link';
 import { MenuComponent, MenuTriggerDirective } from '@service-soft/ui/menu';
@@ -15,15 +17,24 @@ import { LanguageSwitcherLanguage } from './language-switcher-language.model';
 /**
  * Links to the current page in other languages, like in the navbar: `<ngx-language-switcher [languages]="languages" />`.
  * Every link has the hreflang and lang of its language, so search engines and screen readers know it, and the one of
- * the current language is marked. In a menu behind a button with the current language by default, or as a row of
- * links. Inside of a ui-menu, like a menu of the navbar, the links are items of that menu.
+ * the current language is marked. In a menu behind a button with the current language by default, or with only the
+ * icon, or as a row of links. Inside of a ui-menu, like a menu of the navbar, the links are items of that menu. Inside
+ * of a ui-drawer, the button is a row of it, which names the current language beside its icon.
  * The links are plain hrefs, which load the page in the other language, like the build of the app for it.
  * Unset inputs fall back to the values provided with provideLanguageSwitcherConfig.
  */
 @Component({
     selector: 'ngx-language-switcher',
     templateUrl: './language-switcher.component.html',
-    imports: [ButtonComponent, IconComponent, LinkComponent, MenuComponent, MenuTriggerDirective, LanguageMenuItemsComponent],
+    imports: [
+        NgTemplateOutlet,
+        ButtonComponent,
+        IconComponent,
+        LinkComponent,
+        MenuComponent,
+        MenuTriggerDirective,
+        LanguageMenuItemsComponent
+    ],
     host: {
         class: 'contents'
     }
@@ -38,6 +49,12 @@ export class LanguageSwitcherComponent {
     protected readonly isInMenu: boolean = inject(MenuComponent, { optional: true }) != undefined;
 
     /**
+     * Whether it is inside of a ui-drawer, like the one of the navbar, where its button is a row with the room for the
+     * name of the current language, also when it is only an icon elsewhere.
+     */
+    protected readonly isInDrawer: boolean = inject(IS_IN_DRAWER);
+
+    /**
      * The languages, in the order they show.
      */
     readonly languages: InputSignal<LanguageSwitcherLanguage[]> = input.required<LanguageSwitcherLanguage[]>();
@@ -49,7 +66,8 @@ export class LanguageSwitcherComponent {
     readonly current: InputSignal<string> = input(inject(LOCALE_ID));
 
     /**
-     * Whether the languages are in a menu or a row of links.
+     * Whether the languages are in a menu behind a button with the current one, or with only the icon, or in a row of
+     * links.
      */
     readonly appearance: InputSignal<LanguageSwitcherAppearance> = input<LanguageSwitcherAppearance>(this.config.appearance);
 
@@ -81,6 +99,14 @@ export class LanguageSwitcherComponent {
      * The language of the page, which the button of the menu shows.
      */
     protected readonly currentItem: Signal<LanguageSwitcherItem | undefined> = computed(() => this.items().find(item => item.isCurrent));
+
+    /**
+     * What screen readers call the button that only shows the icon, like 'Language: English'.
+     */
+    protected readonly buttonLabel: Signal<string> = computed(() => {
+        const current: LanguageSwitcherItem | undefined = this.currentItem();
+        return current == undefined ? this.label() : `${this.label()}: ${current.label}`;
+    });
 
     private resolveHref(language: LanguageSwitcherLanguage, url: string): string {
         return typeof language.href === 'string'

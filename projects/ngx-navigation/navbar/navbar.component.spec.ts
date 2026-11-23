@@ -114,6 +114,25 @@ describe('NavbarComponent', () => {
         expect(links[1]?.hasAttribute('aria-current')).toBe(false);
     });
 
+    test('draws the navigation on the surface, or in a theme color while the drawer keeps its own, above the page', async () => {
+        TestBed.configureTestingModule({ providers: [provideNavbarConfig({ color: 'primary' })] });
+        const [, root] = await render();
+
+        expect(root.querySelector('header > nav')?.className).toBe('surface-primary');
+        // stacked above the page that follows, with the shadow of dark mode, which shows on a section of its color
+        expect(root.querySelector('header')?.className).toBe('dark relative shadow-1 z-10');
+        // the drawer keeps the mode of the page and its own color
+        expect(root.querySelector('header dialog')).toBeNull();
+        expect(root.querySelector('dialog')?.className).not.toContain('surface-primary');
+    });
+
+    test('draws the navigation on the surface by default, with the shadow of the mode of the page', async () => {
+        const [, root] = await render();
+
+        expect(root.querySelector('header > nav')?.className).toBe('bg-surface text-on-surface');
+        expect(root.querySelector('header')?.className).toBe('relative shadow-1 z-10');
+    });
+
     test('moves elements into the drawer up to their collapse, with a button that opens it for as long', async () => {
         const [fixture, root] = await render();
         const items: Element[] = [...root.querySelectorAll('header > nav > ngx-nav-row > div > div')];

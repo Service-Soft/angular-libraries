@@ -1,0 +1,10 @@
+<!-- the check marks the current mode by more than its color, screen readers hear aria-pressed. It is hidden instead of
+     left out for the other modes: the server renders the page before it knows the mode of the browser, and the same
+     elements on both sides keep the hydration intact. -->
+@for (option of options(); track option.mode) {
+    <ui-menu-item [pressed]="option.isCurrent" (click)="chosen.emit(option.mode)">
+        <ui-icon [icon]="option.icon" />
+        {{ option.label }}
+        <span class="ms-auto flex" [class.invisible]="!option.isCurrent"><ui-icon [icon]="currentIcon" /></span>
+    </ui-menu-item>
+}

@@ -1,0 +1,19 @@
+@if (isInMenu) {
+    <ui-theme-menu-items [options]="options()" (chosen)="choose($event)" />
+} @else {
+    @if (isInDrawer) {
+        <!-- a row of the drawer, like its links, with the room to name the current mode -->
+        <button ui-link appearance="nav" block type="button" [uiMenuTrigger]="menu">
+            <ui-icon [icon]="buttonIcon()" />
+            <!-- the space inside, Angular drops the ones between elements -->
+            <span><span class="sr-only">{{ label() }}: </span>{{ modeLabel() }}</span>
+        </button>
+    } @else {
+        <button ui-button type="button" variant="text" iconOnly [attr.aria-label]="buttonLabel()" [uiMenuTrigger]="menu">
+            <ui-icon [icon]="buttonIcon()" />
+        </button>
+    }
+    <ui-menu #menu>
+        <ui-theme-menu-items [options]="options()" (chosen)="choose($event)" />
+    </ui-menu>
+}
