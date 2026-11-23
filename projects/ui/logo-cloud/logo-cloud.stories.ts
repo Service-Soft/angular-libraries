@@ -45,6 +45,13 @@ export const Narrow: Story = {
     })
 };
 
+// gray until the pointer is on a logo or its link has the focus.
+export const Grayscale: Story = {
+    args: {
+        grayscale: true
+    }
+};
+
 // on the container, like in a section that is set apart.
 export const OnContainer: Story = {
     render: () => ({

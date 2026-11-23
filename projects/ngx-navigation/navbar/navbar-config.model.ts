@@ -1,6 +1,8 @@
 import { NavCollapse } from '@service-soft/ngx-navigation/navigation';
 import { IconDefinition } from '@service-soft/ui/icon';
 
+import { NavbarColor } from './navbar-color.type';
+
 /**
  * The texts of the navbar.
  */
@@ -23,6 +25,10 @@ export type NavbarConfig = {
      * The texts.
      */
     labels: NavbarLabels,
+    /**
+     * The background of the navbar.
+     */
+    color: NavbarColor,
     /**
      * Up to which width of the screen an element without a collapse of its own is in the drawer.
      */

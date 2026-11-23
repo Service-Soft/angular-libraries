@@ -27,6 +27,13 @@ export class MenuItemComponent {
     readonly disabled: InputSignalWithTransform<boolean, unknown> = input(false, { transform: booleanAttribute });
 
     /**
+     * Whether the item is the chosen one of several, like the current mode of a theme switcher, which screen readers
+     * announce as pressed. Unset for an item that is no choice. It shows by nothing else, so give the chosen item a
+     * visible mark of your own, like a check.
+     */
+    readonly pressed: InputSignal<boolean | undefined> = input<boolean>();
+
+    /**
      * The menu the item opens beside it, a `<ui-menu>` inside of the menu of the item. Choosing the item then keeps
      * the menus open.
      */

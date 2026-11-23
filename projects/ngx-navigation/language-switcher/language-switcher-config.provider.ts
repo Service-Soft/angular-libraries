@@ -1,5 +1,5 @@
 import { inject, InjectionToken, Provider } from '@angular/core';
-import { faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { faLanguage } from '@fortawesome/free-solid-svg-icons';
 
 import { LanguageSwitcherConfig } from './language-switcher-config.model';
 
@@ -12,7 +12,9 @@ function getDefaultLanguageSwitcherConfig(): LanguageSwitcherConfig {
     return {
         appearance: 'menu',
         label: $localize`:@@ngx-navigation.language-switcher.label:Language`,
-        icon: faGlobe,
+        // characters of two scripts, the sign of language and translation, which a globe, the sign of a region or of
+        // the web, is not
+        icon: faLanguage,
         // a build for every language under its own path, like Angular's i18n makes them: /de/orders and /en/orders.
         href: (url, code, subPath) => `/${subPath}${url}`
     };

@@ -2,8 +2,9 @@ import { Component, computed, input, InputSignal, Signal } from '@angular/core';
 import { NavAnchorComponent, NavElementLayout, NavLabelComponent } from '@service-soft/ngx-navigation/nav-element';
 import { NavigationUtilities, NavLinkView, NavTitle } from '@service-soft/ngx-navigation/navigation';
 
-// the name of the app, as high as a button. A link inside keeps its font and color, so a linked title looks the same.
-const TITLE_CLASSES: string = 'inline-flex min-h-10 items-center gap-2 font-heading text-title text-on-surface [&_svg]:size-[1.25em]';
+// the name of the app, as high as a button, in the font of the token --font-nav-title. A link inside keeps its font and
+// color, so a linked title looks the same.
+const TITLE_CLASSES: string = 'inline-flex min-h-10 items-center gap-2 font-nav-title text-title text-on-surface [&_svg]:size-[1.25em]';
 
 /**
  * Shows a title, linked when it has a link: the component for titles in the components of the navbar and the footer,

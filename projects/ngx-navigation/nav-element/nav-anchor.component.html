@@ -1,4 +1,27 @@
-@if (link().routerLink; as routerLink) {
+@if (variant(); as variant) {
+    <!-- a call to action, like "Contact": a button that is a link -->
+    @if (link().routerLink; as routerLink) {
+        <a
+            ui-button
+            routerLinkActive
+            ariaCurrentWhenActive="page"
+            [variant]="variant"
+            [color]="buttonColor()"
+            [routerLink]="routerLink"
+            [fragment]="link().fragment"
+            [routerLinkActiveOptions]="link().activeOptions ?? {}"
+            [attr.target]="link().target"
+            [attr.rel]="link().rel"
+            (isActiveChange)="activeChange.emit($event)"
+        >
+            <ngx-nav-label [name]="name()" [icon]="icon()" />
+        </a>
+    } @else {
+        <a ui-button [variant]="variant" [color]="buttonColor()" [href]="link().href" [attr.target]="link().target" [attr.rel]="link().rel">
+            <ngx-nav-label [name]="name()" [icon]="icon()" />
+        </a>
+    }
+} @else if (link().routerLink; as routerLink) {
     <a
         ui-link
         routerLinkActive

@@ -2,6 +2,7 @@ import { Component, LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { DrawerComponent } from '@service-soft/ui/drawer';
 import { MenuComponent } from '@service-soft/ui/menu';
 import { describe, expect, test } from 'vitest';
 
@@ -37,6 +38,17 @@ class RegionalPageComponent {
         { code: 'de-CH', label: 'Deutsch', subPath: 'de' },
         { code: 'fr-CH', label: 'Français', subPath: 'fr' }
     ];
+}
+
+// the switcher as an icon, like in a navbar: in its row, and in its drawer
+@Component({
+    selector: 'ngx-icon-page',
+    template: `<div><ngx-language-switcher appearance="icon" [languages]="languages" /></div>
+        <div><ui-drawer label="Navigation"><ngx-language-switcher appearance="icon" [languages]="languages" /></ui-drawer></div>`,
+    imports: [LanguageSwitcherComponent, DrawerComponent]
+})
+class IconPageComponent {
+    readonly languages: LanguageSwitcherLanguage[] = LANGUAGES;
 }
 
 // the text, the href, the hreflang, the lang and the aria-current of a link.
@@ -115,5 +127,21 @@ describe('LanguageSwitcherComponent', () => {
             'https://de.example.ch/orders?page=2#de-CH',
             'https://fr.example.ch/orders?page=2#fr-CH'
         ]);
+    });
+
+    test('shows only the icon, named by the current language, and in a drawer a row of it with the language', async () => {
+        TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', component: IconPageComponent }])] });
+        const [row, drawer] = await render();
+
+        const iconButton: HTMLButtonElement | null | undefined = row?.querySelector('button[ui-button]');
+        expect(iconButton?.getAttribute('aria-label')).toBe('Language: English');
+        expect(iconButton?.textContent.trim()).toBe('');
+        expect(findLinks(row).map(([text]) => text)).toEqual(['Deutsch', 'English', 'Français', 'Nederlands']);
+
+        // a row like the links of the drawer, not a button of its own
+        const drawerButton: HTMLButtonElement | null | undefined = drawer?.querySelector('button[ui-link]');
+        expect(drawerButton?.getAttribute('aria-label')).toBeNull();
+        expect(drawerButton?.textContent.replaceAll(/\s+/g, ' ').trim()).toBe('Language: English');
+        expect(drawerButton?.querySelector('[lang="en"]')).not.toBeNull();
     });
 });

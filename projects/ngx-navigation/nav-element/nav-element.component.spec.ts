@@ -91,6 +91,20 @@ describe('NavElementComponent', () => {
         expect(popover?.textContent).not.toContain('Hidden');
     });
 
+    test('draws a link with a variant as a button in a row, like a call to action, and as a link in the drawer', async () => {
+        const element: NavElement = { type: 'link', name: 'Contact', route: 'contact', fragment: 'form', variant: 'filled', color: 'secondary' };
+        const row: HTMLElement = await render(element);
+        const button: HTMLAnchorElement | null = row.querySelector('a');
+        expect(button?.getAttribute('href')).toBe('/contact#form');
+        expect(button?.classList).toContain('bg-secondary');
+        expect(button?.textContent).toContain('Contact');
+
+        TestBed.resetTestingModule();
+        const drawer: HTMLElement = await render(element, 'drawer');
+        expect(drawer.querySelector('a')?.classList).toContain('w-full');
+        expect(drawer.querySelector('a')?.classList).not.toContain('bg-secondary');
+    });
+
     test('shows a link over the full width in the drawer, and a button like it', async () => {
         const link: HTMLElement = await render({ type: 'link', name: 'Orders', route: 'orders' }, 'drawer');
         expect(link.querySelector('a')?.classList).toContain('w-full');

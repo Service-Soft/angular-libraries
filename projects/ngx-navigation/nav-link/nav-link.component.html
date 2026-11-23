@@ -4,4 +4,6 @@
     [link]="link()"
     [name]="element().name"
     [icon]="element().icon"
+    [variant]="layout() === 'row' ? element().variant : undefined"
+    [color]="element().color"
 />

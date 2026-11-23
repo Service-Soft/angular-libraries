@@ -44,6 +44,8 @@ Your Tailwind generates the css. Add both packages to your global stylesheet:
 @import "@service-soft/ngx-navigation";
 ```
 
+A title is drawn in the font of the token `--font-nav-title`, the font of headings by default. Set it in your `@theme` when your name has a font of its own, like the one of your wordmark: `--font-nav-title: "Orbitron", var(--font-heading);`.
+
 Every part lives in its own entry point, so a page only loads what it uses: `@service-soft/ngx-navigation/navbar`, `/footer`, `/anchors`, `/breadcrumbs`, `/secondary-nav`, `/language-switcher`, `/not-found`, and one for the component of each type of element, like `/nav-link`. The models and `NavigationUtilities` are in `/navigation`.
 
 # The navbar
@@ -93,7 +95,7 @@ The navbar is a `<header>` with a `<nav>` inside, labelled "Navigation". Each ro
 |---|---|---|---|
 | `title` | the name of the app, linked when it has a `link` | `title`, `icon?`, `link?` | `NavTitleComponent` of `/nav-title` |
 | `image` | an image like the logo, linked when it has a `link`, shown with `NgOptimizedImage` | `url`, `alt`, `width`, `height`, `link?` | `NavImageComponent` of `/nav-image` |
-| `link` | a link, to a route of the app with `route`, or to another site with `url` | `name`, `icon?`, `route` or `url`, `fragment?`, `openInNewTab?` | `NavLinkComponent` of `/nav-link` |
+| `link` | a link, to a route of the app with `route`, or to another site with `url` | `name`, `icon?`, `route` or `url`, `fragment?`, `openInNewTab?`, `variant?` and `color?` (of `ui-button`: drawn as a button in a row, like a call to action; a link in the drawer and in menus) | `NavLinkComponent` of `/nav-link` |
 | `button` | a button that runs an action | `name`, `icon?`, `variant?` (of `ui-button`, `'text'` by default), `action` | `NavButtonComponent` of `/nav-button` |
 | `menu` | links, buttons, menus and custom components under one name; a menu inside opens beside it | `name`, `icon?`, `elements` | `NavMenuComponent` of `/nav-menu` |
 | `text` | plain text, like the copyright in the footer | `text` | `NavTextComponent` of `/nav-text` |
@@ -104,7 +106,7 @@ A `link` of a title or an image is `{ route }` or `{ url }`, like the fields of 
 ## Components of the elements
 The navbar and the footer import none of the components of the elements: `components` brings the ones their rows need, so a navbar with only a title and links never ships the code of images, menus or buttons. A menu shows the links, buttons and menus inside of it itself, so only its own type counts.
 
-A `custom` component inside a menu shows in the menu, and in the drawer once the menu collapsed. `inject(MenuComponent, { optional: true })` of `@service-soft/ui/menu` tells it where it is, so it shows its actions as `ui-menu-item` or `ui-menu-link` in the menu, like the other items, and as buttons or links in the drawer.
+A `custom` component inside a menu shows in the menu, and in the drawer once the menu collapsed. `inject(MenuComponent, { optional: true })` of `@service-soft/ui/menu` tells it where it is, so it shows its actions as `ui-menu-item` or `ui-menu-link` in the menu, like the other items, and as buttons or links in the drawer. In the drawer, `inject(IS_IN_DRAWER)` of `@service-soft/ui/drawer` is true, like for a button that is only an icon in the row and has the room for its text in the drawer, as the [theme switcher](https://www.npmjs.com/package/@service-soft/ui#theme-switcher) and the [language switcher](#language-switcher) do.
 
 Development builds throw when a type of the rows has no component, and when there is a component for a type no element has, as it would only make the bundle bigger. An element whose `condition` hides it still counts, as it may show later. Production builds leave the check out, and an element without a component shows nothing.
 
@@ -246,6 +248,7 @@ protected readonly languages: LanguageSwitcherLanguage[] = [
 
 ```html
 <ngx-language-switcher [languages]="languages" />
+<ngx-language-switcher appearance="icon" [languages]="languages" />
 <ngx-language-switcher appearance="list" [languages]="languages" />
 ```
 
@@ -253,7 +256,7 @@ protected readonly languages: LanguageSwitcherLanguage[] = [
 |---|---|---|
 | `languages` | `LanguageSwitcherLanguage[]` | required — `code`, `label`, `subPath`, the path its build is served below, its code when it has none, and `href`, a fixed address or a function of the url of the current page; the `href` of the config when it has none |
 | `current` | `string` | the `LOCALE_ID` of the app — the code of the language of the page; `en` counts for `en-US` when no code is the same |
-| `appearance` | `'menu'` \| `'list'` | `'menu'` — a button with a globe and the current language that opens a [menu](https://www.npmjs.com/package/@service-soft/ui#menu) of all of them, or a row of links |
+| `appearance` | `'menu'` \| `'icon'` \| `'list'` | `'menu'` — a button with the icon of languages and the current language that opens a [menu](https://www.npmjs.com/package/@service-soft/ui#menu) of all of them, the same button with only the icon, like the theme switcher beside it, or a row of links. Inside of a `ui-drawer`, like the drawer of the navbar, the button of `'menu'` and `'icon'` is a row of the drawer with the current language |
 | `label` | `string` | `'Language'` — what screen readers call it; the button is named "Language: English" |
 
 The link to the current page in a language has its code as `hreflang` and `lang`, so search engines know the page in that language, and screen readers read its name in it. The one of the current language is marked with a check in the menu, underlined in the row, and tells screen readers that it is the current page. The links are plain hrefs, which load the page in the other language. By default they go to `/<subPath><url>`, like `/de/orders?page=2`, where Angular's i18n puts the build of every language. Give a language whose path isn't its code its `subPath`, like `{ code: 'de-CH', label: 'Deutsch', subPath: 'de' }`, the same as the `subPath` of its [SEO locale](#several-languages). Change the links for all languages with `provideLanguageSwitcherConfig({ href: (url, code, subPath) => … })`, and the `label`, the `icon` and the `appearance` there as well. Inside of a `ui-menu`, like a menu of the navbar as a `custom` element, its links are items of that menu.
@@ -361,14 +364,15 @@ Every part reads its defaults and texts from a config, which `provideXConfig` ch
 
 | Provider | Option | Default |
 |---|---|---|
-| `provideNavbarConfig` | `collapse` | `'sm'` — for the elements without a collapse of their own |
+| `provideNavbarConfig` | `color` | `'surface'` — or `'primary'` / `'secondary'`, a [colored surface](../ui/README.md#colored-surfaces) of ui, like the brand color behind a white wordmark. Also the input `color` of `ngx-navbar`. A colored navbar looks the same in both modes and takes the shadow of dark mode, which also shows on a section of its color below it, like a hero. The drawer keeps the colors of the page |
+| | `collapse` | `'sm'` — for the elements without a collapse of their own |
 | | `menuIcon` | `faBars` — the icon of the button that opens the drawer |
 | | `labels` | `navigation: 'Navigation'`, `openNavigation: 'Open the navigation'` |
 | `provideNavigationConfig` | `labels` | `home: 'Home'` — the first step of the breadcrumbs, `anchors: 'On this page'` — what screen readers call the links to the sections |
 | | `routeCondition` | every link shows — see [conditions and actions](#conditions-and-actions) |
 | `provideSeoConfig` | `origin`, `defaultImage`, `locales` | required, none, `[]` — see [SEO](#seo) |
 | `provideNotFoundConfig` | `title`, `message`, `homeLabel`, `homeRoute`, `icon` | `'Page not found'`, a sentence, `'Back to the start page'`, `'/'`, `faSignsPost` |
-| `provideLanguageSwitcherConfig` | `appearance`, `label`, `icon`, `href` | `'menu'`, `'Language'`, `faGlobe`, `(url, code, subPath) => '/' + subPath + url` |
+| `provideLanguageSwitcherConfig` | `appearance`, `label`, `icon`, `href` | `'menu'`, `'Language'`, `faLanguage`, `(url, code, subPath) => '/' + subPath + url` |
 | `provideBreadcrumbsConfig` of `@service-soft/ui/breadcrumbs` | `label` | `'Breadcrumbs'` — what screen readers call the breadcrumbs |
 | `provideDrawerConfig` of `@service-soft/ui/drawer` | `side` | `'start'` — the edge the drawer slides in from |
 
